@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Work in progress... Welcome to my site though, {{ip}}</h1>
+    <ul>
+        <li>
+            <a href="https://github.com/Wisdurm">Github</a>
+        </li>
+        <li>
+            <a href="https://www.youtube.com/@Wisdurm-X/videos">Youtube</a>
+        </li>
+    </ul>
+    <img src="https://static.wikitide.net/videogameballswiki/e/ea/Canny-cat.gif" id="s" style="position: absolute;">
+    <script>
+        const imgWidth = 600; // Actually 500 but 600 makes it look better
+        windowWidth = 0;
+
+        window.onresize = updateWindowSize;
+        window.onload = updateWindowSize
+        function updateWindowSize() {
+            windowWidth = window.innerWidth;
+        }
+
+        setInterval(rot, 0.5)
+        r = 0
+        function rot()
+        {
+            r++
+            document.getElementById("s").style.transform = "rotate(" + r%360 + "deg)";
+            document.getElementById("s").style.left = (-imgWidth) + ( (r*5) % (windowWidth + imgWidth))+ "px"
+        }
+    </script>
+</body>
+</html>

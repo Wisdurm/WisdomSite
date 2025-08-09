@@ -10,7 +10,10 @@ add_executable(WisdomSite
 src/index.cpp
 )
 # Dependencies
-find_package(OpenSSL REQUIRED)
+
+#find_package(OpenSSL REQUIRED)
+# nginx handles SSL
+
 find_package(ZLIB REQUIRED)
 
 include(${CMAKE_SOURCE_DIR}/cmake/CPM.cmake)
@@ -23,13 +26,13 @@ CPMAddPackage(Crow
   "CROW_BUILD_TESTS Off"
   "CROW_BUILD_DOCS Off"
   "CROW_ENABLE_COMPRESSION On"
-  "CROW_ENABLE_SSL On"
+  "CROW_ENABLE_SSL Off"
 )
 
 target_link_libraries( WisdomSite
   PRIVATE
-  OpenSSL::SSL
-  OpenSSL::Crypto
+  #OpenSSL::SSL
+  #OpenSSL::Crypto
   ZLIB::ZLIB
   Crow::Crow
 )
