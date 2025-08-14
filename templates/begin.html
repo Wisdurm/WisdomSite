@@ -6,7 +6,7 @@
     <title>Document</title>
 </head>
 <body>
-    <h1>Work in progress... Welcome to my site though, {{ip}}</h1>
+    <h1>Work in progress... Welcome to my site though</h1>
     <ul>
         <li>
             <a href="https://github.com/Wisdurm">Github</a>
@@ -16,6 +16,19 @@
         </li>
     </ul>
     <img src="https://static.wikitide.net/videogameballswiki/e/ea/Canny-cat.gif" id="s" style="position: absolute;">
+    <br>
+    <p>Leave a message for the next visitor!</p>
+    <p>Try not to be too crude...</p>
+    <form action="/send">
+        <label for="msg">Message:</label>
+        <input type="text" id="msg" name="msg">
+        <input type="submit" value="Submit">
+    </form>
+    <br>
+    <div style="border: 1px solid black; width: 40%;">
+        <p>Current message:</p>
+        <b>{{msg}}</b>
+    </div>
     <script>
         const imgWidth = 600; // Actually 500 but 600 makes it look better
         windowWidth = 0;
