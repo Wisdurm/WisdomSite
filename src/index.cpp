@@ -17,7 +17,6 @@ int main()
         (const crow::request& req){
 	    auto page = crow::mustache::load("begin.html");
         crow::mustache::context ctx({{"msg", text}});
-        text += "a";
 	    return page.render(ctx);
     });
 
