@@ -1,3 +1,6 @@
+# About
+This is my own personal website, currently hosted at [Wisdurm.fi](https://wisdurm.fi)    
+This site is built using [CrowCPP](https://crowcpp.org/master/)  
 # Setup
 First make sure Git and Ninja are installed.  
 ```sudo apt install git ninja-build```  
