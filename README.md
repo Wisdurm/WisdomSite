@@ -36,3 +36,7 @@ Then finally, compile the program with:
 
 **TODO:**
 Other stuff, and verify instructions are correct lol
+# Licenses
+The license for this site is [CC0](LICENSE)  
+HOWEVER, this license only covers this repository, and not any other repositories included as submodules (eg. infinite canvas).  
+You can find the licenses for specific sub modules in their repository.
