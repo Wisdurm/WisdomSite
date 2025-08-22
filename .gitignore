@@ -1,3 +1,2 @@
 build/
-
-# Stuff like CMakeUserPresets should not be added but I'm adding anyway because just one line has to be changed
+CMakeUserPresets.json
