@@ -20,10 +20,18 @@
         var combo = 0
         var tulos = "" //Kertoo mitä olet saanut aikaan
 
-        var kello = 0
+        var offset = 0
         var index = 0
 
-        const songDelay = 0.85 //how long to wait until starting playback of the music
+        const speedMultiplier = 1.35;
+        const nightcore = 0;
+
+        const songDelay = 0.95 //how long to wait until starting playback of the music
+
+        // Deltatime
+        var LAST = 0
+        var NOW = 0
+        var deltatime = 1
 
         class Nuotti
         {
@@ -43,21 +51,34 @@
             {
                 Nappi = document.createElement('button');
                 Nappi.style.backgroundColor = "grey"
+                Nappi.style.width = "25%"
+                Nappi.style.height = "100%"
+                Nappi.style.fontSize = "2.5rem"
                 Nappi.id = i
                 Nappi.textContent = i + 1;
                 Nappi.addEventListener("click", () => PainaNappi(i) );
                 pääDiv.append(Nappi);
             }
             //Aloita logiikka
+            offset = Date.now();
+            offset += 0 // Time it takes for notes to reach buttons (ms)
             playSong()
             setInterval(Logiikka, 1)
         }
         function Logiikka()
         {
+            LAST = NOW;
+            NOW = Date.now();
+            deltatime = (NOW - LAST) / 15
             //NOTE SPAWNING
             viimeNuottiPos = []
-            while (noteStarts[index] < kello)
+            while (noteStarts[index] < (Date.now() - offset)/speedMultiplier)
 			{	
+                if (nuotit[index] < 60) // Trim out percussion/low notes
+                {
+                    index++
+                    continue
+                }
                 nuottiPos = Math.round(Math.random()*3)
                 crashout = false
                 
@@ -89,38 +110,57 @@
                 viimeNuottiPos.push(nuottiPos)
                 index++
 			}
-            kello += 11.6;
             
             //Tyhjennä näyttö
-            const pääDiv = document.getElementById("nuotit");
-            pääDiv.innerHTML = ""
+            divs = []
+            for (let i = 0; i < 4; i++)
+            {    
+                divs.push(document.getElementById("row" + i));
+                divs[i].innerHTML = ""
+            }
             //Nuotit
             for (let i = 0; i < nuotit.length; i++)
             {  
+                
+
                 if (nuotit[i].y > 200)
                 {   //Poista nuotti
                     _ = nuotit.splice(i, 1)
                     maxPisteet += 10;
-                    pisteet --; //tupla rangaistus koska menettää myös tarkkuutta siitä että ei saanut pisteitä
-                    tulos = "Missed..."
+                    pisteet -= 2; //tupla rangaistus koska menettää myös tarkkuutta siitä että ei saanut pisteitä
+                    tulos = "Ohi meni..."
                     combo = 0
                 }
                 else//Anna olla
                 {
-                    nuotit[i].y += 3;
-                    let nuottiDiv = document.createElement("div")
-                    nuottiDiv.textContent = "a"
+                    nuotit[i].y += 1.5 * deltatime;
+                    let nuottiDiv = document.createElement("a")
+                    nuottiDiv.textContent = "★"
                     nuottiDiv.style.position = "absolute"
-                    nuottiDiv.style.top = nuotit[i].y + "px"
-                    nuottiDiv.style.left = (nuotit[i].x * 18.8833) + 12.2334 + 5 + "px"
+                    nuottiDiv.style.top = nuotit[i].y + "%"
+                    nuottiDiv.style.left = 0
+                    nuottiDiv.style.right = 0
+                    nuottiDiv.style.zIndex = "9"
                     //Colour
-                    if (nuotit[i].y > 145 && nuotit[i].y < 155) //Perfect
+                    // 100 is the perfect timing
+                    if (nuotit[i].y > 97 && nuotit[i].y < 103) //Perfect
                         nuottiDiv.style.color = "green"
-                    else if (nuotit[i].y > 135 && nuotit[i].y < 165) //Good 
+                    else if (nuotit[i].y > 95 && nuotit[i].y < 105) //Good 
                         nuottiDiv.style.color = "orange"
-                    else if (nuotit[i].y > 130 && nuotit[i].y < 170) //Bad
+                    else if (nuotit[i].y > 90 && nuotit[i].y < 110) //Bad
                         nuottiDiv.style.color = "red"
-                    pääDiv.append(nuottiDiv)
+                    else // Default
+                        nuottiDiv.style.color = "yellow"
+                    // Transparency
+                    if (nuotit[i].y < 25)
+                    {
+                        nuottiDiv.style.opacity = (nuotit[i].y * 4)/100
+                    }
+                    else if (nuotit[i].y > 110)
+                    {   
+                        nuottiDiv.style.opacity = ((120 - nuotit[i].y) * 10)/100
+                    }
+                    divs[nuotit[i].x].append(nuottiDiv)
                 }
             }
             //Napit
@@ -196,7 +236,7 @@
 
             for (let i = nuotit.length-1; i >= 0; i--) //Pitää käydä kaikki nuotit läpi...
             {
-                if (nuotit[i].x == x && nuotit[i].y > 130 && nuotit[i].y < 170)
+                if (nuotit[i].x == x && nuotit[i].y > 90 && nuotit[i].y < 110)
                 {
                     //Poista nuotti
                     let korkeus = nuotit[i].y //Hups...
@@ -204,12 +244,12 @@
                     combo++;
                     osui = true;
                     //Pisteet
-                    if (korkeus > 145 && korkeus < 155) //Täydellinen
+                    if (korkeus > 97 && korkeus < 103) //Täydellinen
                     {
                         pisteet += 10;
                         tulos = "Perfect!"
                     }
-                    else if (korkeus > 135 && korkeus < 165) //Hyvä 
+                    else if (korkeus > 95 && korkeus < 105) //Hyvä 
                     {
                         pisteet += 9;
                         tulos = "Good!"
@@ -230,23 +270,23 @@
             {
                 document.getElementById(x).style.backgroundColor = "red"
                 combo = 0
-                pisteet -= 3;
+                pisteet -= 6;
                 tulos = "Useless input!"
             }
         }
 
         //Näppäimistö input
 		document.addEventListener('keydown', function(event) {
-    	if(event.keyCode == 68) { //D
+    	if(event.keyCode == 68 || event.keyCode == 49) { //D
     	    PainaNappi(0)
     	}
-    	else if(event.keyCode == 70) { //F
+    	else if(event.keyCode == 70 || event.keyCode == 50) { //F
     	    PainaNappi(1)
     	}
-		else if (event.keyCode == 74) { //J
+		else if (event.keyCode == 74 || event.keyCode == 51) { //J
 			PainaNappi(2)
 		}
-		else if (event.keyCode == 75) { //K
+		else if (event.keyCode == 75 || event.keyCode == 52) { //K
 			PainaNappi(3)
 		}
         });
@@ -264,10 +304,13 @@
             //type of tone. Possible values are sine, square, sawtooth, triangle, and custom. Default is sine.
             //callback to use on end of tone
             function beep(time, duration, frequency, volume, type, callback) {
-                time /= 750
                 
-                var oscillator = audioCtx.createOscillator();
-                var gainNode = audioCtx.createGain();
+                // Seconds to milliseconds
+                time /= 1000
+                duration /= 1000
+
+                oscillator = audioCtx.createOscillator();
+                gainNode = audioCtx.createGain();
                 
                 oscillator.connect(gainNode);
                 gainNode.connect(audioCtx.destination);
@@ -277,35 +320,20 @@
                 if (type){oscillator.type = type;}
                 if (callback){oscillator.onended = callback;}
                 
+                gainNode.gain.exponentialRampToValueAtTime(
+                    1, time + 1
+                )
+                gainNode.gain.exponentialRampToValueAtTime(
+                    0.000001, time + duration + 10 // Kind of arbitrary, I don't really know how this works and I have no idea what 10 does, it just sounds kinda good lol
+                )
+
                 oscillator.start(time + songDelay);
-                oscillator.stop(time + ((duration || 500) / 1000) + songDelay);
+                oscillator.stop(time + duration + songDelay);
             };
 
-            noteMultiplier = 1;
-            delayMultiplier = 1;
-
-            time = 0;
-            j = 0;
-
-            
-            while (j < notes.length)
+            for (let i = 0; i < noteStarts.length; i++)
             {
-                //console.log(j + ":"+ time)
-
-                if (noteStarts[j] == time)
-                {
-                    beep(time, noteLengths[j] * noteMultiplier, MidiToFrequency(notes[j]), 1);
-                    j++;
-                }
-                else if (noteStarts[j] < time) //Broken midi files??
-                {
-                    console.log("Midi file is not very good...")
-                    j++
-                }
-                else
-                {
-                    time++;
-                }
+                beep(noteStarts[i] * speedMultiplier, noteLengths[i] * speedMultiplier, MidiToFrequency(notes[i]-nightcore), 1, "triangle")
             }
         }
         function MidiToFrequency(MidiNumber) //This works I guess 🤷‍
@@ -320,25 +348,43 @@
 			justify-content: center;
 			height: 100vh;
 			align-items: center;
+            background-image: url("https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Hubble_ultra_deep_field.jpg/640px-Hubble_ultra_deep_field.jpg");
 		}
+        button{
+            border: 2px solid whitesmoke;
+            background-color: rgba(125,125,125,0.5);
+            border-radius: 20%;
+            color: white;
+            box-shadow: 0px 0px 5px 1px rgba(255,255,255,0.25);
+        }
+        a{
+            font-size: 4rem;
+            text-shadow: #ffcc00 0 0 7px;
+        }
 	</style>
 </head>
 <body>
-    <div style="justify-content: center; display: flex;">
-        <div id="game" style="width: 100px;height: 170px; background-color: white; text-align: center; position: relative;">
-            <div id="nuotit" style="height: 150px;">
+    <div style="justify-content: center; display: flex; border: 1px solid snow; border-radius: 5%; background-color:rgba(0,0,0,0.5);box-shadow: 0px 0px 20px 5px rgba(255,255,255,0.5); width: 50%; aspect-ratio: 250/170;">
+        <div id="game" style="width: 40%;height: 100%; text-align: center; position: relative;">
+            <div id="nuotit" style="height: 80%; display: flex;">
             <!-- Nuotit lisätään automaattisesti -->
+                <div style="width: 25%; height: 100%; position: relative;" id="row0"></div>
+                <div style="width: 25%; height: 100%; position: relative;" id="row1"></div>
+                <div style="width: 25%; height: 100%; position: relative;" id="row2"></div>
+                <div style="width: 25%; height: 100%; position: relative;" id="row3"></div>
             </div>
-            <div id="ohjaimet">
-            <!-- Napit lisätään automaattisesti -->
+            <div style="height: 20%; width: 100%; position: relative;">
+                <div id="ohjaimet" style="height: 50%; width: 100%; top: 15%; position: absolute;">
+                <!-- Napit lisätään automaattisesti -->
+                </div>
             </div>
         </div>
-        <div id="infobox" style="width: 150px; height: 170; background-color: white;">
+        <div id="infobox" style="width: 60%; height: 170; color: whitesmoke; font-size: 3rem;">
             Score:
             <span id="score" >
 			</span>
 			<br>
-            Accuracy:
+            Accuray:
 			<span id="accuracy">
 			</span>
 			<br>
@@ -352,8 +398,8 @@
             <br>
             <span id="tulos">
             </span>
-            <div id="button">
-                <button onclick="Setup()">Start</button>
+            <div id="button" style="width: 100%; height: 100%;">
+                <button onclick="Setup()" style="font-size: 2rem;">Start</button>
             </div>
 		</div>
     </div>
