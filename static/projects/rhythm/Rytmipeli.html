@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<script>
+		const värit = ["red", "orange", "yellow", "green", "blue", "purple"]
+		const arvosanat = ["D", "C", "B", "A", "S", "SS"]
+		const leveys = 4
+		const korkeus = 6
+		ruudukko = Array.apply(null, Array(korkeus*leveys)).map(function () { return 0; })
+
+		let pisteet = 0
+		let mennytOhi = 0
+		let tulos = ""//Teksti joka kertoo menikö hyvin
+		let combo = 0
+		function Setup()
+		{
+			const element = document.getElementById("Root");
+			for (let x = 0; x < leveys; x++)
+			{
+			
+				let pääDiv = document.createElement("div");
+				pääDiv.style.width = "24px";
+				pääDiv.style.display = "inline-block";
+				
+				//Jono
+				for (let y = 0; y < korkeus; y++)
+				{
+					let jonoDiv = document.createElement("div")
+					jonoDiv.textContent = "⚪"
+					jonoDiv.id = y + "" + x //Että voi eroittaa nää toisistaan, ja että voi muokata ylipäätä
+					pääDiv.append(jonoDiv)
+				}
+
+				Nappi = document.createElement('button');
+				Nappi.style.backgroundColor = "grey"
+				Nappi.id = x
+				Nappi.textContent = x + 1;
+				Nappi.addEventListener("click", () => Testi(x) );
+				pääDiv.append(Nappi);
+
+				element.appendChild(pääDiv)
+			}
+			//Aloita logiikka
+			setInterval(Logic, 200)
+		}
+		function Logic() //Ja myös renderöinti
+		{	
+			if (Math.random() > 0.5)
+			{	
+				ruudukko[Math.round(Math.random()*leveys)] = 2;
+			}
+
+			for (let y = 0; y < korkeus; y++) //Vaikka y
+			{			
+				for (let x = 0; x < leveys; x++) //x
+				{	
+					//Nää x ja y jutut meni vähä pieleen jossaki vaiheessa et niissä ei varsinaisesti ole paljon järkeä, mutta ainakin toimii
+
+					//Logiikka
+					let ruudukkoPos = x + (y*leveys)
+
+					if (ruudukko[ruudukkoPos] == 1)
+					{
+						ruudukko[ruudukkoPos] = 0
+						if (y < korkeus-1) //Jos ei ole ruudukon pohjassa
+							ruudukko[x + ((y+1)*leveys)] = 2
+						else //Jos on
+						{
+							tulos = "Missed!"
+							mennytOhi++;
+							combo = 0
+						}
+					}
+					else if (ruudukko[ruudukkoPos] != 0)
+					{
+						//Laske alas
+						ruudukko[ruudukkoPos]--;
+					}
+
+					//Render
+					ruutu = document.getElementById(y + "" + x)
+					if (ruudukko[ruudukkoPos] == 0)
+					{
+						ruutu.textContent = "⚪"
+						if (y == korkeus-1)
+						{ //Normaali nappi... tällä tavalla mä tän resetoin...
+							document.getElementById(x).style.backgroundColor = "grey"
+						}
+					}
+					else
+					{
+						ruutu.textContent = "🔴"
+
+						if (y == korkeus-1)
+						{ //Kiiltävä nappi
+							document.getElementById(x).style.backgroundColor = "red"
+						}
+					}
+					//ruutu.textContent = ruudukkoPos
+				}
+			}
+			document.getElementById("tulos").textContent = tulos
+			tulos = "" //Tää on sen osuma jutun takia, ei ole koodi varsinaisen hyvin järjestetty...
+			prosentti = Math.round((pisteet/(pisteet + mennytOhi))*100)
+
+			document.getElementById("score").textContent = "Score: " + pisteet
+			document.getElementById("accuracy").textContent = "Accuracy: " + prosentti + " %"
+			document.getElementById("combo").textContent = combo
+			document.getElementById("combo").style.color = värit[combo/3]
+			document.getElementById("rank").textContent = arvosanat[Arvosana(prosentti)]
+			document.getElementById("rank").style.color = värit[Arvosana(prosentti)]
+
+			/*
+			if (combo > 14)
+			{
+				document.body.style.backgroundImage ='url("fire.gif")'
+			}else
+			{
+				document.body.style.backgroundImage = null
+			}
+			*/
+		}
+		function Testi(numero)
+		{
+			let ruudukkoPos = numero + (korkeus*leveys-leveys)
+			console.log(ruudukkoPos)
+
+			if (ruudukko[ruudukkoPos] == 1)
+			{
+				ruudukko[ruudukkoPos] = 0 //Osuit nuottiin
+				tulos = "Hit!"
+				pisteet++;
+				combo++;
+			}else
+			{
+				tulos = "Useless input"
+				combo = 0
+			}
+			document.getElementById(numero).style.backgroundColor = "blue"
+		}
+		function Arvosana(prosentti)
+		{
+			if (prosentti == 100)
+				return 5
+			else if (prosentti > 90)
+				return 4
+			else if (prosentti > 80)
+				return 3
+			else if (prosentti > 70)
+				return 2
+			else if (prosentti > 60)
+				return 1
+			else
+				return 0
+		}
+
+		//Näppäimistö input
+		document.addEventListener('keydown', function(event) {
+    	if(event.keyCode == 68) { //D
+    	    Testi(0);
+    	}
+    	else if(event.keyCode == 70) { //F
+    	    Testi(1)
+    	}
+		else if (event.keyCode == 74) { //J
+			Testi(2)
+		}
+		else if (event.keyCode == 75) { //K
+			Testi(3)
+		}
+});
+	</script>
+	<style>
+		body{
+			display: flex;
+			justify-content: center;
+			height: 100vh;
+			align-items: center;
+		}
+	</style>
+</head>
+<body onload="Setup()">
+	<div style="justify-content: center; display: flex;">
+		<div id="game" style="width: 100px;height: 170px; background-color: white; text-align: center;">
+			<div id="Root">
+				<!-- Tänne lisätään automaattisesti kaikki ne napit -->
+			</div>
+			<div id="tulos">
+			<!-- Terve -->
+			</div>
+		</div>
+		<div id="infobox" style="width: 150px; height: 170; background-color: white;">
+			<span id="score" >
+				Score: 0
+			</span>
+			<br>
+			<span id="accuracy">
+				Accuracy: 0 %
+			</span>
+			<br>
+			Combo: 
+			<span id="combo"">
+			</span>
+			<br>
+			Rank: 
+			<span id="rank"">
+			</span>
+			
+		</div>
+	</div>
+</body>
+</html>

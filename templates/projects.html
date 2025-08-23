@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="static/components/header.js"></script>
+    <script src="static/components/footer.js"></script>
+    <script src="static/components/card.js"></script>
+    <title>Projects</title>
+    <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+    <header-component>
+	    <a slot="wisdom">{{msg-daily}}</a>
+    </header-component>
+    <div class="content">
+        <h1>Projects</h1>
+        <p>This is the central hub for all of my projects. In time, every major "thing" I've worked on will appear here.
+        </p>
+        <h2 id="webtitle">
+            Web 
+        </h2>
+        <p>These are some little web projects I've been working on.</p>
+        <div>
+            <card-component>
+                <div slot="name">Wisdurm.fi</div>
+                <div slot="text">This is my website, the one you're currently on!</div>
+                <span slot="links"><a href="https://wisdurm.fi" class="spanlink">Wisdurm.fi</a></span>
+                <img class="fullimg" src="static/images/thumb-wis.png" slot="image">
+            </card-component>
+            <card-component>
+                <div slot="name">Infinite canvas</div>
+                <div slot="text">This is a (incomplete!) website that features a canvas for drawing, with infinite space to pan and zoom around in. Code for smoothing the lines and a possible shared canvas are in the works. </div>
+                <span slot="links"><a href="static/projects/infinite-canvas/infinite-canvas.html" class="spanlink">Canvas</a></span>
+                <img class="fullimg" src="static/images/thumb-can.png" slot="image">
+            </card-component>
+            <!--
+            <card-component>
+                <div slot="name">Mathematical demonstrations</div>
+                <div slot="text">A collection of small tools for demonstrating various mathematical phenomena related to things such as probability.</div>
+            </card-component>
+            -->
+            <card-component>
+                <div slot="name">Rhythm games</div>
+                <div slot="text">I've made a few very small & simple rhythm games (often without any actual rhythm!) that run in the browser. <br><div style="height: 10px;"></div><b>Heads up!</b> These use DFJK for the control scheme!</div>
+                <span slot="links">
+                    <!-- <a href="static/projects/rhythm/Rytmipeli2-Sound.html" class="spanlink">Game 1</a> Idk what's going on here
+                    •-->
+                    <a href="static/projects/rhythm/Rytmipeli.html" class="spanlink">Game</a>
+                </span>
+                <img class="fullimg" src="static/images/thumb-rhy.png" slot="image">
+            </card-component>
+        </div>
+        <h2>
+            Games
+        </h2>
+        <p>These are games I've made (or more accurately started making), that are more in depth experiences. Almost all of these are unfinished, but maybe you'll
+            still find them interesting.
+        </p>
+        <p>TODO: Add all of them...</p>
+        <div>
+        <!--
+        <card-component>
+            <div slot="name">Earth Defender</div>
+            <div slot="text">Incomplete small rogue-like classic retro shooter game.</div>
+        </card-component>
+        -->
+        </div>
+
+        <h2>
+            Miscellaneous
+        </h2>
+        <p>
+            Projects I've made that don't neatly fit into any of the other categories. These may be better organized in the future.
+        </p>
+        <div>
+            <card-component>
+                <div slot="name">Runtime</div>
+                <div slot="text">This is a programming language I've been working on. It's quiet close to being functional, at which point I'll release it,
+                    however be aware that not only is it a very esoteric language made for fun, but also it's current implementation is VERY inefficient.
+                </div>
+                <span slot="links">NA (not released yet)</span>
+                <img class="fullimg" src="static/images/thumb-run.png" slot="image">
+            </card-component>
+        </div>
+    </div>
+    <footer-component>
+    </footer-component>
+    <script>
+        const funny_titles = ["thingamajigs", "projects", "whatchamacallits", "toys", "things", "thingamabobs", "doodads", "gizmoz", "widgets", "gadgets", "doohickeys"]
+        document.getElementById("webtitle").textContent += funny_titles[Math.round(Math.random()*(funny_titles.length-1))]
+    </script>
+</body>
+</html>
