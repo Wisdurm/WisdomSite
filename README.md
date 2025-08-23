@@ -28,8 +28,6 @@ and paste the following:
   ]
 }
 ```
-Then run:  
-```vcpkg install```  
 Then finally, compile the program with:  
 ```cmake --preset=default```  
 ```cmake --build build```  
