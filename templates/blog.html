@@ -14,8 +14,16 @@
     </header-component>
     <div class="content">
         <h1>Blog</h1>
-        <p>This page will house a blog where I'll make posts about interesting things I've discovered and/or been working on. Currently there is nothing here.
+        <p>This page houses links to all my blog posts, where I make talk about interesting things I've discovered and/or been working on.
         </p>
+        <h2>Posts</h2>
+        <ul>
+            {{#posts}}
+            <li>
+                <a href="/blog/{{.}}">{{.}}</a>
+            </li>
+            {{/posts}}
+        </ul>
     </div>
     <footer-component>
     </footer-component>

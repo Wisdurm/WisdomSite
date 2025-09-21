@@ -8,6 +8,7 @@ project(WisdomSite)
 
 add_executable(WisdomSite 
 src/index.cpp
+src/markdown.cpp
 )
 # Dependencies
 
