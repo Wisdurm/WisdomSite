@@ -20,7 +20,7 @@ int main()
     const std::string pass = "MustanKissanPaksutPosket"; // This is DEFINITELY NOT secure, but it's GOOD ENOUGH for THE TIME BEING
     std::string dailyMsg = "Bruh";
     std::unordered_map<std::string, std::string> blogPosts = {};
-    const char* blogPath = "/blog/";
+    const char* blogPath = "blog";
 
     CROW_ROUTE(app, "/")([&dailyMsg]
         (const crow::request& req){      
@@ -87,7 +87,7 @@ int main()
     CROW_ROUTE(app, "/send")
 	    .methods("GET"_method, "POST"_method)([&dailyMsg, &pass](const crow::request& req, crow::response& res){
 
-        std::vector<std::string>& keys = req.url_params.keys();
+        const std::vector<std::string>& keys = req.url_params.keys();
         
         if (std::find(keys.begin(), keys.end(), "pass") != keys.end())
         {

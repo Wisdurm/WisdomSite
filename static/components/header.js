@@ -47,9 +47,9 @@ headerTemplate.innerHTML = `
     <header>
     <nav>
         <a href="/" class="link logo">Wisdurm.fi</a>
-        <a href="projects" class="link sub">Projects</a>
-        <a href="contact" class="link sub">Contact</a>
-        <a href="blog" class="link sub">Blog</a>
+        <a href="/projects" class="link sub">Projects</a>
+        <a href="/contact" class="link sub">Contact</a>
+        <a href="/blog" class="link sub">Blog</a>
         <a class="link sub" style="margin-left: auto; margin-right: 50px;" id="daily">Word(s) of the day: <slot name="wisdom">Bruhh</slot></a>
     </nav>
     <hr>
