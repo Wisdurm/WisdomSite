@@ -14,8 +14,8 @@ std::string parse(std::string& markdown)
 		MD_SIZE(markdown.size()),
 		captureHtmlFragment,
 		&result,
-		NULL,
-		NULL
+		0,
+		0
 	);
 	return result;
 }
