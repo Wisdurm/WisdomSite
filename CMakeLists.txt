@@ -8,7 +8,6 @@ project(WisdomSite)
 
 add_executable(WisdomSite 
 src/index.cpp
-src/markdown.cpp
 )
 # Dependencies
 
@@ -16,6 +15,7 @@ src/markdown.cpp
 # nginx handles SSL
 
 find_package(ZLIB REQUIRED)
+find_package(md4c REQUIRED)
 
 include(${CMAKE_SOURCE_DIR}/cmake/CPM.cmake)
 CPMAddPackage(Crow
@@ -36,4 +36,5 @@ target_link_libraries( WisdomSite
   #OpenSSL::Crypto
   ZLIB::ZLIB
   Crow::Crow
+  md4c::md4c-html
 )

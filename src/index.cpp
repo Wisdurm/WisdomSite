@@ -6,6 +6,8 @@
 #include <fstream>
 #include <unordered_map>
 #include <vector>
+#include <algorithm>
+#include <cctype>
 
 std::string process_text(std::string str)
 {
@@ -56,9 +58,16 @@ int main()
         std::unordered_map<std::string, std::string>::iterator it;
         for (it = blogPosts.begin(); it != blogPosts.end(); it++)   
         {
+            // Links
             std::string postName = it->first.substr(0, it->first.find_last_of('.'));
-            postName[0] = toupper(postName.at(0));
-            ctx["posts"][i] = postName;
+            ctx["posts"][i]["link"] = postName;
+
+            // Posts
+
+            // Replace underscore with space
+            std::transform(postName.begin(), postName.end(), postName.begin(),
+                [](unsigned char c) { if (c == '_') return ' '; else return (char)c; });
+            ctx["posts"][i]["name"] = postName;
             i++;
         }
 	    return page.render(ctx);
@@ -68,7 +77,6 @@ int main()
     (const crow::request& req, std::string str) {
 
         str += ".md";
-        str[0] = tolower(str.at(0)); // This isn't completely fool proof, but it's my site so I'll hopefully not forget this... hopefully
         std::unordered_map<std::string, std::string>::iterator it = blogPosts.find(str);
         if (it != blogPosts.end()) // Exists
         {
