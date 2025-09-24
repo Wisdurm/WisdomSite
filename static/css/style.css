@@ -83,3 +83,7 @@ a {
 .fullimg{
     height: 100%;
 }
+
+blockquote {
+	    border-left: 4px solid #333;
+}
