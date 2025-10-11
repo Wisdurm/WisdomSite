@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+
+<channel xml:base="https://wisdurm.fi/blog">
+	<title>Wisdurm blog</title>
+	<description>Wisdurm blog posts :D</description>
+	<item>
+		<title>1. Hello world</title>
+		<description>First blog post, describing the process of setting up blog posts.</description>
+		<link>https://wisdurm.fi/blog/1._Hello_world</link>
+		<pubDate>2025-09-24T20:53:00+03:00</pubDate>
+	</item
+</channel>
+	
+</rss>
