@@ -74,7 +74,7 @@ int main()
     });
 
     CROW_ROUTE(app, "/blog/<string>")([&dailyMsg, &blogPosts]
-    (const crow::request& req, std::string str) {
+    (const crow::request& req, crow::response& res, std::string str) {
 
         str += ".md";
         std::unordered_map<std::string, std::string>::iterator it = blogPosts.find(str);
@@ -82,14 +82,13 @@ int main()
         {
 	        auto page = crow::mustache::load("blogPost.html");
             crow::mustache::context ctx({ {"msg-daily", dailyMsg}, {"blogText", parse(blogPosts.at(str))} });
-	        return page.render(ctx);
+	        res.body = page.render(ctx).body_;
         }
         else // Blog post does not exist
         {
-            auto page = crow::mustache::load("404.html");
-            return page.render();
+            res.redirect("/404");
         }
-
+        res.end();
     });
 
     CROW_ROUTE(app, "/send")
@@ -105,6 +104,21 @@ int main()
         res.redirect("/");
         res.end();
 	});
+
+    CROW_CATCHALL_ROUTE(app)
+        ([&dailyMsg](crow::response& res) {
+        if (res.code == 404)
+        {
+            auto page = crow::mustache::load("404.html");
+            crow::mustache::context ctx({ {"msg-daily", dailyMsg} });
+	        res.body = page.render(ctx).body_;
+        }
+        else if (res.code == 405)
+        {
+            res.body = "The HTTP method does not seem to be correct.";
+        }
+        res.end();
+    });
 
     // Find blog files
     for (const auto& entry : std::filesystem::directory_iterator(blogPath))
