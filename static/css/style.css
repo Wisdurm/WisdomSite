@@ -25,7 +25,7 @@ body::after{
 a:hover {
     box-shadow: inset 0 -2px 0 0 #346734;
 }
-.content{
+main{
     padding-left: 2%;
     padding-bottom: 50px;
 }
@@ -86,4 +86,9 @@ a {
 
 blockquote {
 	    border-left: 4px solid #333;
+}
+aside{
+    margin-left: auto;
+    margin-right: 20px;
+    width: 320px;
 }

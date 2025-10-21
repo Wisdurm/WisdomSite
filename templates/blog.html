@@ -12,19 +12,21 @@
     <header-component>
 	    <a slot="wisdom">{{msg-daily}}</a>
     </header-component>
-    <div class="content">
-        <h1>Blog</h1>
-        <p>This page houses links to all my blog posts, where I make talk about interesting things I've discovered and/or been working on.
-        </p>
-        <h2>Posts</h2>
-        <ul>
-            {{#posts}}
-            <li>
-                <a href="/blog/{{link}}">{{name}}</a>
-            </li>
-            {{/posts}}
-        </ul>
-    </div>
+    <main>
+        <section>
+            <h1>Blog</h1>
+            <p>This page houses links to all my blog posts, where I make talk about interesting things I've discovered and/or been working on.
+            </p>
+            <h2>Posts</h2>
+            <ul>
+                {{#posts}}
+                <li>
+                    <a href="/blog/{{link}}">{{name}}</a>
+                </li>
+                {{/posts}}
+            </ul>
+        </section>
+    </main>
     <footer-component>
     </footer-component>
 </body>
