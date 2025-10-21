@@ -39,6 +39,9 @@ footerTemplate.innerHTML = `
             position: absolute;
             bottom: 0;
             display:inline-block;
+
+            border-top: 3px solid #346734;
+            padding-top: 5px;
         }
         hr{
             margin: 0;
@@ -49,7 +52,6 @@ footerTemplate.innerHTML = `
         }
     </style>
     <footer>
-        <hr>
         <div style="display:flex;justify-content:center;align-items:center">
             <h1>Wisdurm.fi</h1>
         </div>
