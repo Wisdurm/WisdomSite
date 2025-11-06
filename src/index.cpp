@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <cctype>
 #include "bcrypt/BCrypt.hpp"
+#include <cmath>
 
 std::string process_text(std::string str)
 {
@@ -17,45 +18,61 @@ std::string process_text(std::string str)
     return str;
 }
 
+std::string getMotd(std::string& daily, std::vector<std::string>& motdBackup, time_t& lastUpdate)
+{
+	// If message of the day is set, use it.
+	if (daily != "")
+		return daily;
+ 	else // Otherwise, fallback to older ones
+	{
+		return motdBackup.at(0);
+	}
+}
+
 int main()
 {
     crow::SimpleApp app;
-	const std::string salt = "mirri";
+	const std::string salt = "mirri"; // Password salt
     const std::string pass = "$2a$12$VZOmbvUUaMNmafKN3nynAuZtlJ6SKLJrB25G3Ssm/zFPtFbr8owGG"; // TODO: Maybe should be in .env file? Idk
-    std::string dailyMsg = "Bruh";
+
+    std::string dailyMsg = "";
+	std::vector<std::string> motdBackup; // Old motds to use in the abscence of a new one
+	time_t lastUpdate; // Time since motd last updated
+	time(&lastUpdate);
+
     std::unordered_map<std::string, std::string> blogPosts = {};
     const char* blogPath = "blog";
 
-    CROW_ROUTE(app, "/")([&dailyMsg]
+    CROW_ROUTE(app, "/")([&dailyMsg, &motdBackup, &lastUpdate]
         (const crow::request& req){      
 
 	    auto page = crow::mustache::load("index.html");
-        crow::mustache::context ctx({{"msg-daily", dailyMsg}});
+        crow::mustache::context ctx({{"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)}});
 	    return page.render(ctx);
     });
 
-    CROW_ROUTE(app, "/projects")([&dailyMsg]
+    CROW_ROUTE(app, "/projects")([&dailyMsg, &motdBackup, &lastUpdate]
         (const crow::request& req){       
 
 	    auto page = crow::mustache::load("projects.html");
-        crow::mustache::context ctx({{"msg-daily", dailyMsg}});
+        crow::mustache::context ctx({{"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)}});
 	    return page.render(ctx);
     });
 
-    CROW_ROUTE(app, "/contact")([&dailyMsg]
+    CROW_ROUTE(app, "/contact")([&dailyMsg, &motdBackup, &lastUpdate]
         (const crow::request& req){       
 
 	    auto page = crow::mustache::load("contact.html");
-        crow::mustache::context ctx({{"msg-daily", dailyMsg}});
+        crow::mustache::context ctx({{"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)}});
 	    return page.render(ctx);
     });
 
-    CROW_ROUTE(app, "/blog")([&dailyMsg, &blogPosts]
+    CROW_ROUTE(app, "/blog")([&dailyMsg, &motdBackup, &lastUpdate, &blogPosts]
         (const crow::request& req){       
 
 	    auto page = crow::mustache::load("blog.html");
         crow::mustache::context ctx;
-        ctx["msg-daily"] = dailyMsg;
+        ctx["msg-daily"] = getMotd(dailyMsg, motdBackup, lastUpdate);
         int i = 0;
         std::unordered_map<std::string, std::string>::iterator it;
         for (it = blogPosts.begin(); it != blogPosts.end(); it++)   
@@ -75,7 +92,7 @@ int main()
 	    return page.render(ctx);
     });
 
-    CROW_ROUTE(app, "/blog/<string>")([&dailyMsg, &blogPosts]
+    CROW_ROUTE(app, "/blog/<string>")([&dailyMsg, &motdBackup, &lastUpdate, &blogPosts]
     (const crow::request& req, crow::response& res, std::string str) {
 
         str += ".md";
@@ -83,7 +100,7 @@ int main()
         if (it != blogPosts.end()) // Exists
         {
 	        auto page = crow::mustache::load("blogPost.html");
-            crow::mustache::context ctx({ {"msg-daily", dailyMsg}, {"blogText", parse(blogPosts.at(str))} });
+            crow::mustache::context ctx({ {"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)}, {"blogText", parse(blogPosts.at(str))} });
 	        res.body = page.render(ctx).body_;
         }
         else // Blog post does not exist
@@ -143,6 +160,19 @@ int main()
         std::string filePath = entry.path().string();
         blogPosts[filePath.substr(filePath.find_last_of("/\\") + 1)] = fileText; // File name
     }
+	// Motd
+	std::ifstream motdFile;
+	motdFile.open("motd.txt", std::fstream::in);
+	if (motdFile.fail())
+	{
+		std::cout << "Unable to open motd.txt file";
+		return EXIT_FAILURE;
+	}
+	std::string text;
+	while (getline(motdFile, text)) { // Copy all lines to motdBackup, &lastUpdate
+		motdBackup.push_back(text);
+	}
+	motdFile.close();
 
     app.port(18080).multithreaded().run();
 }
