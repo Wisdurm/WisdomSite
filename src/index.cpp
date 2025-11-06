@@ -8,6 +8,7 @@
 #include <vector>
 #include <algorithm>
 #include <cctype>
+#include "bcrypt/BCrypt.hpp"
 
 std::string process_text(std::string str)
 {
@@ -19,7 +20,8 @@ std::string process_text(std::string str)
 int main()
 {
     crow::SimpleApp app;
-    const std::string pass = "MustanKissanPaksutPosket"; // This is DEFINITELY NOT secure, but it's GOOD ENOUGH for THE TIME BEING
+	const std::string salt = "mirri";
+    const std::string pass = "$2a$12$VZOmbvUUaMNmafKN3nynAuZtlJ6SKLJrB25G3Ssm/zFPtFbr8owGG"; // TODO: Maybe should be in .env file? Idk
     std::string dailyMsg = "Bruh";
     std::unordered_map<std::string, std::string> blogPosts = {};
     const char* blogPath = "blog";
@@ -92,14 +94,13 @@ int main()
     });
 
     CROW_ROUTE(app, "/send")
-	    .methods("GET"_method, "POST"_method)([&dailyMsg, &pass](const crow::request& req, crow::response& res){
+	    .methods("GET"_method, "POST"_method)([&dailyMsg, &pass, &salt](const crow::request& req, crow::response& res){
 
         const std::vector<std::string>& keys = req.url_params.keys();
         
-        if (std::find(keys.begin(), keys.end(), "pass") != keys.end())
+        if (std::find(keys.begin(), keys.end(), "pass") != keys.end() and BCrypt::validatePassword(req.url_params.get("pass") + salt, pass))
         {
-            if (req.url_params.get("pass") == pass) // For whaetever reason, these two conditionals don't "fit" in the same if statement :thinking:
-                dailyMsg = process_text(req.url_params.get("msg"));
+			dailyMsg = process_text(req.url_params.get("msg"));
         }
         res.redirect("/");
         res.end();

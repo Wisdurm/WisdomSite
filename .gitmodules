@@ -1,3 +1,6 @@
 [submodule "static/projects/infinite-canvas"]
 	path = static/projects/infinite-canvas
 	url = https://github.com/Wisdurm/infinite-canvas.git
+[submodule "external/libbcrypt"]
+	path = external/libbcrypt
+	url = https://github.com/trusch/libbcrypt.git

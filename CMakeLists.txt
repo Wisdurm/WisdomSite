@@ -14,6 +14,12 @@ src/index.cpp
 #find_package(OpenSSL REQUIRED)
 # nginx handles SSL
 
+# It took me like 2 HOURS to get A SINGLE hashing library TO LINK
+# I HATE USING LIBRARIES IN C++
+# ADD. CMAKE. TO. YOUR. PROJECT. PLEAAASEEEE *cough* *cough* argon2
+add_subdirectory(${CMAKE_SOURCE_DIR}/external/libbcrypt)
+include_directories(${CMAKE_SOURCE_DIR}/external/libbcrypt/include)
+
 find_package(ZLIB REQUIRED)
 find_package(md4c REQUIRED)
 
@@ -37,4 +43,5 @@ target_link_libraries( WisdomSite
   ZLIB::ZLIB
   Crow::Crow
   md4c::md4c-html
+  bcrypt
 )
