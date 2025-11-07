@@ -22,6 +22,7 @@ include_directories(${CMAKE_SOURCE_DIR}/external/libbcrypt/include)
 
 find_package(ZLIB REQUIRED)
 find_package(md4c REQUIRED)
+find_package(pugixml REQUIRED)
 
 include(${CMAKE_SOURCE_DIR}/cmake/CPM.cmake)
 CPMAddPackage(Crow
@@ -44,4 +45,5 @@ target_link_libraries( WisdomSite
   Crow::Crow
   md4c::md4c-html
   bcrypt
+  pugixml::pugixml
 )

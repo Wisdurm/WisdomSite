@@ -10,6 +10,7 @@
 #include <cctype>
 #include "bcrypt/BCrypt.hpp"
 #include <ctime>
+#include "pugixml.hpp"
 
 std::string process_text(std::string str)
 {
@@ -41,13 +42,16 @@ std::string getMotd(std::string& daily, std::vector<std::string>& motdBackup, ti
 int main()
 {
     crow::SimpleApp app;
+	// Password things
 	const std::string salt = "mirri"; // Password salt
     const std::string pass = "$2a$12$VZOmbvUUaMNmafKN3nynAuZtlJ6SKLJrB25G3Ssm/zFPtFbr8owGG"; // TODO: Maybe should be in .env file? Idk
-
+	// Message of the day (motd)
     std::string dailyMsg = "";
 	std::vector<std::string> motdBackup; // Old motds to use in the abscence of a new one
 	time_t lastUpdate; // Time since motd last updated
 	time(&lastUpdate);
+	// Xml
+	pugi::xml_document pdoc;
 
     std::unordered_map<std::string, std::string> blogPosts = {};
     const char* blogPath = "blog";
@@ -204,6 +208,12 @@ int main()
 		motdBackup.push_back(text);
 	}
 	motdFile.close();
-
+	// Open xml document
+	pugi::xml_parse_result result = pdoc.load_file("projects.xml");
+    if (!result) {
+		CROW_LOG_CRITICAL << "Unable to open projects.xml file";
+        return EXIT_FAILURE;
+	}
+	// Other stuff finished, start server
     app.port(18080).multithreaded().run();
 }

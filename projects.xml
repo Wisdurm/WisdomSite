@@ -1,0 +1,16 @@
+<projects>
+	<cat name="Web" desc="These are some web things">
+		<item name="Wisdurm.fi" desc="My site" img="/static/images/thumb-wis.png">
+			<link href="https://wisdurm.fi">Wisdurm.fi</link>
+		</item>
+		<item name="Infinite canvas" dect="inf canvas" img="/static/images/thumb-can.png">
+			<link href="https://google.com">Canvas</link>
+			<link href="/admin">Src</link>
+		</item>
+	</cat>
+	<cat name="Games" desc="Games I've made">
+		<item name="Terrabit" desc="Terraira cmd" img="/static/images/thumb-ter.png">
+			<link src="/">Abc</link>
+		</item>
+	</cat>
+</projects>
