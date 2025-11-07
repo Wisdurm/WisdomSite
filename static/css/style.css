@@ -19,7 +19,7 @@ body{
 body::after{
     content: '';
     display: block;
-    height: 60px;
+    height: 80px;
 }
 
 a:hover {

@@ -12,7 +12,6 @@ footerTemplate.innerHTML = `
             font-weight: 700;
             color: #346734;
             text-decoration: none;
-            font-size: 1.2em;
             font-family: FreeSerif;
         }
 
@@ -35,7 +34,7 @@ footerTemplate.innerHTML = `
 
         footer{
             width:100%;
-            height: 60px;
+            height: 80px;
             position: absolute;
             bottom: 0;
             display:inline-block;
@@ -49,11 +48,22 @@ footerTemplate.innerHTML = `
         h1{
             color: #346734;
             font-family: FreeSerif;
+			margin-top: 5px;
+			margin-bottom: 0;
         }
+		p {
+            color: #346734;
+            font-weight: 500;
+            font-size: 1.2em;
+            font-family: FreeSerif;
+			margin-top: 0;
+			margin-bottom: 10px;
+		}
     </style>
     <footer>
-        <div style="display:flex;justify-content:center;align-items:center">
+        <div style="display:flex;justify-content:center;align-items:center;flex-direction:column">
             <h1>Wisdurm.fi</h1>
+			<p>Licensed under CC0-1.0; do whatever you want • <a href="https://github.com/Wisdurm/WisdomSite">Source code</a> <p>
         </div>
     </footer>
 `;
