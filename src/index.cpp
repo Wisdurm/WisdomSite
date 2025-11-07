@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <cctype>
 #include "bcrypt/BCrypt.hpp"
-#include <cmath>
+#include <ctime>
 
 std::string process_text(std::string str)
 {
@@ -20,13 +20,22 @@ std::string process_text(std::string str)
 
 std::string getMotd(std::string& daily, std::vector<std::string>& motdBackup, time_t& lastUpdate)
 {
+	time_t now;
+	time(&now);
 	// If message of the day is set, use it.
-	if (daily != "")
-		return daily;
- 	else // Otherwise, fallback to older ones
-	{
-		return motdBackup.at(0);
+	if (daily != "") {
+		CROW_LOG_INFO << "Hours since last update: " << ((now - lastUpdate)/60.0/60);
+		if (((now - lastUpdate)/60.0/60) > 30) { // If more than 30 hours has passed, reset the daily word
+			lastUpdate = now;
+			daily= "";
+		}
+		else {
+			return daily;
+		}
 	}
+ 	// Otherwise, fallback to older ones
+	long day = now/60/60/24; // How many days since Jan 1 1900
+	return motdBackup.at(day % motdBackup.size());
 }
 
 int main()
@@ -64,6 +73,16 @@ int main()
 
 	    auto page = crow::mustache::load("contact.html");
         crow::mustache::context ctx({{"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)}});
+	    return page.render(ctx);
+    });
+
+    CROW_ROUTE(app, "/admin")([&lastUpdate]
+        (const crow::request& req){       
+
+		time_t now;
+		time(&now);
+	    auto page = crow::mustache::load("motd.html");
+        crow::mustache::context ctx({{"time-since", (now - lastUpdate)/60/60 }}); // Hours since last update
 	    return page.render(ctx);
     });
 
@@ -111,13 +130,25 @@ int main()
     });
 
     CROW_ROUTE(app, "/send")
-	    .methods("GET"_method, "POST"_method)([&dailyMsg, &pass, &salt](const crow::request& req, crow::response& res){
+	    .methods("GET"_method, "POST"_method)([&dailyMsg, &pass, &salt, &motdBackup](const crow::request& req, crow::response& res){
 
         const std::vector<std::string>& keys = req.url_params.keys();
         
         if (std::find(keys.begin(), keys.end(), "pass") != keys.end() and BCrypt::validatePassword(req.url_params.get("pass") + salt, pass))
         {
 			dailyMsg = process_text(req.url_params.get("msg"));
+			motdBackup.push_back(dailyMsg);
+			// Write dailymsg to file in case it's funny :D
+			std::ofstream motdFile;
+			motdFile.open("motd.txt", std::fstream::app);
+			if (motdFile.fail())
+			{
+				CROW_LOG_CRITICAL << "Unable to open motd.txt file";
+			}
+			else {
+				motdFile << dailyMsg; // i luv c++ :)
+				motdFile.close();
+			}
         }
         res.redirect("/");
         res.end();
@@ -141,13 +172,13 @@ int main()
     // Find blog files
     for (const auto& entry : std::filesystem::directory_iterator(blogPath))
     {
-        std::cout << "Loading file: " << entry.path() << std::endl;
+        CROW_LOG_INFO << "Loading file: " << entry.path();
         std::ifstream file;
         // Open file
         file.open(entry.path(), std::fstream::in);
         if (file.fail())
         {
-            std::cout << "Unable to open file " << entry.path();
+            CROW_LOG_CRITICAL << "Unable to open file " << entry.path();
             return EXIT_FAILURE;
         }
         file.seekg(0, std::ios::end);
@@ -165,7 +196,7 @@ int main()
 	motdFile.open("motd.txt", std::fstream::in);
 	if (motdFile.fail())
 	{
-		std::cout << "Unable to open motd.txt file";
+		CROW_LOG_CRITICAL << "Unable to open motd.txt file";
 		return EXIT_FAILURE;
 	}
 	std::string text;
