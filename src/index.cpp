@@ -11,6 +11,7 @@
 #include "bcrypt/BCrypt.hpp"
 #include <ctime>
 #include "pugixml.hpp"
+#include <format>
 
 std::string process_text(std::string str)
 {
@@ -39,6 +40,30 @@ std::string getMotd(std::string& daily, std::vector<std::string>& motdBackup, ti
 	return motdBackup.at(day % motdBackup.size());
 }
 
+// Turns xml item into a <card-component> element
+inline std::string htmlCard(pugi::xml_node item) {
+	std::string html = std::format("<card-component>"
+			"<div slot='name'>{0}</div>"
+			"<div slot='text'>{1}</div>"
+			"<img slot='image' src='{2}' class='{3}'>"
+			"<span slot='links'>",
+			item.attribute("name").as_string(),
+			item.attribute("desc").as_string(),
+			item.attribute("img").as_string(),
+			item.attribute("imgform").as_string()
+		);
+	// Links need to be parsed seperately :DDDDDDDDDDDDDDDDDD
+	auto links = item.children("link");
+	for (pugi::xml_named_node_iterator it = links.begin(); it != links.end();) {
+		html += std::format("<a class='spanlink' href='{1}'>{0}</a>", it->child_value(), it->attribute("href").as_string());
+		if (++it != links.end()) { // TODO: does i++ iterate it?
+			html += " • ";
+		}
+	}
+	html += "</span> </card-component>";
+	return html;
+}
+
 int main()
 {
     crow::SimpleApp app;
@@ -52,23 +77,32 @@ int main()
 	time(&lastUpdate);
 	// Xml
 	pugi::xml_document pdoc;
-
+	std::vector<std::string> items; // yadadadadada blah blah blah lalalalalalala
+	std::string projectPage = ""; // Just straight up store it here because why would I parse it everytime
+	// Blogs
     std::unordered_map<std::string, std::string> blogPosts = {};
     const char* blogPath = "blog";
 
-    CROW_ROUTE(app, "/")([&dailyMsg, &motdBackup, &lastUpdate]
+    CROW_ROUTE(app, "/")([&dailyMsg, &motdBackup, &lastUpdate, &pdoc, &items]
         (const crow::request& req){      
 
+		// Project of the day
+		time_t now;
+		time(&now);
+		long day = now/60/60/24; // How many days since Jan 1 1900
+		std::string potd = items.at(day % items.size()); // TODO: Randomization
+		//
 	    auto page = crow::mustache::load("index.html");
-        crow::mustache::context ctx({{"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)}});
+        crow::mustache::context ctx({{"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)}, {"project-daily", potd}});
 	    return page.render(ctx);
     });
 
-    CROW_ROUTE(app, "/projects")([&dailyMsg, &motdBackup, &lastUpdate]
+    CROW_ROUTE(app, "/projects")([&dailyMsg, &motdBackup, &lastUpdate, &projectPage]
         (const crow::request& req){       
 
+		// 
 	    auto page = crow::mustache::load("projects.html");
-        crow::mustache::context ctx({{"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)}});
+        crow::mustache::context ctx({{"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)}, {"projects-text", projectPage}});
 	    return page.render(ctx);
     });
 
@@ -136,24 +170,27 @@ int main()
     CROW_ROUTE(app, "/send")
 	    .methods("GET"_method, "POST"_method)([&dailyMsg, &pass, &salt, &motdBackup](const crow::request& req, crow::response& res){
 
-        const std::vector<std::string>& keys = req.url_params.keys();
-        
-        if (std::find(keys.begin(), keys.end(), "pass") != keys.end() and BCrypt::validatePassword(req.url_params.get("pass") + salt, pass))
-        {
-			dailyMsg = process_text(req.url_params.get("msg"));
-			motdBackup.push_back(dailyMsg);
-			// Write dailymsg to file in case it's funny :D
-			std::ofstream motdFile;
-			motdFile.open("motd.txt", std::fstream::app);
-			if (motdFile.fail())
+		const char* r = req.url_params.get("pass");
+		if (r != nullptr)
+		{
+        	const std::string url_pass = r;
+			if (BCrypt::validatePassword(url_pass + salt, pass))
 			{
-				CROW_LOG_CRITICAL << "Unable to open motd.txt file";
+				dailyMsg = process_text(req.url_params.get("msg"));
+				motdBackup.push_back(dailyMsg);
+				// Write dailymsg to file in case it's funny :D
+				std::ofstream motdFile;
+				motdFile.open("motd.txt", std::fstream::app);
+				if (motdFile.fail())
+				{
+					CROW_LOG_CRITICAL << "Unable to open motd.txt file";
+				}
+				else {
+					motdFile << dailyMsg; // i luv c++ :)
+					motdFile.close();
+				}
 			}
-			else {
-				motdFile << dailyMsg; // i luv c++ :)
-				motdFile.close();
-			}
-        }
+		}
         res.redirect("/");
         res.end();
 	});
@@ -213,6 +250,21 @@ int main()
     if (!result) {
 		CROW_LOG_CRITICAL << "Unable to open projects.xml file";
         return EXIT_FAILURE;
+	}
+	// Parse items
+	for (pugi::xml_node cat : pdoc.child("projects"))
+	{
+		// Make sections for each category
+		projectPage += std::format("<section> <h2>{0}</h2> <p>{1}</p>",
+				cat.attribute("name").as_string(),
+				cat.attribute("desc").as_string()
+			); // Cat info
+		for (pugi::xml_node item : cat.children("item")) {
+			// Items
+			items.push_back(htmlCard(item));
+			projectPage += items.back();
+		}
+		projectPage += "</section>";
 	}
 	// Other stuff finished, start server
     app.port(18080).multithreaded().run();

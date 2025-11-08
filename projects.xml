@@ -1,16 +1,49 @@
 <projects>
-	<cat name="Web" desc="These are some web things">
-		<item name="Wisdurm.fi" desc="My site" img="/static/images/thumb-wis.png">
+	<cat name="Web" desc="These are some little web projects I've been working on.">
+		<item name="Wisdurm.fi" desc="This is my website, the one you're currently on!" img="/static/images/thumb-wis.png" imgform="fullimgh">
 			<link href="https://wisdurm.fi">Wisdurm.fi</link>
 		</item>
-		<item name="Infinite canvas" dect="inf canvas" img="/static/images/thumb-can.png">
-			<link href="https://google.com">Canvas</link>
-			<link href="/admin">Src</link>
+		<item name="Infinite canvas" desc="This is a (incomplete!) website that features a canvas for drawing, with infinite space to pan and zoom around in. Code for smoothing the lines and a possible shared canvas are in the works. " img="/static/images/thumb-can.png" imgform="fullimgw">
+			<link href="/static/projects/infinite-canvas/infinite-canvas.html">Canvas</link>
+			<link href="https://github.com/Wisdurm/infinite-canvas">Src</link>
+		</item>
+		<item name="Rhythm games" desc="
+						I've made a few very small & simple rhythm games (sometimes without any actual rhythm!) that run in the browser. <br>
+                    	<div style='height: 10px;'></div>
+						<b>Heads up!</b> These use DFJK for the control scheme!"
+						img="/static/images/thumb-rhy.png" imgform="fullimgw">
+			<link href="/static/projects/rhythm/Rytmipeli2-Sound.html">Game 1</link>
+			<link href="/static/projects/rhythm/Rytmipeli.html">Game 2</link>
 		</item>
 	</cat>
-	<cat name="Games" desc="Games I've made">
-		<item name="Terrabit" desc="Terraira cmd" img="/static/images/thumb-ter.png">
-			<link src="/">Abc</link>
+	<cat name="Games" desc="Games I've that are more in depth experiences. This doesn't include all of my games, and even so these are all currently unfinished, but maybe you'll still find them cool.">
+		<item name="Unnamed-Tower-Defense-Game" desc="This is a tower defense game I started writing in C#.
+	It's currently in a perfectly playable state, but it's obviously unfinished." img="/static/images/thumb-tow.png" imgform="fullimgw">
+			<link href="https://www.youtube.com/watch?v=fkQT2tmIeyg">Video</link>
+			<link href="https://github.com/Wisdurm/Unnamed-Tower-Defense-Game">Src</link>
+		</item>
+		<item name="Horrible World" desc="This is a war/civilization simulation game I also wrote in C#.
+                    This is, I believe, still my largest project by lines of code." img="/static/images/thumb-hor.png" imgform="fullimgh">
+			<link href="https://github.com/Wisdurm/Unnamed-Tower-Defense-Game">Video</link>
+			<link href="https://github.com/Wisdurm/Horrible-World">Src</link>
+		</item>
+		<item name="Terrabit" desc="Very simple text-based Terraria remake. More of a proof of concept, never got far into development.
+                    <small>(Also my first big programming project ever!)</small>" img="/static/images/thumb-ter.png" imgform="fullimgh">
+			<link src="https://www.youtube.com/watch?v=ivEEdUHqQ6c">Video</link>
+			<link src="https://github.com/Wisdurm/Terrabit">Src</link>
+		</item>
+	</cat>
+	<cat name="Miscellaneous" desc="Projects I've made that don't neatly fit into any of the other categories. These may be better organized in the future.
+	">
+		<item name="Runtime" desc=" A very-high-level, questionably-evaluated, purely-object-oriented, interpreted programming language.
+                        Made for fun, and is not particularly fast, but hopefully a bit fun to mess around with :)" img="/static/images/thumb-run.png" imgform="imgcenter">
+			<link src="">Releases</link>
+			<link src="">Src</link>
+		</item>
+		<item name="Desktop Flashbang" desc="What it says on the tin, a program which throws a flashbang on your screen." img="/static/images/thumb-flb.png" imgform="fullimgh">
+			<link src="https://github.com/Wisdurm/Flashbang/releases">Releases</link>
+			<link src="https://github.com/Wisdurm/Flashbang">Src</link>
+			<link src="https://www.youtube.com/watch?v=hBsc_-OxonE">Video</link>
 		</item>
 	</cat>
 </projects>

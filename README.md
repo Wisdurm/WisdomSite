@@ -2,6 +2,8 @@
 
 This is my own personal website, currently hosted at [Wisdurm.fi](https://wisdurm.fi)    
 This site is built using [CrowCPP](https://crowcpp.org/master/)  
+** This site is built for my personal use. It is not very well made, but it does just barely work.
+CrowCPP was used just because "C++ web framework funny" ** 
 
 # Setup
 
