@@ -109,3 +109,9 @@ article{
     /*TODO: Looks bad on mobile*/
     max-width: 60%;
 }
+#rss {
+	position: absolute;
+	width: 30px;
+	bottom: 120px;
+	left: 40px;
+}
