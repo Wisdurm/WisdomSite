@@ -29,21 +29,21 @@
 		</item>
 		<item name="Terrabit" desc="Very simple text-based Terraria remake. More of a proof of concept, never got far into development.
                     <small>(Also my first big programming project ever!)</small>" img="/static/images/thumb-ter.png" imgform="fullimgh">
-			<link src="https://www.youtube.com/watch?v=ivEEdUHqQ6c">Video</link>
-			<link src="https://github.com/Wisdurm/Terrabit">Src</link>
+			<link href="https://www.youtube.com/watch?v=ivEEdUHqQ6c">Video</link>
+			<link href="https://github.com/Wisdurm/Terrabit">Src</link>
 		</item>
 	</cat>
 	<cat name="Miscellaneous" desc="Projects I've made that don't neatly fit into any of the other categories. These may be better organized in the future.
 	">
 		<item name="Runtime" desc=" A very-high-level, questionably-evaluated, purely-object-oriented, interpreted programming language.
                         Made for fun, and is not particularly fast, but hopefully a bit fun to mess around with :)" img="/static/images/thumb-run.png" imgform="imgcenter">
-			<link src="">Releases</link>
-			<link src="">Src</link>
+			<link href="https://github.com/Wisdurm/Runtime/releases">Releases</link>
+			<link href="github.com/Wisdurm/Runtime">Src</link>
 		</item>
 		<item name="Desktop Flashbang" desc="What it says on the tin, a program which throws a flashbang on your screen." img="/static/images/thumb-flb.png" imgform="fullimgh">
-			<link src="https://github.com/Wisdurm/Flashbang/releases">Releases</link>
-			<link src="https://github.com/Wisdurm/Flashbang">Src</link>
-			<link src="https://www.youtube.com/watch?v=hBsc_-OxonE">Video</link>
+			<link href="https://github.com/Wisdurm/Flashbang/releases">Releases</link>
+			<link href="https://github.com/Wisdurm/Flashbang">Src</link>
+			<link href="https://www.youtube.com/watch?v=hBsc_-OxonE">Video</link>
 		</item>
 	</cat>
 </projects>
