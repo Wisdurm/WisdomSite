@@ -42,7 +42,7 @@ std::string getMotd(std::string& daily, std::vector<std::string>& motdBackup, ti
 
 // Turns xml item into a <card-component> element
 inline std::string htmlCard(pugi::xml_node item) {
-	std::string html = std::format("<card-component>"
+	std::string html = std::format("<card-component id='{0}'>"
 			"<div slot='name'>{0}</div>"
 			"<div slot='text'>{1}</div>"
 			"<img slot='image' src='{2}' class='{3}'>"
@@ -186,7 +186,7 @@ int main()
 					CROW_LOG_CRITICAL << "Unable to open motd.txt file";
 				}
 				else {
-					motdFile << dailyMsg; // i luv c++ :)
+					motdFile << "\n" << dailyMsg;
 					motdFile.close();
 				}
 			}
@@ -255,7 +255,7 @@ int main()
 	for (pugi::xml_node cat : pdoc.child("projects"))
 	{
 		// Make sections for each category
-		projectPage += std::format("<section> <h2>{0}</h2> <p>{1}</p>",
+		projectPage += std::format("<section> <h2 id='{0}'>{0}</h2> <p>{1}</p>",
 				cat.attribute("name").as_string(),
 				cat.attribute("desc").as_string()
 			); // Cat info
