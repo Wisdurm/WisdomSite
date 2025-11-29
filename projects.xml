@@ -37,8 +37,7 @@
 	">
 		<item name="Runtime" desc=" A very-high-level, questionably-evaluated, purely-object-oriented, interpreted programming language.
                         Made for fun, and is not particularly fast, but hopefully a bit fun to mess around with :)" img="/static/images/thumb-run.png" imgform="imgcenter">
-			<link href="https://github.com/Wisdurm/Runtime/releases">Releases</link>
-			<link href="https://github.com/Wisdurm/Runtime">Src</link>
+			<link href="https://runtime.wisdurm.fi/public/index.php">Site</link>
 		</item>
 		<item name="Desktop Flashbang" desc="What it says on the tin, a program which throws a flashbang on your screen." img="/static/images/thumb-flb.png" imgform="fullimgh">
 			<link href="https://github.com/Wisdurm/Flashbang/releases">Releases</link>
