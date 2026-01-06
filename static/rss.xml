@@ -1,20 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <rss version="2.0">
 
-<channel xml:base="https://wisdurm.fi/blog">
+<channel xml:base="https://wisdurm.fi/blog" link="https://wisdurm.fi/blog">
 	<title>Wisdurm blog</title>
 	<description>Wisdurm blog posts :D</description>
 	<item>
 		<title>1. Hello world</title>
 		<description>First blog post, describing the process of setting up blog posts.</description>
 		<link>https://wisdurm.fi/blog/1._Hello_world</link>
-		<pubDate>2025-09-24T20:53:00+03:00</pubDate>
+		<guid isPermalink="true">https://wisdurm.fi/blog/1._Hello_world</guid>
+		<pubDate>Wed, 24 Sep 2025 20:53:00 EEST</pubDate>
 	</item>
 	<item>
 		<title>2. Runtime difficulties</title>
 		<description>Back to blogging, to talk about some work on Runtime.</description>
 		<link>https://wisdurm.fi/blog/2._Runtime_difficulties</link>
-		<pubDate>2026-01-06T17:03:00+03:00</pubDate>
+		<guid isPermalink="true">https://wisdurm.fi/blog/2._Runtime_difficulties</guid>
+		<pubDate>Tue, 6 Jan 2026 17:03:00 EEST</pubDate>
 	</item>
 </channel>
 	
