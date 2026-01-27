@@ -51,7 +51,7 @@ h3{
     color: #346734;
     font-family: FreeSerif;
 }
-p{
+p, li{
     color: #333;
     font-size: 1.2em;
     margin-top: 0;

@@ -80,7 +80,7 @@ int main()
 	std::vector<std::string> items; // yadadadadada blah blah blah lalalalalalala
 	std::string projectPage = ""; // Just straight up store it here because why would I parse it everytime
 	// Blogs
-    std::unordered_map<std::string, std::string> blogPosts = {};
+    std::map<std::string, std::string> blogPosts = {};
     const char* blogPath = "blog";
 
     CROW_ROUTE(app, "/")([&dailyMsg, &motdBackup, &lastUpdate, &pdoc, &items]
@@ -131,8 +131,8 @@ int main()
         crow::mustache::context ctx;
         ctx["msg-daily"] = getMotd(dailyMsg, motdBackup, lastUpdate);
         int i = 0;
-        std::unordered_map<std::string, std::string>::iterator it;
-        for (it = blogPosts.begin(); it != blogPosts.end(); it++)   
+        std::map<std::string, std::string>::reverse_iterator it;
+        for (it = blogPosts.rbegin(); it != blogPosts.rend(); it++)   
         {
             // Links
             std::string postName = it->first.substr(0, it->first.find_last_of('.'));
@@ -153,7 +153,7 @@ int main()
     (const crow::request& req, crow::response& res, std::string str) {
 
         str += ".md";
-        std::unordered_map<std::string, std::string>::iterator it = blogPosts.find(str);
+        std::map<std::string, std::string>::iterator it = blogPosts.find(str);
         if (it != blogPosts.end()) // Exists
         {
 	        auto page = crow::mustache::load("blogPost.html");
