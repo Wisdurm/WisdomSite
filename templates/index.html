@@ -1,47 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="/static/components/header.js"></script>
-    <script src="/static/components/footer.js"></script>
-    <script src="/static/components/card.js"></script>
-    <title>Landing page</title>
-    <link rel="stylesheet" href="/static/css/style.css">
-</head>
-<body>
-    <header-component>
-	    <a slot="wisdom">{{msg-daily}}</a>
-    </header-component>
-    <main>
-        <section>
-            <h1>Welcome to Wisdurm.fi</h1>
-            <p>This is my personal site that I'm currently using to practice web development, to showcase some projects I've made and to in general to serve as a central
-                place for all of my work.
-            </p>
-            <p>
-                Currently this site is still very unfinished, as it is missing much of my work, some fun features and also I think I might spice up the look a bit as well in the future.
-            </p>
-            <h2>Pages</h2>
-            <ul>
-                <li>
-                    <a href="/projects">Projects</a>
-                </li>
-                <li>
-                    <a href="/contact">Contact</a>
-                </li>
-                <li>
-                    <a href="/blog">Blog</a>
-                </li>
-            </ul>
-        </section>
-        <aside>
-            <h2>Project of the day!</h2>
-			{{&project-daily}}
-        </aside>
-    </main>
-    <footer-component>
-    </footer-component>
-</body>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="/static/components/header.js"></script>
+		<script src="/static/components/footer.js"></script>
+		<script src="/static/components/card.js"></script>
+		<title>Landing page</title>
+		<link rel="stylesheet" href="/static/css/style.css">
+	</head>
+	<body>
+		<main>
+			<header-component>
+				<a slot="wisdom">{{msg-daily}}</a>
+			</header-component>
+			<section>
+				<h1>Welcome to Wisdurm.fi</h1>
+				<p>This is my personal site that I'm currently using to practice web development, to showcase some projects I've made and to in general to serve as a central
+					place for all of my work.
+				</p>
+				<p>
+					Currently this site is still very unfinished, as it is missing much of my work, some fun features and also I think I might spice up the look a bit as well in the future.
+				</p>
+				<h2>Pages</h2>
+				<ul>
+					<li>
+						<a href="/projects">Projects</a>
+					</li>
+					<li>
+						<a href="/contact">Contact</a>
+					</li>
+					<li>
+						<a href="/blog">Blog</a>
+					</li>
+				</ul>
+			</section>
+			<aside>
+				<h2>Project of the day!</h2>
+				{{&project-daily}}
+			</aside>
+			<footer-component>
+			</footer-component>
+		</main>
+	</body>
 </html>
-

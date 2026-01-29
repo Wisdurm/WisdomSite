@@ -1,83 +1,20 @@
-const footerTemplate = document.createElement('template');
-footerTemplate.innerHTML = `
-    <style>
-        @font-face{
-            font-family: 'FreeSerif';
-            src: url(FreeSerif.otf);
-        }
-        .sub:hover {
-            box-shadow: inset 0 -2px 0 0 #346734;
-        }
-        a {
-            font-weight: 700;
-            color: #346734;
-            text-decoration: none;
-            font-family: FreeSerif;
-        }
-
-        hr {
-            color: #346734;
-        }
-
-        .logo{
-            font-size: 3.1em;
-        }
-
-        .link{
-            margin: auto 15px 0 15px;
-        }
-
-        .sub{
-            font-family: Lucida Console;
-            font-size: 1.2em;
-        }
-
-        footer{
-            width:100%;
-            height: 80px;
-            position: absolute;
-            bottom: 0;
-            display:inline-block;
-
-            border-top: 3px solid #346734;
-            padding-top: 5px;
-        }
-        hr{
-            margin: 0;
-        }
-        h1{
-            color: #346734;
-            font-family: FreeSerif;
-			margin-top: 5px;
-			margin-bottom: 0;
-        }
-		p {
-            color: #346734;
-            font-weight: 500;
-            font-size: 1.2em;
-            font-family: FreeSerif;
-			margin-top: 0;
-			margin-bottom: 10px;
-		}
-    </style>
-    <footer>
-        <div style="display:flex;justify-content:center;align-items:center;flex-direction:column">
-            <h1>Wisdurm.fi</h1>
-			<p>Licensed under CC0-1.0; do whatever you want • <a href="https://github.com/Wisdurm/WisdomSite">Source code</a> <p>
-        </div>
-    </footer>
-`;
-
-
 class Footer extends HTMLElement {
   constructor() {
     super();
   }
 
-  connectedCallback() {
-    const shadowRoot = this.attachShadow({mode : "closed" });
-    shadowRoot.appendChild(footerTemplate.content);
-  }
+		connectedCallback() {
+				this.innerHTML =  `
+    <footer>
+        <h1>Wisdurm.fi</h1>
+			  <p>
+          Licensed under CC0-1.0;
+          do whatever you want •
+          <a href="https://github.com/Wisdurm/WisdomSite">Source code</a>
+        <p>
+    </footer>
+`;
+		}
 }
 
 customElements.define('footer-component', Footer);
