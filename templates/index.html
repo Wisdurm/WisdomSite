@@ -10,37 +10,39 @@
 		<link rel="stylesheet" href="/static/css/style.css">
 	</head>
 	<body>
-		<main>
-			<header-component>
-				<a slot="wisdom">{{msg-daily}}</a>
-			</header-component>
-			<section>
-				<h1>Welcome to Wisdurm.fi</h1>
-				<p>This is my personal site that I'm currently using to practice web development, to showcase some projects I've made and to in general to serve as a central
-					place for all of my work.
-				</p>
-				<p>
-					Currently this site is still very unfinished, as it is missing much of my work, some fun features and also I think I might spice up the look a bit as well in the future.
-				</p>
-				<h2>Pages</h2>
-				<ul>
-					<li>
-						<a href="/projects">Projects</a>
-					</li>
-					<li>
-						<a href="/contact">Contact</a>
-					</li>
-					<li>
-						<a href="/blog">Blog</a>
-					</li>
-				</ul>
-			</section>
+		<header-component>
+			<a slot="wisdom">{{msg-daily}}</a>
+		</header-component>
+		<div class="block">
+			<main>
+				<section>
+					<h1>Welcome to Wisdurm.fi</h1>
+					<p>This is my personal site that I'm currently using to practice web development, to showcase some projects I've made and to in general to serve as a central
+						place for all of my work.
+					</p>
+					<p>
+						Currently this site is still very unfinished, as it is missing much of my work, some fun features and also I think I might spice up the look a bit as well in the future.
+					</p>
+					<h2>Pages</h2>
+					<ul>
+						<li>
+							<a href="/projects">Projects</a>
+						</li>
+						<li>
+							<a href="/contact">Contact</a>
+						</li>
+						<li>
+							<a href="/blog">Blog</a>
+						</li>
+					</ul>
+				</section>
+			</main>
 			<aside>
 				<h2>Project of the day!</h2>
 				{{&project-daily}}
 			</aside>
-			<footer-component>
-			</footer-component>
-		</main>
+		</div class="block">
+		<footer-component>
+		</footer-component>
 	</body>
 </html>

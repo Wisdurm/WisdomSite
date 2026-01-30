@@ -5,29 +5,36 @@
 }
 :root {
 	--dark: black;
+	--page-width: 1200px;
 }
 /* Main block */
 body {
     margin: 0;
     padding: 0;
 	display: flex;
+	flex-direction: column;
 	align-items: center;
 	justify-content: center;
 }
+/* Center block  */
+.block {
+	border: 5px solid var(--dark);
+	display: flex;
+	flex-direction: row;
+	/* Space */
+	width: var(--page-width);
+	min-height: 1000px;
+}
+/* Main content block */
 main {
 	/* Aestethics */
-	border-radius: 30px;
+	/* border-radius: 30px; */
 	border: 5px solid var(--dark);
-	background-color: red;
-	/* Space */
-	width: 80%;
-	margin-top: 20px;
-	margin-bottom: 50px;
+	/* background-color: wheat; */
 	/* Flex */
 	display: flex;
 	flex-direction: column;
 }
-/* Building blocks */
 section {
 	padding-left: 10px;
 }
@@ -38,13 +45,40 @@ ul {
 /* Footer css */
 footer{
     width:100%;
-	/* Positioning */
-	position: relative;
-	bottom: 0;
-    border-top: 3px solid #346734;
-    margin-top: 50px;
 }
-
+/* Header css */
+header {
+	border: 1px solid black;
+	width: var(--page-width);
+	/* Some space */
+	margin-top: 20px;
+	/* Aligning items */
+	display: flex;
+	flex-direction: row;
+}
+.logo {
+	font-size: 5em;
+}
+.sub {
+	font-size: 1.4em;
+}
+/* Message of the day */
+#daily-container {
+	display:flex;
+	align-items:center;
+	justify-content: center;
+	padding: 0px 20px;
+	/* Visual */
+	background-color: wheat;
+}
+#daily {
+	font-size: 2em;
+}
+/* Flex utils */
+.flex-right {
+	margin-left: auto;
+}
+/* Link hover */
 a:hover {
     box-shadow: inset 0 -2px 0 0 #346734;
 }
@@ -66,7 +100,6 @@ h3{
 p, li{
     color: #333;
     font-size: 1.2em;
-    margin-top: 0;
     font-family: FreeSerif;
 }
 
