@@ -168,7 +168,7 @@ int main()
     });
 
     CROW_ROUTE(app, "/send")
-	    .methods("GET"_method, "POST"_method)([&dailyMsg, &pass, &salt, &motdBackup](const crow::request& req, crow::response& res){
+	    .methods("GET"_method, "POST"_method)([&dailyMsg, &pass, &salt, &motdBackup, &lastUpdate](const crow::request& req, crow::response& res){
 
 		const char* r = req.url_params.get("pass");
 		if (r != nullptr)
@@ -178,6 +178,8 @@ int main()
 			{
 				dailyMsg = process_text(req.url_params.get("msg"));
 				motdBackup.push_back(dailyMsg);
+				// Update date
+				time(&lastUpdate);
 				// Write dailymsg to file in case it's funny :D
 				std::ofstream motdFile;
 				motdFile.open("motd.txt", std::fstream::app);
