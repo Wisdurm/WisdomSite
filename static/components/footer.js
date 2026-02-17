@@ -8,8 +8,7 @@ class Footer extends HTMLElement {
     <footer>
         <h1>Wisdurm.fi</h1>
 			  <p>
-          Licensed under CC0-1.0;
-          do whatever you want
+          Licensed under the BSD-2-Clause license
           <a href="https://github.com/Wisdurm/WisdomSite">• Source code</a>
         </p>
     </footer>

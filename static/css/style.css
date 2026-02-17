@@ -90,6 +90,9 @@ a:hover {
 	flex-direction: column;
 	min-width: 100px;
 }
+#rss {
+	width: 30px;
+}
 
 /*
   COMPONENTS CSS

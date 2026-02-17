@@ -1,34 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="/static/components/header.js"></script>
-    <script src="/static/components/footer.js"></script>
-    <title>Blog</title>
-    <link rel="stylesheet" href="/static/css/style.css">
-</head>
-<body>
-    <header-component>
-	    <a slot="wisdom">{{msg-daily}}</a>
-    </header-component>
-    <main>
-        <section>
-            <h1>Blog</h1>
-            <p>This page houses links to all my blog posts, where I make talk about interesting things I've discovered and/or been working on.
-            </p>
-            <h2>Posts</h2>
-            <ul>
-                {{#posts}}
-                <li>
-                    <a href="/blog/{{link}}">{{name}}</a>
-                </li>
-                {{/posts}}
-            </ul>
-			<a href="/static/rss.xml"><img id="rss" src="https://upload.wikimedia.org/wikipedia/en/thumb/4/43/Feed-icon.svg/1024px-Feed-icon.svg.png"></a>
-        </section>
-    </main>
-    <footer-component>
-    </footer-component>
-</body>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="/static/components/header.js"></script>
+		<script src="/static/components/footer.js"></script>
+		<title>Blog</title>
+		<link rel="stylesheet" href="/static/css/style.css">
+	</head>
+	<body>
+		<div class="block">
+			<header-component>
+				<span slot="wisdom">{{msg-daily}}</span>
+			</header-component>
+		</div>
+		<div class="block zenith">
+			<main>
+				<div class="border">
+					<h1>Blog</h1>
+					<p>
+						This page houses links to all my blog posts, where I make
+						talk about interesting things I've discovered and/or been working on.
+					</p>
+					<h2>Posts</h2>
+					<ul>
+						{{#posts}}
+						<li>
+							<a href="/blog/{{link}}">{{name}}</a>
+						</li>
+						{{/posts}}
+					</ul>
+					<a href="/static/rss.xml"><img id="rss" src="/static/images/Feed-icon.svg"></a>
+				</div>
+			</main>
+		</div>
+		<footer-component>
+		</footer-component>
+	</body>
 </html>

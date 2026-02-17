@@ -9,24 +9,28 @@
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-    <header-component>
-	    <a slot="wisdom">{{msg-daily}}</a>
-    </header-component>
-    <main>
-        <section>
-            <h1>Contact</h1>
-            <p>This page serves the purpose of linking to all of my other social media, as well as being a way to contact me directly 
-                (or at least in the future it will).</p>
-                <ul>
-                    <li>
-                        <a href="https://youtube.com/@wisdurm-x">Youtube</a>
-                    </li>
-                    <li>
-                        <a href="https://github.com/Wisdurm">Github</a>
-                    </li>
-                </ul>
-        </section>
-    </main>
+    <div class="block">
+		<header-component>
+			<span slot="wisdom">{{msg-daily}}</span>
+		</header-component>
+	</div>
+    <div class="block zenith">
+		<main>
+			<div class="border">
+				<h1>Contact</h1>
+				<p>This page serves the purpose of linking to all of my other social media, as well as being a way to contact me directly 
+					(or at least in the future it will).</p>
+				<ul>
+					<li>
+						<a href="https://youtube.com/@wisdurm-x">Youtube</a>
+					</li>
+					<li>
+						<a href="https://github.com/Wisdurm">Github</a>
+					</li>
+				</ul>
+			</div>
+		</main>
+    </div>
     <footer-component>
     </footer-component>
 </body>
