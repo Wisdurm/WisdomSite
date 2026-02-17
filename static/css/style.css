@@ -3,9 +3,22 @@
     font-family: 'FreeSerif';
     src: url(FreeSerif.otf);
 }
+@font-face {
+  font-family: "Hasklug";
+  src:
+    url("HasklugNerdFontMono-Regular.otf") format("opentype");
+}
 :root {
 	--dark: black;
 	--page-width: 1200px;
+
+	--blue: #0014ab;
+	--red: #a30000;
+	--txt-bg: #DDD;
+
+	/* Every element that isn't a child
+	   of .zenith will have this by default */
+	font-family: "FreeSerif";
 }
 /* Main block */
 body {
@@ -15,41 +28,80 @@ body {
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
+	background-color: var(--blue);
 }
-/* Center block  */
+/* Highest level block  */
 .block {
-	border: 5px solid var(--dark);
+	/* Default color */
+	background-color: var(--txt-bg);
+	/* Shadow */
+	-webkit-box-shadow: 15px 16px 0px 5px #000000; 
+	box-shadow: 15px 16px 0px 5px #000000;
+	/* Some space */
+	margin: 20px;
+}
+/* Main center block */
+.zenith {
 	display: flex;
 	flex-direction: row;
+	font-family: "Hasklug";
 	/* Space */
 	width: var(--page-width);
-	min-height: 1000px;
+	/* min-height: 1000px; */
 }
-/* Main content block */
-main {
-	/* Aestethics */
-	/* border-radius: 30px; */
-	border: 5px solid var(--dark);
+/* Containers for main content blocks */
+main, aside, header {
+	padding: 10px 5px;
 	/* background-color: wheat; */
 	/* Flex */
 	display: flex;
-	flex-direction: column;
+	flex-direction: column;	
 }
-section {
-	padding-left: 10px;
+/* Main boxes */
+.border {
+	border: 1px solid var(--dark);
+	padding: 5px;
+	height: fit-content;
 }
-/* Special padding necessary */
-ul {
-	margin-left: 20px;
+
+/* Multiple choice */
+a {
+	width: 100%;
+	display: inline-block;
+	color: black;
+	text-decoration: none;
 }
+a:hover {
+	background-color: var(--red);
+	color: white;
+	text-decoration: underline;
+}
+
+/* Card gallery */
+.card-gallery {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+}
+
+/*
+  COMPONENTS CSS
+*/
+
 /* Footer css */
 footer{
-    width:100%;
+	background-color: white;
+	margin: 20px;
+	padding: 10px;
 }
+
+
 /* Header css */
-header {
-	border: 1px solid black;
+header-component {
 	width: var(--page-width);
+	display: block; /* Could be flex but oh well */
+}
+header {
 	/* Some space */
 	margin-top: 20px;
 	/* Aligning items */
@@ -57,7 +109,7 @@ header {
 	flex-direction: row;
 }
 .logo {
-	font-size: 5em;
+	font-size: 6em;
 }
 .sub {
 	font-size: 1.4em;
@@ -69,7 +121,8 @@ header {
 	justify-content: center;
 	padding: 0px 20px;
 	/* Visual */
-	background-color: wheat;
+	background-color: var(--blue);
+	color: white;
 }
 #daily {
 	font-size: 2em;
@@ -78,53 +131,8 @@ header {
 .flex-right {
 	margin-left: auto;
 }
-/* Link hover */
-a:hover {
-    box-shadow: inset 0 -2px 0 0 #346734;
-}
-h1{
-    color: #346734;
-    font-size: 2.6em;
-    margin-bottom: 0.4em;
-    font-family: FreeSerif;
-}
-h2{
-    color: #346734;
-    font-size: 1.8em;
-    font-family: FreeSerif;
-}
-h3{
-    color: #346734;
-    font-family: FreeSerif;
-}
-p, li{
-    color: #333;
-    font-size: 1.2em;
-    font-family: FreeSerif;
-}
 
-ul {
-    padding: 0;
-}
-
-hr {
-    color: #346734;
-}
-
-a {
-    font-weight: 700;
-    color: #346734;
-    text-decoration: none;
-    font-size: 1.2em;
-    font-family: FreeSerif;
-}
-
-.spanlink{
-    font-weight: 700;
-    color: #346734;
-    font-size: 0.94em;
-    text-align: start;
-}
+/* Card css */
 .fullimgh{
     height: 100%;
 }
@@ -136,27 +144,6 @@ a {
     height: 100%;
     margin: auto;
 }
-blockquote {
-	border-left: 4px solid #333;
-}
-pre{
-    background-color: #bbb;
-    border-radius: 1em;
-    width: max-content;
-    padding: 1em;
-}
-aside{
-    margin-left: auto;
-    margin-right: 20px;
-    width: 320px;
-}
-article{
-    /*TODO: Looks bad on mobile*/
-    max-width: 60%;
-}
-#rss {
-	position: absolute;
-	width: 30px;
-	bottom: 120px;
-	left: 40px;
+.spanlink {
+	display: inline;
 }

@@ -8,23 +8,33 @@
     <script src="/static/components/card.js"></script>
     <title>Projects</title>
     <link rel="stylesheet" href="/static/css/style.css">
+	<script src="/static/jquery-4.0.0.min.js"></script>
+	<script src="/static/jquery.fittext.js"></script>
+	<script src="/static/fittext.js"></script>
 </head>
 <body>
-    <header-component>
-	    <a slot="wisdom">{{msg-daily}}</a>
-    </header-component>
-    <main>
-        <h1>Projects</h1>
-        <p>
-            This is the central hub for all of my projects. In time, every major "thing" I've worked on will appear here.
-        </p>
-		{{&projects-text}}
-    </main>
+	<div class="block">
+		<header-component>
+			<span slot="wisdom">{{msg-daily}}</span>
+		</header-component>
+	</div>
+	<div class="block zenith">
+		<main>
+			<div class="border">
+				<h1>Projects</h1>
+				<p>
+					This is the central hub for all of my projects. In time, every major "thing" I've worked on will appear here.
+				</p>
+				{{&projects-text}}
+			</div>
+		</main>
+	</div>
     <footer-component>
     </footer-component>
     <script>
-        const funny_titles = ["thingamajigs", "projects", "whatchamacallits", "toys", "things", "thingamabobs", "doodads", "gizmoz", "widgets", "gadgets", "doohickeys"]
-        document.getElementById("Web").textContent += " " + funny_titles[Math.round(Math.random()*(funny_titles.length-1))]
+		// Some funny titles ( client side because idk bored )
+        const funny_titles = ["thingamajigs", "projects", "whatchamacallits", "toys", "things", "thingamabobs", "doodads", "gizmoz", "widgets", "gadgets", "doohickeys"];
+        $("#Web")[0].textContent += " " + funny_titles[Math.round(Math.random()*(funny_titles.length-1))];
     </script>
 </body>
 </html>

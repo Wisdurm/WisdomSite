@@ -10,12 +10,24 @@
 		<link rel="stylesheet" href="/static/css/style.css">
 	</head>
 	<body>
-		<header-component>
-			<a slot="wisdom">{{msg-daily}}</a>
-		</header-component>
 		<div class="block">
+			<header-component>
+				<span slot="wisdom">{{msg-daily}}</span>
+			</header-component>
+		</div>
+		<div class="block zenith">
+			<aside>
+				<div class="border">
+					<!-- General -->
+					<strong>General</strong>
+					<a href="/projects"> Projects </a>
+					<a href="/contact"> Contact </a>
+					<a href="/blog"> Blog </a>
+					<!-- Page specific -->
+				</div>
+			</aside>
 			<main>
-				<section>
+				<div class="border">
 					<h1>Welcome to Wisdurm.fi</h1>
 					<p>This is my personal site that I'm currently using to practice web development, to showcase some projects I've made and to in general to serve as a central
 						place for all of my work.
@@ -27,6 +39,7 @@
 					<ul>
 						<li>
 							<a href="/projects">Projects</a>
+
 						</li>
 						<li>
 							<a href="/contact">Contact</a>
@@ -35,13 +48,15 @@
 							<a href="/blog">Blog</a>
 						</li>
 					</ul>
-				</section>
+				</div>
 			</main>
 			<aside>
-				<h2>Project of the day!</h2>
-				{{&project-daily}}
+				<div class="border">
+					<h2>Project of the day!</h2>
+					{{&project-daily}}
+				</div>
 			</aside>
-		</div class="block">
+		</div>
 		<footer-component>
 		</footer-component>
 	</body>

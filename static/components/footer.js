@@ -9,9 +9,9 @@ class Footer extends HTMLElement {
         <h1>Wisdurm.fi</h1>
 			  <p>
           Licensed under CC0-1.0;
-          do whatever you want •
-          <a href="https://github.com/Wisdurm/WisdomSite">Source code</a>
-        <p>
+          do whatever you want
+          <a href="https://github.com/Wisdurm/WisdomSite">• Source code</a>
+        </p>
     </footer>
 `;
 		}

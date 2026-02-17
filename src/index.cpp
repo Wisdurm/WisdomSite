@@ -67,19 +67,19 @@ inline std::string htmlCard(pugi::xml_node item) {
 int main()
 {
     crow::SimpleApp app;
-	// Password things
-	const std::string salt = "mirri"; // Password salt
+    // Password things
+    const std::string salt = "mirri"; // Password salt
     const std::string pass = "$2a$12$VZOmbvUUaMNmafKN3nynAuZtlJ6SKLJrB25G3Ssm/zFPtFbr8owGG"; // TODO: Maybe should be in .env file? Idk
-	// Message of the day (motd)
+    // Message of the day (motd)
     std::string dailyMsg = "";
-	std::vector<std::string> motdBackup; // Old motds to use in the abscence of a new one
-	time_t lastUpdate; // Time since motd last updated
-	time(&lastUpdate);
-	// Xml
-	pugi::xml_document pdoc;
-	std::vector<std::string> items; // yadadadadada blah blah blah lalalalalalala
-	std::string projectPage = ""; // Just straight up store it here because why would I parse it everytime
-	// Blogs
+    std::vector<std::string> motdBackup; // Old motds to use in the abscence of a new one
+    time_t lastUpdate; // Time since motd last updated
+    time(&lastUpdate);
+    // Xml
+    pugi::xml_document pdoc;
+    std::vector<std::string> items; // yadadadadada blah blah blah lalalalalalala
+    std::string projectPage = ""; // Just straight up store it here because why would I parse it everytime
+    // Blogs
     std::map<std::string, std::string> blogPosts = {};
     const char* blogPath = "blog";
 
@@ -210,64 +210,65 @@ int main()
             res.body = "The HTTP method does not seem to be correct.";
         }
         res.end();
-    });
+	});
 
     // Find blog files
     for (const auto& entry : std::filesystem::directory_iterator(blogPath))
     {
-        CROW_LOG_INFO << "Loading file: " << entry.path();
-        std::ifstream file;
-        // Open file
-        file.open(entry.path(), std::fstream::in);
-        if (file.fail())
-        {
-            CROW_LOG_CRITICAL << "Unable to open file " << entry.path();
-            return EXIT_FAILURE;
-        }
-        file.seekg(0, std::ios::end);
-        size_t size = file.tellg();
-        std::string fileText(size, ' ');
-        file.seekg(0);
-        file.read(&fileText[0], size);
-        file.close();
+	    CROW_LOG_INFO << "Loading file: " << entry.path();
+	    std::ifstream file;
+	    // Open file
+	    file.open(entry.path(), std::fstream::in);
+	    if (file.fail())
+	    {
+		    CROW_LOG_CRITICAL << "Unable to open file " << entry.path();
+		    return EXIT_FAILURE;
+	    }
+	    file.seekg(0, std::ios::end);
+	    size_t size = file.tellg();
+	    std::string fileText(size, ' ');
+	    file.seekg(0);
+	    file.read(&fileText[0], size);
+	    file.close();
 
-        std::string filePath = entry.path().string();
-        blogPosts[filePath.substr(filePath.find_last_of("/\\") + 1)] = fileText; // File name
+	    std::string filePath = entry.path().string();
+	    blogPosts[filePath.substr(filePath.find_last_of("/\\") + 1)] = fileText; // File name
     }
-	// Motd
-	std::ifstream motdFile;
-	motdFile.open("motd.txt", std::fstream::in);
-	if (motdFile.fail())
-	{
-		CROW_LOG_CRITICAL << "Unable to open motd.txt file";
-		return EXIT_FAILURE;
-	}
-	std::string text;
-	while (getline(motdFile, text)) { // Copy all lines to motdBackup, &lastUpdate
-		motdBackup.push_back(text);
-	}
-	motdFile.close();
-	// Open xml document
-	pugi::xml_parse_result result = pdoc.load_file("projects.xml");
+    // Motd
+    std::ifstream motdFile;
+    motdFile.open("motd.txt", std::fstream::in);
+    if (motdFile.fail())
+    {
+	    CROW_LOG_CRITICAL << "Unable to open motd.txt file";
+	    return EXIT_FAILURE;
+    }
+    std::string text;
+    while (getline(motdFile, text)) { // Copy all lines to motdBackup, &lastUpdate
+	    motdBackup.push_back(text);
+    }
+    motdFile.close();
+    // Open xml document
+    pugi::xml_parse_result result = pdoc.load_file("projects.xml");
     if (!result) {
-		CROW_LOG_CRITICAL << "Unable to open projects.xml file";
-        return EXIT_FAILURE;
-	}
-	// Parse items
-	for (pugi::xml_node cat : pdoc.child("projects"))
-	{
-		// Make sections for each category
-		projectPage += std::format("<section> <h2 id='{0}'>{0}</h2> <p>{1}</p>",
-				cat.attribute("name").as_string(),
-				cat.attribute("desc").as_string()
-			); // Cat info
-		for (pugi::xml_node item : cat.children("item")) {
-			// Items
-			items.push_back(htmlCard(item));
-			projectPage += items.back();
-		}
-		projectPage += "</section>";
-	}
-	// Other stuff finished, start server
+	    CROW_LOG_CRITICAL << "Unable to open projects.xml file";
+	    return EXIT_FAILURE;
+    }
+    // Parse items
+    for (pugi::xml_node cat : pdoc.child("projects"))
+    {
+	    // Make sections for each category
+	    projectPage += std::format("<section> <h2 id='{0}'>{0}</h2> <p>{1}</p>"
+				       "<div class='card-gallery'>",
+				       cat.attribute("name").as_string(),
+				       cat.attribute("desc").as_string()
+		    ); // Cat info
+	    for (pugi::xml_node item : cat.children("item")) {
+		    // Items
+		    items.push_back(htmlCard(item));
+		    projectPage += items.back();
+	    }
+	    projectPage += "</div></section>";
+    }
+    // Other stuff finished, start server
     app.port(18080).multithreaded().run();
 }
