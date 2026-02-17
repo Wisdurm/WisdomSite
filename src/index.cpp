@@ -79,6 +79,7 @@ int main()
     pugi::xml_document pdoc;
     std::vector<std::string> items; // yadadadadada blah blah blah lalalalalalala
     std::string projectPage = ""; // Just straight up store it here because why would I parse it everytime
+    std::string projectLinks = "";
     // Blogs
     std::map<std::string, std::string> blogPosts = {};
     const char* blogPath = "blog";
@@ -97,12 +98,16 @@ int main()
 	    return page.render(ctx);
     });
 
-    CROW_ROUTE(app, "/projects")([&dailyMsg, &motdBackup, &lastUpdate, &projectPage]
+    CROW_ROUTE(app, "/projects")([&dailyMsg, &motdBackup, &lastUpdate, &projectPage, &projectLinks]
         (const crow::request& req){       
 
 		// 
 	    auto page = crow::mustache::load("projects.html");
-        crow::mustache::context ctx({{"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)}, {"projects-text", projectPage}});
+        crow::mustache::context ctx({
+			{"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)},
+			{"projects-text", projectPage},
+			{"projects-links", projectLinks}
+		});
 	    return page.render(ctx);
     });
 
@@ -256,16 +261,25 @@ int main()
     // Parse items
     for (pugi::xml_node cat : pdoc.child("projects"))
     {
+	    // Sub title for links
+	    projectLinks += std::format("<strong>{0}</strong>",
+					cat.attribute("name").as_string());
 	    // Make sections for each category
 	    projectPage += std::format("<section> <h2 id='{0}'>{0}</h2> <p>{1}</p>"
 				       "<div class='card-gallery'>",
 				       cat.attribute("name").as_string(),
 				       cat.attribute("desc").as_string()
 		    ); // Cat info
+	    // Items
 	    for (pugi::xml_node item : cat.children("item")) {
 		    // Items
 		    items.push_back(htmlCard(item));
 		    projectPage += items.back();
+		    // Links
+		    projectLinks += std::format("<a href='{0}'>{1}</a>",
+						// Get first link
+						item.children("link").begin()->attribute("href").as_string(),
+						item.attribute("name").as_string());
 	    }
 	    projectPage += "</div></section>";
     }

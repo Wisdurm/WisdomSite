@@ -5,9 +5,6 @@ cardTemplate.innerHTML = `
         a:hover {
             box-shadow: inset 0 -2px 0 0 #346734;
         }
-        .con {
-
-        }
         div{
             outline: solid black;
         }
@@ -32,7 +29,7 @@ cardTemplate.innerHTML = `
             margin-top: auto;
         }
     </style>
-    <div style="width: 300px;height: 400px; display:inline-block; margin: 0 20px; vertical-align: top">
+    <div style="width: 300px;height: 400px; display:inline-block; margin: 20px 10px; vertical-align: top">
         <div style="display:flex; height: 100%; width: 100%; flex-direction: column;">
             <div style="width:80%; height: 35%; margin: 10% auto 0; overflow:hidden">
                 <slot name="image"><img src="https://static.wikitide.net/videogameballswiki/e/ea/Canny-cat.gif" style="width:100%; height: 100%"></slot>

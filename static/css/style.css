@@ -84,6 +84,13 @@ a:hover {
 	flex-wrap: wrap;
 }
 
+/* Left hand nav */
+.alt-nav {
+	display: flex;
+	flex-direction: column;
+	min-width: 100px;
+}
+
 /*
   COMPONENTS CSS
 */
@@ -146,4 +153,5 @@ header {
 }
 .spanlink {
 	display: inline;
+	font-size: 0.8em;
 }

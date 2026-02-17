@@ -12,8 +12,10 @@
                     	<div style='height: 10px;'></div>
 						<b>Heads up!</b> These use DFJK for the control scheme!"
 						img="/static/images/thumb-rhy.png" imgform="fullimgw">
-			<link href="/static/projects/rhythm/Rytmipeli2-Sound.html">Game 1</link>
-			<link href="/static/projects/rhythm/Rytmipeli.html">Game 2</link>
+						<link href="/static/projects/rhythm/Rytmipeli.html">
+						Alright game </link>
+						<link href="/static/projects/rhythm/Rytmipeli2-Sound.html">
+						Meh game</link>
 		</item>
 	</cat>
 	<cat name="Games" desc="Games I've that are more in depth experiences. This doesn't include all of my games, and even so these are all currently unfinished, but maybe you'll still find them cool.">
