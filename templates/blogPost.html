@@ -7,20 +7,28 @@
     <script src="/static/components/footer.js"></script>
     <title>Blog</title>
     <link rel="stylesheet" href="/static/css/style.css">
+	<script src="/static/jquery-4.0.0.min.js"></script>
+	<script src="/static/scripts/script.js"></script>
     <!-- Code highlighting -->
-    <link rel="stylesheet" href="/static/highlighting/vs2015.min.css">
+    <link rel="stylesheet" href="/static/highlighting/isotope.min.css">
     <script src="/static/highlighting/highlight.min.js"></script>
     <script src="/static/highlighting/cpp.min.js"></script>
 </head>
 <body>
-    <header-component>
-	    <a slot="wisdom">{{msg-daily}}</a>
-    </header-component>
-    <main>
-        <article>
-            {{&blogText}}
-        </article>
-    </main>
+	<div class="block">
+		<header-component>
+			<span slot="wisdom">{{msg-daily}}</span>
+		</header-component>
+	</div>
+	<div class="block zenith">
+		<main>
+			<div class="border">
+				<article>
+					{{&blogText}}
+				</article>
+			</div>
+		</main>
+	</div>
     <footer-component>
     </footer-component>
     <script>hljs.highlightAll();</script>

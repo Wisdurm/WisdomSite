@@ -43,14 +43,15 @@ std::string getMotd(std::string& daily, std::vector<std::string>& motdBackup, ti
 // Turns xml item into a <card-component> element
 inline std::string htmlCard(pugi::xml_node item) {
 	std::string html = std::format("<card-component id='{0}'>"
-			"<div slot='name'>{0}</div>"
-			"<div slot='text'>{1}</div>"
-			"<img slot='image' src='{2}' class='{3}'>"
-			"<span slot='links'>",
-			item.attribute("name").as_string(),
-			item.attribute("desc").as_string(),
-			item.attribute("img").as_string(),
-			item.attribute("imgform").as_string()
+				       "<div slot='name'>{0}</div>"
+				       "<div slot='text'>{1}</div>"
+				       "<img slot='image' src='{2}' class='{3}' alt='{4}'>"
+				       "<span slot='links'>",
+				       item.attribute("name").as_string(),
+				       item.attribute("desc").as_string(),
+				       item.attribute("img").as_string(),
+				       item.attribute("imgform").as_string(),
+				       item.attribute("alt").as_string()
 		);
 	// Links need to be parsed seperately :DDDDDDDDDDDDDDDDDD
 	auto links = item.children("link");

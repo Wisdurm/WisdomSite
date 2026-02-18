@@ -21,18 +21,19 @@ headerTemplate.innerHTML = `
           Word(s) of the day: <slot name="wisdom">NO SLOT</slot>
         </p>
     </div>
+    <button class="important" onclick="swapFont()">Readability features</button>
 </div>
     </header>
 `;
 
 class Header extends HTMLElement {
   constructor() {
-    super();
+			super();
   }
 
   connectedCallback() {
-	  const shadowRoot = this.attachShadow({mode : "closed" });
-    shadowRoot.appendChild(headerTemplate.content.cloneNode(true));
+			const shadowRoot = this.attachShadow({mode : "closed" });
+			shadowRoot.appendChild(headerTemplate.content.cloneNode(true));
   }
 }
 

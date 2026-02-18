@@ -1,4 +1,6 @@
-/* Globals */
+/*
+  GLOBALS
+*/
 @font-face{
     font-family: 'FreeSerif';
     src: url(FreeSerif.otf);
@@ -8,16 +10,27 @@
   src:
     url("HasklugNerdFontMono-Regular.otf") format("opentype");
 }
+@font-face {
+  font-family: "Lexend";
+  src:
+    url("Lexend-Light.ttf");
+}
 :root {
 	--dark: black;
 	--page-width: 1200px;
+	--dark: #333;
+	--txt-bg: #DDD;
+	--light: #EEE;
 
 	--blue: #0014ab;
 	--red: #a30000;
-	--txt-bg: #DDD;
+
+	--light-em: #fa6b6b;
 
 	/* Every element that isn't a child
-	   of .zenith will have this by default */
+	   of .zenith will have this by default.
+	   This is changed by accessiblity options.
+   */
 	font-family: "FreeSerif";
 }
 /* Main block */
@@ -63,20 +76,9 @@ main, aside, header {
 	padding: 5px;
 	height: fit-content;
 }
-
-/* Multiple choice */
-a {
-	width: 100%;
-	display: inline-block;
-	color: black;
-	text-decoration: none;
+aside > .border {
+	margin-bottom: 5px;
 }
-a:hover {
-	background-color: var(--red);
-	color: white;
-	text-decoration: underline;
-}
-
 /* Card gallery */
 .card-gallery {
 	display: flex;
@@ -95,6 +97,85 @@ a:hover {
 }
 
 /*
+  INPUT STYLES
+*/
+
+/* Input */
+input {
+	background-color: var(--blue);
+	color: white;
+}
+/* Button */
+button {
+	border: none;
+	background-color: inherit;
+	font-family: inherit;
+	width: fit-content;
+	margin-left: auto;
+	margin-right: auto;
+}
+button:hover {
+	cursor: pointer;
+	text-decoration: underline;
+	background-color: var(--red);
+	color: white;
+}
+button:before {
+	content: "<";
+}
+button:after {
+	content: ">";
+}
+/* Multiple choice */
+a {
+	width: 100%;
+	display: inline-block;
+	color: black;
+	text-decoration: none;
+}
+a:hover {
+	background-color: var(--red);
+	color: white;
+	text-decoration: underline;
+}
+/* Exception for 88x31 */
+.i88x31 {
+	display: block;
+}
+.i88x31:hover {
+	background-color: inherit;
+}
+/* Radio */
+fieldset {
+	background-color: var(--blue);
+	color: white;
+}
+input[type="radio"] {
+  /* Add if not using autoprefixer */
+  -webkit-appearance: none;
+  appearance: none;
+  /* Not removed via appearance */
+  margin: 0;
+}
+input[type="radio"]::before {
+	content: "[ ";
+}
+input[type="radio"]:checked::before {
+	content: "[*";
+}
+input[type="radio"]::after {
+	content: "]";
+}
+
+/*
+  MARKDOWN STUFF
+*/
+blockquote {
+	border-left: 4px solid var(--dark);
+	padding-left: 5px;
+}
+
+/*
   COMPONENTS CSS
 */
 
@@ -104,8 +185,6 @@ footer{
 	margin: 20px;
 	padding: 10px;
 }
-
-
 /* Header css */
 header-component {
 	width: var(--page-width);
@@ -132,7 +211,7 @@ header {
 	padding: 0px 20px;
 	/* Visual */
 	background-color: var(--blue);
-	color: white;
+	color: var(--light);
 }
 #daily {
 	font-size: 2em;
@@ -157,4 +236,25 @@ header {
 .spanlink {
 	display: inline;
 	font-size: 0.8em;
+}
+
+/*
+  ACCESSIBILITY
+*/
+.important {
+	font-size: 1.5em;
+}
+.important, button {
+	animation: 2s 2 alternate attention;
+}
+@keyframes attention {
+	from {
+		background-color: inherit;
+		color: black;
+	}
+	
+	to {
+		background-color: var(--light-em);
+		color: white;
+	}
 }

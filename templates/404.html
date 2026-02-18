@@ -9,17 +9,22 @@
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-    <header-component>
-	    <a slot="wisdom">{{msg-daily}}</a>
-    </header-component>
-    <main>
-        <section>
-            <h1>404 - Not found</h1>
-            <p>
-                The page you are looking for cannot be found.
-            </p>
-        </section>
-    </main>
+	<div class="block">
+		<!-- This doesn't really work but I think that's CrowsCPP's fault -->
+		<header-component>
+			<a slot="wisdom">{{msg-daily}}</a>
+		</header-component>
+	</div>
+	<div class="block zenith">
+		<main>
+			<div class="border">
+				<h1>404 - Not found</h1>
+				<p>
+					The page you are looking for cannot be found.
+				</p>
+			</div>
+		</main>
+	</div>
     <footer-component>
     </footer-component>
 </body>
