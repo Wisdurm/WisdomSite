@@ -257,6 +257,16 @@ int main()
         res.end();
 	});
 
+    CROW_ROUTE(app, "/guestbook")([&dailyMsg, &motdBackup, &lastUpdate]
+				(const crow::request& req){       
+
+	    auto page = crow::mustache::load("guestbook.html");
+	    crow::mustache::context ctx({
+			{"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)}
+		    });
+	    return page.render(ctx);
+       });
+
     CROW_CATCHALL_ROUTE(app)
         ([&dailyMsg](crow::response& res) {
         if (res.code == 404)

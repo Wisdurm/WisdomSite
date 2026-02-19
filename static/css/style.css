@@ -101,7 +101,7 @@ aside > .border {
 */
 
 /* Input */
-input {
+input, textarea {
 	background-color: var(--blue);
 	color: white;
 }
@@ -145,25 +145,34 @@ a:hover {
 .i88x31:hover {
 	background-color: inherit;
 }
-/* Radio */
+/* Radio and checkbox */
 fieldset {
 	background-color: var(--blue);
 	color: white;
+	font-size: 0.8em;
 }
-input[type="radio"] {
+input[type="radio"],
+input[type="checkbox"]
+{
   /* Add if not using autoprefixer */
   -webkit-appearance: none;
   appearance: none;
   /* Not removed via appearance */
   margin: 0;
 }
-input[type="radio"]::before {
+input[type="radio"]::before,
+input[type="checkbox"]::before
+{
 	content: "[ ";
 }
-input[type="radio"]:checked::before {
+input[type="radio"]:checked::before,
+input[type="checkbox"]:checked::before
+{
 	content: "[*";
 }
-input[type="radio"]::after {
+input[type="radio"]::after,
+input[type="checkbox"]::after
+{
 	content: "]";
 }
 
@@ -244,7 +253,7 @@ header {
 .important {
 	font-size: 1.5em;
 }
-.important, button {
+.important { /* TODO: For important buttons */
 	animation: 2s 2 alternate attention;
 }
 @keyframes attention {
