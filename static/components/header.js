@@ -22,6 +22,7 @@ headerTemplate.innerHTML = `
         </p>
     </div>
     <button class="important" onclick="swapFont()">Readability features</button>
+This is site is still being worked on! Some things are still coming in the redesign!
 </div>
     </header>
 `;

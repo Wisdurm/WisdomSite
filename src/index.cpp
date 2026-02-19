@@ -1,26 +1,34 @@
-#include "crow.h"
+// Internal
 #include "markdown.hpp"
+// C++
+#include <numeric>
 #include <string>
 #include <iostream>
 #include <filesystem>
 #include <fstream>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 #include <algorithm>
-#include <cctype>
-#include "bcrypt/BCrypt.hpp"
-#include <ctime>
-#include "pugixml.hpp"
 #include <format>
+#include <random>
+// C
+#include <cctype>
+#include <ctime>
+#include <cstdlib>
+// External
+#include "bcrypt/BCrypt.hpp"
+#include "pugixml.hpp"
+#include "crow.h"
 
-std::string process_text(std::string str)
+static std::string process_text(std::string str)
 {
     if (str.length() > 100)
         str.erase(100);
     return str;
 }
 
-std::string getMotd(std::string& daily, std::vector<std::string>& motdBackup, time_t& lastUpdate)
+static std::string getMotd(std::string& daily, std::vector<std::string>& motdBackup, time_t& lastUpdate)
 {
 	time_t now;
 	time(&now);
@@ -41,7 +49,7 @@ std::string getMotd(std::string& daily, std::vector<std::string>& motdBackup, ti
 }
 
 // Turns xml item into a <card-component> element
-inline std::string htmlCard(pugi::xml_node item) {
+static std::string htmlCard(pugi::xml_node item) {
 	std::string html = std::format("<card-component id='{0}'>"
 				       "<div slot='name'>{0}</div>"
 				       "<div slot='text'>{1}</div>"
@@ -65,8 +73,30 @@ inline std::string htmlCard(pugi::xml_node item) {
 	return html;
 }
 
+// Generate a list of web badge elements
+static std::string webBadgeArray(const std::vector<std::pair<std::string, std::string>>& webBadges, int amount) {
+	std::string result = "";
+	// Random indeces
+	std::vector<int> random(webBadges.size());
+	std::iota(random.begin(), random.end(), 0);
+	std::random_device rd;
+	std::shuffle(random.begin(), random.end(), rd);
+	const std::vector<int> indeces(random.begin(), random.begin() + amount);
+	for (auto i : indeces) {
+		const std::pair<std::string, std::string>& pair = webBadges[i];
+		result += std::format("<a href='{1}' class='i88x31'>"
+				      "<img src='/static/images/badges/{0}'/> </a>",
+				      pair.first,
+				      pair.second
+			);
+	}
+	return result;
+}
+
 int main()
 {
+	// Seed randomness
+	srand(time(0));
     crow::SimpleApp app;
     // Password things
     const std::string salt = "mirri"; // Password salt
@@ -84,8 +114,24 @@ int main()
     // Blogs
     std::map<std::string, std::string> blogPosts = {};
     const char* blogPath = "blog";
+    // Badges
+    const std::vector<std::pair<std::string, std::string>> webBadges = {
+	    {"powered-by-debian.gif", "https://debian.org"},
+	    {"7zip.gif", "https://www.7-zip.org"},
+	    {"winrar.gif", ""},
+	    {"linux_now.gif", "https://kernel.org"},
+	    {"emacs2.gif", "https://www.gnu.org/software/emacs"},
+	    {"vim.gif", "https://www.vim.org/"},
+	    {"any_browser.gif", ""}, // I'll come up with something later
+	    {"powered.gif", ""},
+	    {"blender.gif" , "https://www.blender.org/"},
+	    {"cc-button.gif", ""},
+	    {"firefox_now.png", "https://www.firefox.com/"},
+	    {"best_viewed_with_eyes.gif", ""},
+	    {"button38.gif", "https://github.com/Wisdurm/"}
+    };
 
-    CROW_ROUTE(app, "/")([&dailyMsg, &motdBackup, &lastUpdate, &pdoc, &items]
+    CROW_ROUTE(app, "/")([&dailyMsg, &motdBackup, &lastUpdate, &pdoc, &items, &webBadges]
         (const crow::request& req){      
 
 		// Project of the day
@@ -95,19 +141,23 @@ int main()
 		std::string potd = items.at(day % items.size()); // TODO: Randomization
 		//
 	    auto page = crow::mustache::load("index.html");
-        crow::mustache::context ctx({{"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)}, {"project-daily", potd}});
+        crow::mustache::context ctx({
+			{"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)},
+			{"project-daily", potd},
+			{"badges", webBadgeArray(webBadges, 8)}
+		});
 	    return page.render(ctx);
     });
 
-    CROW_ROUTE(app, "/projects")([&dailyMsg, &motdBackup, &lastUpdate, &projectPage, &projectLinks]
+    CROW_ROUTE(app, "/projects")([&dailyMsg, &motdBackup, &lastUpdate, &projectPage, &projectLinks, &webBadges]
         (const crow::request& req){       
 
-		// 
 	    auto page = crow::mustache::load("projects.html");
         crow::mustache::context ctx({
 			{"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)},
 			{"projects-text", projectPage},
-			{"projects-links", projectLinks}
+			{"projects-links", projectLinks},
+			{"badges", webBadgeArray(webBadges, 8)}
 		});
 	    return page.render(ctx);
     });
@@ -116,7 +166,9 @@ int main()
         (const crow::request& req){       
 
 	    auto page = crow::mustache::load("contact.html");
-        crow::mustache::context ctx({{"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)}});
+        crow::mustache::context ctx({
+			{"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)}
+		});
 	    return page.render(ctx);
     });
 
@@ -136,6 +188,7 @@ int main()
 	    auto page = crow::mustache::load("blog.html");
         crow::mustache::context ctx;
         ctx["msg-daily"] = getMotd(dailyMsg, motdBackup, lastUpdate);
+	// ctx["badges"] = webBadgeArray(webBadges, 8);
         int i = 0;
         std::map<std::string, std::string>::reverse_iterator it;
         for (it = blogPosts.rbegin(); it != blogPosts.rend(); it++)   
@@ -149,10 +202,11 @@ int main()
             // Replace underscore with space
             std::transform(postName.begin(), postName.end(), postName.begin(),
                 [](unsigned char c) { if (c == '_') return ' '; else return (char)c; });
-            ctx["posts"][i]["name"] = postName;
+	    // Remove numbers since ol
+            ctx["posts"][i]["name"] = std::string(postName.begin() + 3, postName.end());
             i++;
         }
-	    return page.render(ctx);
+	return page.render(ctx);
     });
 
     CROW_ROUTE(app, "/blog/<string>")([&dailyMsg, &motdBackup, &lastUpdate, &blogPosts]
