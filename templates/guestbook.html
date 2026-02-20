@@ -28,7 +28,7 @@
 						I'll probably remove it if it isn't appropriate though.
 					</p>
 					<h2>Leave a message!</h2>
-					<form method="POST" action="/" class="border">
+					<form method="POST" action="/" class="border" id="comment">
 						<label for="name">Name:</label> <br>
 						<input type="text" id="name" name="name" required
 							   placeholder="Jaakko Pekka"/> <br>
@@ -36,11 +36,11 @@
 						<textarea id="msg" name="msg" minlength=5
 								  maxlength=250 placeholder="Bout to bust"
 								  required rows=6 cols=50></textarea> <br>
-						<label for="evil">Validation: </label> <br>
+						<label for="evil0">Validation: </label> <br>
 						<fieldset>
-							<input type="checkbox" name="evil" id="evil"
-							required/> I didn't write anything bad and I am not
-							a spam bot<br> 
+							<input type="checkbox" name="evil0" id="evil0"
+							required/> <span>I didn't write anything bad and I am not
+							a spam bot<span><br> 
 						</fieldset>
 						<button type="submit">Submit</button>
 					</form>

@@ -19,10 +19,14 @@
 	--dark: black;
 	--page-width: 1200px;
 	--dark: #333;
-	--txt-bg: #DDD;
 	--light: #EEE;
 
+	--txt-bg: #DDD;
+	--dank-bg: #B0BCC0;
+
 	--blue: #0014ab;
+	--dank-blue: rgba(0, 11, 60, 1);
+	
 	--red: #a30000;
 
 	--light-em: #fa6b6b;
@@ -33,20 +37,29 @@
    */
 	font-family: "FreeSerif";
 }
-/* Main block */
+html {
+	height: 100%;
+}
+/* Main */
 body {
+	/* space */
     margin: 0;
     padding: 0;
+	/* flex */
 	display: flex;
 	flex-direction: column;
-	align-items: center;
+	align-items: center;	
 	justify-content: center;
+	/* bg */
 	background-color: var(--blue);
+	background: linear-gradient(180deg, var(--blue) 0%, var(--dank-blue) 100%) no-repeat;
+	background-attachment: fixed;
 }
 /* Highest level block  */
 .block {
 	/* Default color */
 	background-color: var(--txt-bg);
+	background: linear-gradient(90deg, var(--dank-bg) 0%, var(--txt-bg) 50%, var(--dank-bg) 100%);
 	/* Shadow */
 	-webkit-box-shadow: 15px 16px 0px 5px #000000; 
 	box-shadow: 15px 16px 0px 5px #000000;
