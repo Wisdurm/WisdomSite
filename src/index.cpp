@@ -1,4 +1,5 @@
 // Internal
+#include "crow/logging.h"
 #include "markdown.hpp"
 // C++
 #include <numeric>
@@ -19,6 +20,7 @@
 // External
 #include "bcrypt/BCrypt.hpp"
 #include "pugixml.hpp"
+#include <sqlite3.h>
 #include "crow.h"
 
 static std::string process_text(std::string str)
@@ -98,6 +100,8 @@ int main()
 	// Seed randomness
 	srand(time(0));
     crow::SimpleApp app;
+    // Database
+    sqlite3 *db;
     // Password things
     const std::string salt = "mirri"; // Password salt
     const std::string pass = "$2a$12$VZOmbvUUaMNmafKN3nynAuZtlJ6SKLJrB25G3Ssm/zFPtFbr8owGG"; // TODO: Maybe should be in .env file? Idk
@@ -253,17 +257,45 @@ int main()
 				}
 			}
 		}
-        res.redirect("/");
-        res.end();
+		res.redirect("/");
+		res.end();
 	});
 
-    CROW_ROUTE(app, "/guestbook")([&dailyMsg, &motdBackup, &lastUpdate]
+    CROW_ROUTE(app, "/guestbook")([&dailyMsg, &motdBackup, &lastUpdate, &db]
 				(const crow::request& req){       
 
 	    auto page = crow::mustache::load("guestbook.html");
 	    crow::mustache::context ctx({
 			{"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)}
 		    });
+	    // Get comments
+	    struct comment {		    
+		    const std::string msg;
+		    const std::string name;
+		    const int posted;
+	    };
+	    std::vector<comment> comments;
+	    // TODO: I think some tricks allow skipping *data, they're just a
+	    // tad too difficult for me to figure out at the moment
+	    sqlite3_exec(db, "SELECT * FROM comments;",
+			 [](void* data, int argc, char** argv, char** azColName) {
+				 auto comments = static_cast<std::vector<comment>*>(data);
+				 comment c{
+					 .msg = std::string(argv[0]),
+					 .name = std::string(argv[1]),
+					 .posted = std::stoi(argv[2])
+				 };
+				 comments->push_back(c);
+				 return 0;
+			 }, &comments, NULL);
+	    // Format comments
+	    int i = 0;
+	    for (auto c : comments) {
+		    ctx["comments"][i]["msg"] = c.msg;
+		    ctx["comments"][i]["name"] = c.name;
+		    ctx["comments"][i]["posted"] = c.posted;
+		    i++;
+	    }
 	    return page.render(ctx);
        });
 
@@ -348,6 +380,16 @@ int main()
 	    }
 	    projectPage += "</div></section>";
     }
+    // Initialize database connection
+    int opened = sqlite3_open("db.db", &db);
+    if (opened) {
+	    CROW_LOG_CRITICAL << "Unable to establish database connection: " << sqlite3_errmsg(db);
+	    sqlite3_close(db);
+	    return EXIT_FAILURE;
+    }
     // Other stuff finished, start server
     app.port(18080).multithreaded().run();
+    std::cout << "[CLEANUP] Closing database connection\n";
+    sqlite3_close(db);
+    std::cout << "[CLEANUP] Closed\n";
 }

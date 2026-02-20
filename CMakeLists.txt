@@ -23,6 +23,7 @@ include_directories(${CMAKE_SOURCE_DIR}/external/libbcrypt/include)
 find_package(ZLIB REQUIRED)
 find_package(md4c REQUIRED)
 find_package(pugixml REQUIRED)
+find_package(unofficial-sqlite3 REQUIRED)
 
 include(${CMAKE_SOURCE_DIR}/cmake/CPM.cmake)
 CPMAddPackage(Crow
@@ -46,4 +47,5 @@ target_link_libraries( WisdomSite
   md4c::md4c-html
   bcrypt
   pugixml::pugixml
+  unofficial::sqlite3::sqlite3
 )

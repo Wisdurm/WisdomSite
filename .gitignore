@@ -3,3 +3,4 @@ CMakeUserPresets.json
 .vs/
 compile_commands.json
 motd.txt
+db.db

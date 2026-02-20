@@ -1,8 +1,9 @@
 {
   "dependencies": [
     "asio",
-    "zlib",
     "md4c",
-	"pugixml"
+    "pugixml",
+    "zlib",
+    "sqlite3"
   ]
 }

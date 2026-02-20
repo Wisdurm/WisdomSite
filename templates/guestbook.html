@@ -45,13 +45,13 @@
 						<button type="submit">Submit</button>
 					</form>
 					<h2>Comments</h2>
-					<ol reversed>
+					<ul reversed>
 						{{#comments}}
 						<li>
-							{{msg}}
+							{{msg}} - <small>{{name}} {{posted}}</small>
 						</li>
 						{{/comments}}
-					</ol>				
+					</ul>				
 				</div>
 			</main>
 		</div>
