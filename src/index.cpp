@@ -1,5 +1,4 @@
 // Internal
-#include "crow/logging.h"
 #include "markdown.hpp"
 // C++
 #include <numeric>
@@ -22,6 +21,7 @@
 #include "pugixml.hpp"
 #include <sqlite3.h>
 #include "crow.h"
+#include "crow/logging.h"
 
 static std::string process_text(std::string str)
 {
@@ -136,137 +136,137 @@ int main()
     };
 
     CROW_ROUTE(app, "/")([&dailyMsg, &motdBackup, &lastUpdate, &pdoc, &items, &webBadges]
-        (const crow::request& req){      
-
-		// Project of the day
-		time_t now;
-		time(&now);
-		long day = now/60/60/24; // How many days since Jan 1 1900
-		std::string potd = items.at(day % items.size()); // TODO: Randomization
-		//
+			 (const crow::request& req){
+	    // Project of the day
+	    time_t now;
+	    time(&now);
+	    long day = now/60/60/24; // How many days since Jan 1 1900
+	    std::string potd = items.at(day % items.size()); // TODO: Randomization
+	    //
 	    auto page = crow::mustache::load("index.html");
-        crow::mustache::context ctx({
-			{"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)},
-			{"project-daily", potd},
-			{"badges", webBadgeArray(webBadges, 8)}
-		});
+	    crow::mustache::context ctx({
+			    {"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)},
+			    {"project-daily", potd},
+			    {"badges", webBadgeArray(webBadges, 8)}
+		    });
 	    return page.render(ctx);
     });
 
     CROW_ROUTE(app, "/projects")([&dailyMsg, &motdBackup, &lastUpdate, &projectPage, &projectLinks, &webBadges]
-        (const crow::request& req){       
-
+				 (const crow::request& req){
+	    // List of projects
 	    auto page = crow::mustache::load("projects.html");
-        crow::mustache::context ctx({
-			{"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)},
-			{"projects-text", projectPage},
-			{"projects-links", projectLinks},
-			{"badges", webBadgeArray(webBadges, 8)}
-		});
+	    crow::mustache::context ctx({
+			    {"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)},
+			    {"projects-text", projectPage},
+			    {"projects-links", projectLinks},
+			    {"badges", webBadgeArray(webBadges, 8)}
+		    });
 	    return page.render(ctx);
     });
 
     CROW_ROUTE(app, "/contact")([&dailyMsg, &motdBackup, &lastUpdate]
-        (const crow::request& req){       
-
+				(const crow::request& req){       
+	    // TODO: Contact form
 	    auto page = crow::mustache::load("contact.html");
-        crow::mustache::context ctx({
-			{"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)}
-		});
+	    crow::mustache::context ctx({
+			    {"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)}
+		    });
 	    return page.render(ctx);
     });
 
     CROW_ROUTE(app, "/admin")([&lastUpdate]
-        (const crow::request& req){       
-
-		time_t now;
-		time(&now);
+			      (const crow::request& req){       
+	    // Admin page, plain
+	    time_t now;
+	    time(&now);
 	    auto page = crow::mustache::load("motd.html");
-        crow::mustache::context ctx({{"time-since", (now - lastUpdate)/60/60 }}); // Hours since last update
+	    crow::mustache::context ctx({{"time-since", (now - lastUpdate)/60/60 }}); // Hours since last update
 	    return page.render(ctx);
     });
 
     CROW_ROUTE(app, "/blog")([&dailyMsg, &motdBackup, &lastUpdate, &blogPosts]
-        (const crow::request& req){       
-
+			     (const crow::request& req){       
+	    // List of posts
 	    auto page = crow::mustache::load("blog.html");
-        crow::mustache::context ctx;
-        ctx["msg-daily"] = getMotd(dailyMsg, motdBackup, lastUpdate);
-	// ctx["badges"] = webBadgeArray(webBadges, 8);
-        int i = 0;
-        std::map<std::string, std::string>::reverse_iterator it;
-        for (it = blogPosts.rbegin(); it != blogPosts.rend(); it++)   
-        {
-            // Links
-            std::string postName = it->first.substr(0, it->first.find_last_of('.'));
-            ctx["posts"][i]["link"] = postName;
+	    crow::mustache::context ctx;
+	    ctx["msg-daily"] = getMotd(dailyMsg, motdBackup, lastUpdate);
+	    // ctx["badges"] = webBadgeArray(webBadges, 8);
+	    int i = 0;
+	    std::map<std::string, std::string>::reverse_iterator it;
+	    for (it = blogPosts.rbegin(); it != blogPosts.rend(); it++)   
+	    {
+		    // Links
+		    std::string postName = it->first.substr(0, it->first.find_last_of('.'));
+		    ctx["posts"][i]["link"] = postName;
 
-            // Posts
+		    // Posts
 
-            // Replace underscore with space
-            std::transform(postName.begin(), postName.end(), postName.begin(),
-                [](unsigned char c) { if (c == '_') return ' '; else return (char)c; });
-	    // Remove numbers since ol
-            ctx["posts"][i]["name"] = std::string(postName.begin() + 3, postName.end());
-            i++;
-        }
-	return page.render(ctx);
+		    // Replace underscore with space
+		    std::transform(postName.begin(), postName.end(), postName.begin(),
+				   [](unsigned char c) { if (c == '_') return ' '; else return (char)c; });
+		    // Remove numbers since ol
+		    ctx["posts"][i]["name"] = std::string(postName.begin() + 3, postName.end());
+		    i++;
+	    }
+	    return page.render(ctx);
     });
 
     CROW_ROUTE(app, "/blog/<string>")([&dailyMsg, &motdBackup, &lastUpdate, &blogPosts]
-    (const crow::request& req, crow::response& res, std::string str) {
-
-        str += ".md";
-        std::map<std::string, std::string>::iterator it = blogPosts.find(str);
-        if (it != blogPosts.end()) // Exists
-        {
-	        auto page = crow::mustache::load("blogPost.html");
-            crow::mustache::context ctx({ {"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)}, {"blogText", parse(blogPosts.at(str))} });
-	        res.body = page.render(ctx).body_;
-        }
-        else // Blog post does not exist
-        {
-            res.redirect("/404");
-        }
-        res.end();
+				      (const crow::request& req, crow::response& res, std::string str) {
+	    // Actual blog page
+	    str += ".md";
+	    std::map<std::string, std::string>::iterator it = blogPosts.find(str);
+	    if (it != blogPosts.end()) // Exists
+	    {
+		    auto page = crow::mustache::load("blogPost.html");
+		    crow::mustache::context ctx({ {"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)}, {"blogText", parse(blogPosts.at(str))} });
+		    res.body = page.render(ctx).body_;
+	    }
+	    else // Blog post does not exist
+	    {
+		    res.redirect("/404");
+	    }
+	    res.end();
     });
 
     CROW_ROUTE(app, "/send")
-	    .methods("GET"_method, "POST"_method)([&dailyMsg, &pass, &salt, &motdBackup, &lastUpdate](const crow::request& req, crow::response& res){
-
-		const char* r = req.url_params.get("pass");
-		if (r != nullptr)
-		{
-        	const std::string url_pass = r;
-			if (BCrypt::validatePassword(url_pass + salt, pass))
-			{
-				dailyMsg = process_text(req.url_params.get("msg"));
-				motdBackup.push_back(dailyMsg);
-				// Update date
-				time(&lastUpdate);
-				// Write dailymsg to file in case it's funny :D
-				std::ofstream motdFile;
-				motdFile.open("motd.txt", std::fstream::app);
-				if (motdFile.fail())
-				{
-					CROW_LOG_CRITICAL << "Unable to open motd.txt file";
-				}
-				else {
-					motdFile << "\n" << dailyMsg;
-					motdFile.close();
-				}
-			}
-		}
-		res.redirect("/");
-		res.end();
-	});
+    .methods("GET"_method, "POST"_method)([&dailyMsg, &pass, &salt, &motdBackup, &lastUpdate]
+					  (const crow::request& req, crow::response& res) {
+	    // Set motd
+	    if (const char* p = req.url_params.get("pass"),
+		*m = req.url_params.get("msg"); // I don't like this
+		p and m)
+	    {
+		    const std::string url_pass = p;
+		    if (BCrypt::validatePassword(url_pass + salt, pass))
+		    {
+			    dailyMsg = process_text(m);
+			    CROW_LOG_INFO << "Updated motd : \"" << dailyMsg << "\"";
+			    motdBackup.push_back(dailyMsg);
+			    // Update date
+			    time(&lastUpdate);
+			    // Write dailymsg to file in case it's funny :D
+			    std::ofstream motdFile;
+			    motdFile.open("motd.txt", std::fstream::app);
+			    if (motdFile.fail()) {
+				    CROW_LOG_CRITICAL << "Unable to open motd.txt file";
+			    } else {
+				    motdFile << "\n" << dailyMsg;
+				    motdFile.close();
+			    }
+		    }
+	    }
+	    res.redirect("/");
+	    res.end();
+    });
 
     CROW_ROUTE(app, "/guestbook")([&dailyMsg, &motdBackup, &lastUpdate, &db]
-				(const crow::request& req){       
-
+				  (const crow::request& req) {
+	    // Page for comments and form
 	    auto page = crow::mustache::load("guestbook.html");
 	    crow::mustache::context ctx({
-			{"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)}
+			    {"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)}
 		    });
 	    // Get comments
 	    struct comment {		    
@@ -293,11 +293,83 @@ int main()
 	    for (auto c : comments) {
 		    ctx["comments"][i]["msg"] = c.msg;
 		    ctx["comments"][i]["name"] = c.name;
-		    ctx["comments"][i]["posted"] = c.posted;
+		    // Format unix time
+		    char buffer[256];
+		    const auto t = static_cast<time_t>(c.posted);
+		    std::strftime(buffer, sizeof(buffer), "%d.%m.%Y", localtime(&t));
+		    ctx["comments"][i]["posted"] = buffer;
 		    i++;
 	    }
 	    return page.render(ctx);
-       });
+    });
+
+    CROW_ROUTE(app, "/comment")
+	    .methods("GET"_method, "POST"_method)(
+		    [&dailyMsg, &pass, &salt, &motdBackup, &lastUpdate, &db]
+		    (const crow::request& req, crow::response& res) {
+	    // Post comment
+	    auto qs = req.get_body_params();
+	    if (const char* n = qs.get("name"),
+		*m = qs.get("msg");
+		n and m)
+	    {
+		    const std::string name = n;
+		    const std::string msg = m;
+		    time_t posted = time(nullptr);
+		    // Validation
+		    if (name.size() == 0) {
+			    // name len wrong
+			    res.redirect("/guestbook?err=name");
+			    goto EXIT;
+		    }
+		    if (msg.size() < 5 or
+			msg.size() > 250) {
+			    // msg len wrong
+			    res.redirect("/guestbook?err=desc");
+			    goto EXIT;
+		    }
+		    // Correct checkmarks
+		    for (uint8_t i = 0; i < 8; i++) {
+			    // bruh
+			    const auto e = std::string("evil") +
+				    std::string{static_cast<char>(i + '0')};
+			    // Skip 6 because front end does aswell
+			    if (i != 6 and not qs.get(e)) {
+				    res.redirect("/guestbook?err=evil");
+				    goto EXIT;
+			    }
+		    }
+		    // Add to database
+		    sqlite3_stmt* st;
+		    int rc = sqlite3_prepare_v2(db,
+						"INSERT INTO comments "
+						"VALUES(?, ?, ?);",
+						-1, &st, NULL);
+		    CROW_LOG_DEBUG << "Prepare: " << rc;
+		    if (rc != SQLITE_OK) {
+			    CROW_LOG_ERROR << "SQL ERROR: " << rc;
+			    rc = sqlite3_finalize(st); // I think?
+			    res.redirect("/guestbook?err=internal");
+			    goto EXIT;
+		    }
+		    // Add values to statement
+		    sqlite3_bind_text(st, 1, msg.c_str(), -1, SQLITE_STATIC);
+		    sqlite3_bind_text(st, 2, name.c_str(), -1, SQLITE_STATIC);
+		    sqlite3_bind_int(st, 3, static_cast<int>(posted));
+		    // Execute statement
+		    rc = sqlite3_step(st);
+		    CROW_LOG_DEBUG << "Step: " << rc;
+		    rc = sqlite3_finalize(st);
+		    CROW_LOG_DEBUG << "Finalize: " << rc;
+		    // Success
+		    res.redirect("/guestbook");
+	    } else {
+		    // Missing params
+		    res.redirect("/guestbook?err=missing");
+	    }
+					  EXIT: // ???? emacs ?????
+	    res.end();
+    });
 
     CROW_CATCHALL_ROUTE(app)
         ([&dailyMsg](crow::response& res) {
@@ -388,7 +460,9 @@ int main()
 	    return EXIT_FAILURE;
     }
     // Other stuff finished, start server
+    app.loglevel(crow::LogLevel::DEBUG);
     app.port(18080).multithreaded().run();
+    // Post run cleanup
     std::cout << "[CLEANUP] Closing database connection\n";
     sqlite3_close(db);
     std::cout << "[CLEANUP] Closed\n";
