@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <fstream>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 #include <algorithm>
@@ -134,6 +135,18 @@ int main()
 	    {"best_viewed_with_eyes.gif", ""},
 	    {"button38.gif", "https://github.com/Wisdurm/"}
     };
+    // Error messages
+    const std::unordered_map<std::string, std::string> errMsgs {
+	    {"evil", "You did not promise to be kind."},
+	    {"name", "Your name did not pass validation."},
+	    {"msg", "Your message did not pass validation."},
+	    {"internal", "The server encountered an interal error, "
+	     "you should probably checkback later."},
+	    {"ip", "Your public ip address has already been used to "
+	    "make a comment, sorry."},
+    };
+    // Public Ips which have already left a comment
+    std::unordered_set<std::string> usedAddresses; // TODO: Store in db
 
     CROW_ROUTE(app, "/")([&dailyMsg, &motdBackup, &lastUpdate, &pdoc, &items, &webBadges]
 			 (const crow::request& req){
@@ -261,13 +274,25 @@ int main()
 	    res.end();
     });
 
-    CROW_ROUTE(app, "/guestbook")([&dailyMsg, &motdBackup, &lastUpdate, &db]
+    CROW_ROUTE(app, "/guestbook")
+	    .methods("GET"_method, "POST"_method)([&dailyMsg, &motdBackup, &lastUpdate, &db, &errMsgs]
 				  (const crow::request& req) {
 	    // Page for comments and form
 	    auto page = crow::mustache::load("guestbook.html");
 	    crow::mustache::context ctx({
 			    {"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)}
 		    });
+	    // If error message
+	    if (const char* e = req.url_params.get("err")) {
+		    const std::string err = e;
+		    const std::string errorBox = std::format(
+			    "<div class='error'><strong>Error</strong><br>"
+			    "The server could not process your request "
+			    "for the following reason: <br> {0}"
+			    "</div><br>",
+			    errMsgs.contains(err) ? errMsgs.at(err) : "Loser");
+		    ctx["error"] = errorBox;
+	    }
 	    // Get comments
 	    struct comment {		    
 		    const std::string msg;
@@ -303,19 +328,22 @@ int main()
 	    return page.render(ctx);
     });
 
-    CROW_ROUTE(app, "/comment")
-	    .methods("GET"_method, "POST"_method)(
-		    [&dailyMsg, &pass, &salt, &motdBackup, &lastUpdate, &db]
-		    (const crow::request& req, crow::response& res) {
+    CROW_ROUTE(app, "/comment").methods("GET"_method, "POST"_method)
+	    ([&dailyMsg, &pass, &salt, &motdBackup, &lastUpdate, &db, &usedAddresses]
+	     (const crow::request& req, crow::response& res)
+    {
 	    // Post comment
+	    const std::string addr = req.remote_ip_address;
+	    // Actual params
 	    auto qs = req.get_body_params();
 	    if (const char* n = qs.get("name"),
 		*m = qs.get("msg");
+		not usedAddresses.contains(addr) and
 		n and m)
 	    {
 		    const std::string name = n;
 		    const std::string msg = m;
-		    time_t posted = time(nullptr);
+		    time_t now = time(nullptr);
 		    // Validation
 		    if (name.size() == 0) {
 			    // name len wrong
@@ -325,16 +353,18 @@ int main()
 		    if (msg.size() < 5 or
 			msg.size() > 250) {
 			    // msg len wrong
-			    res.redirect("/guestbook?err=desc");
+			    res.redirect("/guestbook?err=msg");
 			    goto EXIT;
 		    }
 		    // Correct checkmarks
+		    const int trick = localtime(&now)->tm_hour % 6;
 		    for (uint8_t i = 0; i < 8; i++) {
 			    // bruh
 			    const auto e = std::string("evil") +
 				    std::string{static_cast<char>(i + '0')};
 			    // Skip 6 because front end does aswell
-			    if (i != 6 and not qs.get(e)) {
+			    if (i != 6 and (i != trick and not qs.get(e))
+				or (i == trick and qs.get(e))) {
 				    res.redirect("/guestbook?err=evil");
 				    goto EXIT;
 			    }
@@ -355,17 +385,23 @@ int main()
 		    // Add values to statement
 		    sqlite3_bind_text(st, 1, msg.c_str(), -1, SQLITE_STATIC);
 		    sqlite3_bind_text(st, 2, name.c_str(), -1, SQLITE_STATIC);
-		    sqlite3_bind_int(st, 3, static_cast<int>(posted));
+		    sqlite3_bind_int(st, 3, static_cast<int>(now));
 		    // Execute statement
 		    rc = sqlite3_step(st);
 		    CROW_LOG_DEBUG << "Step: " << rc;
 		    rc = sqlite3_finalize(st);
 		    CROW_LOG_DEBUG << "Finalize: " << rc;
 		    // Success
+		    usedAddresses.insert(addr);
 		    res.redirect("/guestbook");
 	    } else {
-		    // Missing params
-		    res.redirect("/guestbook?err=missing");
+		    if (usedAddresses.contains(addr)) {
+			    // Used up ip address
+			    res.redirect("/guestbook?err=ip");			    
+		    } else {
+			    // Missing params
+			    res.redirect("/guestbook?err=missing");
+		    }
 	    }
 					  EXIT: // ???? emacs ?????
 	    res.end();

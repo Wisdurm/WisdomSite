@@ -109,6 +109,14 @@ aside > .border {
 	width: 30px;
 }
 
+.comment-list > .border {
+	margin-bottom: 10px;
+}
+.error {
+	padding: 10px;
+	background-color: var(--light-em);
+}
+
 /*
   INPUT STYLES
 */
