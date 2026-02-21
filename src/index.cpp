@@ -133,7 +133,15 @@ int main()
 	    {"cc-button.gif", "https://skp.fi/"},
 	    {"firefox_now.png", "https://www.firefox.com/"},
 	    {"best_viewed_with_eyes.gif", ""},
-	    {"button38.gif", "https://github.com/Wisdurm/"}
+	    {"button38.gif", "https://github.com/Wisdurm/"},
+	    {"gue.jpg", "/guestbook"},
+	    {"powered-cpp.gif", "https://legacy.cplusplus.com/"},
+	    {"powered-cpp.gif", "https://cppreference.com/"},
+	    {"sdl.gif", "https://www.libsdl.org/"},
+	    {"winrar3.gif", "https://www.win-rar.com/"},
+	    {"winrar4.gif", "https://www.win-rar.com/"},
+	    {"winxp.gif", "https://endof10.org/"},
+	    {"tor.gif", "https://www.torproject.org"},
     };
     // Error messages
     const std::unordered_map<std::string, std::string> errMsgs {
