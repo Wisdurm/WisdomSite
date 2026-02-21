@@ -123,14 +123,14 @@ int main()
     const std::vector<std::pair<std::string, std::string>> webBadges = {
 	    {"powered-by-debian.gif", "https://debian.org"},
 	    {"7zip.gif", "https://www.7-zip.org"},
-	    {"winrar.gif", ""},
+	    {"winrar.gif", "https://www.win-rar.com/"},
 	    {"linux_now.gif", "https://kernel.org"},
 	    {"emacs2.gif", "https://www.gnu.org/software/emacs"},
 	    {"vim.gif", "https://www.vim.org/"},
 	    {"any_browser.gif", ""}, // I'll come up with something later
 	    {"powered.gif", ""},
 	    {"blender.gif" , "https://www.blender.org/"},
-	    {"cc-button.gif", ""},
+	    {"cc-button.gif", "https://skp.fi/"},
 	    {"firefox_now.png", "https://www.firefox.com/"},
 	    {"best_viewed_with_eyes.gif", ""},
 	    {"button38.gif", "https://github.com/Wisdurm/"}
@@ -140,7 +140,7 @@ int main()
 	    {"evil", "You did not promise to be kind."},
 	    {"name", "Your name did not pass validation."},
 	    {"msg", "Your message did not pass validation."},
-	    {"internal", "The server encountered an interal error, "
+	    {"internal", "The server encountered an internal error, "
 	     "you should probably checkback later."},
 	    {"ip", "Your public ip address has already been used to "
 	    "make a comment, sorry."},
@@ -333,7 +333,9 @@ int main()
 	     (const crow::request& req, crow::response& res)
     {
 	    // Post comment
-	    const std::string addr = req.remote_ip_address;
+	    // remote_ip_address does not work because of reverse proxy
+	    // X-Real-IP needs to be configued in Nginx
+	    const std::string addr = req.get_header_value("X-Real-IP");
 	    // Actual params
 	    auto qs = req.get_body_params();
 	    if (const char* n = qs.get("name"),
@@ -496,7 +498,7 @@ int main()
 	    return EXIT_FAILURE;
     }
     // Other stuff finished, start server
-    app.loglevel(crow::LogLevel::DEBUG);
+    //app.loglevel(crow::LogLevel::DEBUG);
     app.port(18080).multithreaded().run();
     // Post run cleanup
     std::cout << "[CLEANUP] Closing database connection\n";
