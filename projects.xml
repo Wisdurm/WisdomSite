@@ -50,5 +50,10 @@
 	  <link href="https://github.com/Wisdurm/Flashbang">Src</link>
 	  <link href="https://www.youtube.com/watch?v=hBsc_-OxonE">Video</link>
 	</item>
+	<item name="wisdomkey" desc="Small accessiblity program for moving around
+								 the mouse using a small set of keys."
+		  img="/static/images/thumb-key.png" imgform="fullimgh">
+	  <link href="https://github.com/Wisdurm/wisdomkey">Src</link>
+	</item>
   </cat>
 </projects>

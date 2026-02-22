@@ -162,6 +162,14 @@ a:hover {
 /* Exception for 88x31 */
 .i88x31 {
 	display: block;
+	image-rendering: auto;
+    image-rendering: crisp-edges;
+    image-rendering: pixelated;
+    image-rendering: -webkit-optimize-contrast;
+}
+.i88x31 > img {
+	width: 88px;
+	height: 31px;
 }
 .i88x31:hover {
 	background-color: inherit;
