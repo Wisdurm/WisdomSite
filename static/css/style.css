@@ -31,8 +31,11 @@
 
 	--light-em: #fa6b6b;
 
-	/* Every element that isn't a child
-	   of .zenith will have this by default.
+	--yellow: #dbdb87;
+
+	/*
+	  Every element that isn't a child
+	   of .zenith will have this font by default.
 	   This is changed by accessiblity options.
    */
 	font-family: "FreeSerif";
@@ -116,7 +119,12 @@ aside > .border {
 	padding: 10px;
 	background-color: var(--light-em);
 }
-
+.notice {
+	background-color: var(--yellow);
+	padding: 2px;
+	word-break: break-word;
+	hyphens: auto;
+}
 /*
   INPUT STYLES
 */

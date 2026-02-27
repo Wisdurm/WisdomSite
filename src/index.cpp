@@ -153,8 +153,6 @@ int main()
 	    {"ip", "Your public ip address has already been used to "
 	    "make a comment, sorry."},
     };
-    // Public Ips which have already left a comment
-    std::unordered_set<std::string> usedAddresses; // TODO: Store in db
 
     CROW_ROUTE(app, "/")([&dailyMsg, &motdBackup, &lastUpdate, &pdoc, &items, &webBadges]
 			 (const crow::request& req){
@@ -337,7 +335,7 @@ int main()
     });
 
     CROW_ROUTE(app, "/comment").methods("GET"_method, "POST"_method)
-	    ([&dailyMsg, &pass, &salt, &motdBackup, &lastUpdate, &db, &usedAddresses]
+	    ([&dailyMsg, &pass, &salt, &motdBackup, &lastUpdate, &db]
 	     (const crow::request& req, crow::response& res)
     {
 	    // Post comment
@@ -348,7 +346,6 @@ int main()
 	    auto qs = req.get_body_params();
 	    if (const char* n = qs.get("name"),
 		*m = qs.get("msg");
-		not usedAddresses.contains(addr) and
 		n and m)
 	    {
 		    const std::string name = n;
@@ -379,11 +376,40 @@ int main()
 				    goto EXIT;
 			    }
 		    }
+		    // Check ip not already used
+		    sqlite3_stmt* st_ip;
+		    int rc_ip = sqlite3_prepare_v2(db,
+						"SELECT * FROM comments "
+						"WHERE ip=?;",
+						-1, &st_ip, NULL);
+		    CROW_LOG_DEBUG << "Prepare: " << rc_ip;
+		    if (rc_ip != SQLITE_OK) {
+			    CROW_LOG_ERROR << "SQL ERROR: " << rc_ip;
+			    rc_ip = sqlite3_finalize(st_ip); // I think?
+			    res.redirect("/guestbook?err=internal");
+			    goto EXIT;
+		    }
+		    // Add values to statement
+		    sqlite3_bind_text(st_ip, 1, addr.c_str(), -1, SQLITE_STATIC);
+		    // Step forward to see if a result (1 at max)
+		    rc_ip = sqlite3_step(st_ip);
+		    CROW_LOG_DEBUG << "Step: " << rc_ip;
+		    if (rc_ip == SQLITE_ROW) {
+			    CROW_LOG_INFO << "Failed, ip: " << addr << " has already posted";
+			    rc_ip = sqlite3_finalize(st_ip);
+			    CROW_LOG_DEBUG << "Finalize: " << rc_ip;
+			    res.redirect("/guestbook?err=ip");
+			    goto EXIT;
+		    }
+		    // Cleanup
+		    rc_ip = sqlite3_finalize(st_ip);
+		    CROW_LOG_DEBUG << "Finalize: " << rc_ip;
+		    //
 		    // Add to database
 		    sqlite3_stmt* st;
 		    int rc = sqlite3_prepare_v2(db,
 						"INSERT INTO comments "
-						"VALUES(?, ?, ?);",
+						"VALUES(?, ?, ?, ?);",
 						-1, &st, NULL);
 		    CROW_LOG_DEBUG << "Prepare: " << rc;
 		    if (rc != SQLITE_OK) {
@@ -396,22 +422,17 @@ int main()
 		    sqlite3_bind_text(st, 1, msg.c_str(), -1, SQLITE_STATIC);
 		    sqlite3_bind_text(st, 2, name.c_str(), -1, SQLITE_STATIC);
 		    sqlite3_bind_int(st, 3, static_cast<int>(now));
+		    sqlite3_bind_text(st, 4, addr.c_str(), -1, SQLITE_STATIC);
 		    // Execute statement
 		    rc = sqlite3_step(st);
 		    CROW_LOG_DEBUG << "Step: " << rc;
 		    rc = sqlite3_finalize(st);
 		    CROW_LOG_DEBUG << "Finalize: " << rc;
 		    // Success
-		    usedAddresses.insert(addr);
 		    res.redirect("/guestbook");
 	    } else {
-		    if (usedAddresses.contains(addr)) {
-			    // Used up ip address
-			    res.redirect("/guestbook?err=ip");			    
-		    } else {
-			    // Missing params
-			    res.redirect("/guestbook?err=missing");
-		    }
+		    // Missing params
+		    res.redirect("/guestbook?err=missing");
 	    }
 					  EXIT: // ???? emacs ?????
 	    res.end();

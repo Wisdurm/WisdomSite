@@ -54,7 +54,7 @@ $( document ).ready(function() {
 										"I didn't write anything bad but I am a spam bot",
 										"I *promise* I didn't not write anything bad",
 										"I \"promise\"",
-										"Possibly",
+										"Dubiously",
 										"For'dnt real",
 										"I would lie",
 								];

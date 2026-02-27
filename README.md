@@ -7,8 +7,8 @@ CrowCPP was used just because "C++ web framework funny"**
 
 # Setup
 
-First make sure Git and Ninja are installed.  
-```sudo apt install git ninja-build```  
+First make sure dependencies are installed.  
+```sudo apt install git ninja-build libsqlite3-0```  
 Then install and setup vcpkg.  
 Start by cloning the repository:  
 ```git clone https://github.com/microsoft/vcpkg.git```  
@@ -34,9 +34,15 @@ and paste the following:
   ]
 }
 ```
-Then finally, compile the program with:  
+Then, compile the program with:  
 ```cmake --preset=default```  
 ```cmake --build build```  
+
+To setup the database, create `db.db` using the command:  
+```sqlite3 db.db```  
+And then run the setup script in sqlite with:  
+```.read setup.sql```  
+Optionally delete the test comment left in the database.  
 
 **TODO:**
 Other stuff, and verify instructions are correct lol
