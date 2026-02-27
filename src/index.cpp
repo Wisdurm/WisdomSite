@@ -308,7 +308,9 @@ int main()
 	    std::vector<comment> comments;
 	    // TODO: I think some tricks allow skipping *data, they're just a
 	    // tad too difficult for me to figure out at the moment
-	    sqlite3_exec(db, "SELECT * FROM comments;",
+	    sqlite3_exec(db,
+			 "SELECT * FROM comments "
+			 "ORDER BY posted DESC;",
 			 [](void* data, int argc, char** argv, char** azColName) {
 				 auto comments = static_cast<std::vector<comment>*>(data);
 				 comment c{
