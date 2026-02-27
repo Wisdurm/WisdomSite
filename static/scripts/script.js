@@ -1,8 +1,9 @@
 function swapFont() {
 		// More readable font
 		$(".zenith").css("font-family", "Lexend");
-		// Increase article size
-		$("article").css("font-size", "1.3em");
+		// Increase article readablity (is this actually better? TODO)
+		$("article").css("font-size", "1.4em");
+		$("article").css("line-height", "1.5em");
 }
 
 $( document ).ready(function() {

@@ -30,6 +30,7 @@
 	--red: #a30000;
 
 	--light-em: #fa6b6b;
+	--vlight: #bda6a6;
 
 	--yellow: #dbdb87;
 
@@ -111,7 +112,15 @@ aside > .border {
 #rss {
 	width: 30px;
 }
+.addition {
+	font-size: 1.5em;
+}
+.addition > a {
+	background-color: var(--vlight);
+}
 
+/* EXTRA PADDING WHEN NEED BE */
+main > .border,
 .comment-list > .border {
 	margin-bottom: 10px;
 }
@@ -219,6 +228,10 @@ input[type="checkbox"]::after
 blockquote {
 	border-left: 4px solid var(--dark);
 	padding-left: 5px;
+}
+article {
+	width: 70%;
+	font-size: 1.2em;
 }
 
 /*
