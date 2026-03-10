@@ -88,6 +88,7 @@ main, aside, header {
 	flex-direction: column;	
 }
 /* Main boxes */
+figure,
 .border {
 	border: 1px solid var(--dark);
 	padding: 5px;
@@ -95,6 +96,10 @@ main, aside, header {
 }
 aside > .border {
 	margin-bottom: 5px;
+}
+figcaption {
+	padding: 10px 20px;
+	border-left: 4px solid var(--dark);
 }
 /* Card gallery */
 .card-gallery {
