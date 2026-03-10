@@ -4,3 +4,6 @@
 [submodule "external/libbcrypt"]
 	path = external/libbcrypt
 	url = https://github.com/trusch/libbcrypt.git
+[submodule "static/projects/rhythm2"]
+	path = static/projects/rhythm2
+	url = https://github.com/Wisdurm/rhythm
