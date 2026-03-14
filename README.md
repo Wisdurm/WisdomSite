@@ -10,13 +10,15 @@ CrowCPP was used just because "C++ web framework funny"**
 ## VCPKG & Linux
 
 First make sure dependencies are installed.  
-```sudo apt install git ninja-build libsqlite3-0```  
+```sudo apt install git ninja-build libsqlite3-0``` 
+
 Then install and setup vcpkg.  
 Start by cloning the repository:  
 ```git clone https://github.com/microsoft/vcpkg.git```  
 Then run the bootstrap script:  
 ```cd vcpkg; .\bootstrap-vcpkg.bat``` On Windows  
 ```cd vcpkg && ./bootstrap-vcpkg.sh``` On Linux  
+
 Now all dependencies are setup.  
 For the next steps, clone and cd into this repository.   
 **When cloning this repository, make sure to clone all submodules**
@@ -24,6 +26,8 @@ For the next steps, clone and cd into this repository.
 Then, compile the program with:  
 ```cmake --preset=default```  
 ```cmake --build build```  
+
+Create the motd.txt file
 
 To setup the database, create `db.db` using the command:  
 ```sqlite3 db.db```  
@@ -33,13 +37,13 @@ Optionally delete the test comment left in the database.
 
 ## OpenBSD
 
-First install all dependencies
+First install all dependencies  
 ```doas pkg_add git md4c pugixml sqlite3 cmake asio```
 
-Then cd into this repository, **make sure to clone submodules.**
-Compile with:
-```cmake -S . -B build```
-```cmake --build build```
+Then cd into this repository, **make sure to clone submodules.**  
+Compile with:  
+```cmake -S . -B build```  
+```cmake --build build```  
 
 Create the motd.txt file
 
