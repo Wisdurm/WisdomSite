@@ -121,7 +121,7 @@ int main()
     const char* blogPath = "blog";
     // Badges
     const std::vector<std::pair<std::string, std::string>> webBadges = {
-	    {"powered-by-debian.gif", "https://debian.org"},
+	    {"powered-by-openbsd.png", "https://openbsd.org"},
 	    {"7zip.gif", "https://www.7-zip.org"},
 	    {"winrar.gif", "https://www.win-rar.com/"},
 	    {"linux_now.gif", "https://kernel.org"},
