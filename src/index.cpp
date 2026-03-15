@@ -140,7 +140,7 @@ int main()
 		{"winrar4.webp", "https://www.win-rar.com/"},
 		{"winxp.webp", "https://endof10.org/"},
 		{"tor.webp", "https://www.torproject.org"},
-		{"valid-rss-rogers.webp", ""},
+		{"valid-rss-rogers.webp", "http://validator.w3.org/feed/check.cgi?url=https%3A//wisdurm.fi/static/rss.xml"},
 	};
 	// Error messages
 	const std::unordered_map<std::string, std::string> errMsgs {
