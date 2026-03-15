@@ -32,7 +32,7 @@ cardTemplate.innerHTML = `
     <div style="width: 300px;height: 400px; display:inline-block; margin: 20px 10px; vertical-align: top">
         <div style="display:flex; height: 100%; width: 100%; flex-direction: column;">
             <div style="width:80%; height: 35%; margin: 10% auto 0; overflow:hidden">
-                <slot name="image"><img src="https://static.wikitide.net/videogameballswiki/e/ea/Canny-cat.gif" style="width:100%; height: 100%"></slot>
+                <slot name="image"><img src="/static/images/button.webp" style="width:100%; height: 100%"></slot>
             </div>
             <h3 style="font-size: 1.83em; margin-top: 0; padding-top: 5%; margin-bottom: 0"><slot name="name">Cool project</slot></h3>
 

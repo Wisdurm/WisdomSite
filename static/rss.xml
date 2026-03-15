@@ -10,28 +10,28 @@
 		<title>1. Hello world</title>
 		<description>First blog post, describing the process of setting up blog posts.</description>
 		<link>https://wisdurm.fi/blog/1._Hello_world</link>
-		<guid isPermalink="true">https://wisdurm.fi/blog/1._Hello_world</guid>
+		<guid>https://wisdurm.fi/blog/1._Hello_world</guid>
 		<pubDate>Wed, 24 Sep 2025 20:53:00 +0300</pubDate>
 	</item>
 	<item>
 		<title>2. Runtime difficulties</title>
 		<description>Back to blogging, to talk about some work on Runtime.</description>
 		<link>https://wisdurm.fi/blog/2._Runtime_difficulties</link>
-		<guid isPermalink="true">https://wisdurm.fi/blog/2._Runtime_difficulties</guid>
+		<guid>https://wisdurm.fi/blog/2._Runtime_difficulties</guid>
 		<pubDate>Tue, 06 Jan 2026 17:03:00 +0300</pubDate>
 	</item>
 	<item>
 		<title>3. So Many ideas</title>
 		<description>Just rambling for the sake of it.</description>
 		<link>https://wisdurm.fi/blog/3._So_many_ideas</link>
-		<guid isPermalink="true">https://wisdurm.fi/blog/3._So_many_ideas</guid>
+		<guid>https://wisdurm.fi/blog/3._So_many_ideas</guid>
 		<pubDate>Tue, 27 Jan 2026 20:57:40 +0300</pubDate>
 	</item>
 	<item>
 		<title>4. Hello anew</title>
 		<description>Site redesign!!!</description>
 		<link>https://wisdurm.fi/blog/4._Hello_anew</link>
-		<guid isPermalink="true">https://wisdurm.fi/blog/4._Hello_anew</guid>
+		<guid>https://wisdurm.fi/blog/4._Hello_anew</guid>
 		<pubDate>Fri, 27 Feb 2026 16:00:00 +0300</pubDate>
 	</item>
 </channel>

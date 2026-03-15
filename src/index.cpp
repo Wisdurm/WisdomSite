@@ -121,27 +121,28 @@ int main()
     const char* blogPath = "blog";
     // Badges
     const std::vector<std::pair<std::string, std::string>> webBadges = {
-	    {"powered-by-openbsd.png", "https://openbsd.org"},
-	    {"7zip.gif", "https://www.7-zip.org"},
-	    {"winrar.gif", "https://www.win-rar.com/"},
+	    {"powered-by-openbsd.webp", "https://openbsd.org"},
+	    {"7zip.webp", "https://www.7-zip.org"},
+	    {"winrar.webp", "https://www.win-rar.com/"},
 	    {"linux_now.gif", "https://kernel.org"},
-	    {"emacs2.gif", "https://www.gnu.org/software/emacs"},
-	    {"vim.gif", "https://www.vim.org/"},
-	    {"any_browser.gif", ""}, // I'll come up with something later
+	    {"emacs2.webp", "https://www.gnu.org/software/emacs"},
+	    {"vim.webp", "https://www.vim.org/"},
+	    {"any_browser.webp", ""}, // I'll come up with something later
 	    {"powered.gif", ""},
-	    {"blender.gif" , "https://www.blender.org/"},
-	    {"cc-button.gif", "https://skp.fi/"},
-	    {"firefox_now.png", "https://www.firefox.com/"},
+	    {"blender.webp" , "https://www.blender.org/"},
+	    {"cc-button.webp", "https://skp.fi/"},
+	    {"firefox_now.webp", "https://www.firefox.com/"},
 	    {"best_viewed_with_eyes.gif", ""},
-	    {"button38.gif", "https://github.com/Wisdurm/"},
+	    {"button38.webp", "https://github.com/Wisdurm/"},
 	    {"gue.jpg", "/guestbook"},
-	    {"powered-cpp.gif", "https://legacy.cplusplus.com/"},
-	    {"powered-cpp.gif", "https://cppreference.com/"},
-	    {"sdl.gif", "https://www.libsdl.org/"},
-	    {"winrar3.gif", "https://www.win-rar.com/"},
-	    {"winrar4.gif", "https://www.win-rar.com/"},
-	    {"winxp.gif", "https://endof10.org/"},
-	    {"tor.gif", "https://www.torproject.org"},
+	    {"powered-cpp.webp", "https://legacy.cplusplus.com/"},
+	    {"powered-cpp.webp", "https://cppreference.com/"},
+	    {"sdl.webp", "https://www.libsdl.org/"},
+	    {"winrar3.webp", "https://www.win-rar.com/"},
+	    {"winrar4.webp", "https://www.win-rar.com/"},
+	    {"winxp.webp", "https://endof10.org/"},
+	    {"tor.webp", "https://www.torproject.org"},
+	    {"valid-rss-rogers.webp", ""},
     };
     // Error messages
     const std::unordered_map<std::string, std::string> errMsgs {
@@ -529,8 +530,10 @@ int main()
 	    return EXIT_FAILURE;
     }
     // Other stuff finished, start server
-    //app.loglevel(crow::LogLevel::DEBUG);
-    app.port(18080).multithreaded().run();
+    app.port(18080).multithreaded()
+		.use_compression(crow::compression::algorithm::DEFLATE)
+		.loglevel(crow::LogLevel::INFO)
+		.run();
     // Post run cleanup
     std::cout << "[CLEANUP] Closing database connection\n";
     sqlite3_close(db);
