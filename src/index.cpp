@@ -42,9 +42,8 @@ static std::string getMotd(std::string& daily, std::vector<std::string>& motdBac
 		CROW_LOG_INFO << "Hours since last update: " << ((now - lastUpdate)/60.0/60);
 		if (((now - lastUpdate)/60.0/60) > 30) { // If more than 30 hours has passed, reset the daily word
 			lastUpdate = now;
-			daily= "";
-		}
-		else {
+			daily = "";
+		} else {
 			return daily;
 		}
 	}
@@ -353,7 +352,8 @@ int main()
 				const std::string msg = m;
 				time_t now = time(nullptr);
 				// Validation
-				if (name.size() == 0) {
+				if (name.size() == 0 or
+				    name.size() > 50) {
 					// name len wrong
 					res.redirect("/guestbook?err=name");
 					goto EXIT;
@@ -491,7 +491,7 @@ int main()
 	motdFile.close();
 	// Open xml document
 	CROW_LOG_INFO << "Loading projects";
-	pugi::xml_parse_result result = pdoc.load_file("projects.xml");
+	const pugi::xml_parse_result result = pdoc.load_file("projects.xml");
 	if (!result) {
 		CROW_LOG_CRITICAL << "Unable to open projects.xml file";
 		return EXIT_FAILURE;
