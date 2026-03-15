@@ -94,6 +94,9 @@ figure,
 	padding: 5px;
 	height: fit-content;
 }
+main > .border {
+	padding-left: 10px;
+}
 aside > .border {
 	margin-bottom: 5px;
 }
@@ -107,7 +110,9 @@ figcaption {
 	flex-direction: row;
 	flex-wrap: wrap;
 }
-
+.spanLink {
+	width: auto;
+}
 /* Left hand nav */
 .alt-nav {
 	display: flex;

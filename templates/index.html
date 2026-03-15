@@ -30,7 +30,11 @@
 					<!-- Page specific -->
 				</div>
 				<div class="border">
-					{{&badges}}
+					{{#badges}}
+					<a href="{{href}}" class="i88x31">
+						<img src="/static/images/badges/{{img}}">
+					</a>
+					{{/badges}}
 				</div>
 				<div class="border">
 					<img src="/static/images/fin.gif">
@@ -84,7 +88,19 @@
 			<aside>
 				<div class="border">
 					<h2>Project of the day!</h2>
-					{{&project-daily}}
+					{{#project-daily}}
+					<card-component id="{{name}}">
+						<div slot="name">{{name}}</div>
+						<div slot="text">{{desc}}</div>
+						<img class="{{imgform}}" slot="image" src="{{img}}"
+							 alt="{{name}}">
+						<span slot="links">
+							{{#links}}
+							<a class="spanLink" href="{{href}}">{{text}}</a>
+							{{/links}}
+						</span>
+					</card-component>
+					{{/project-daily}}
 				</div>
 			</aside>
 		</div>

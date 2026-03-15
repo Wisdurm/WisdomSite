@@ -27,7 +27,13 @@
 				<a href="/contact"> Contact </a>
 				<a href="/blog"> Blog </a>
 				<!-- Page specific -->
-				{{&projects-links}}
+				{{#projects}}
+				<strong>{{name}}</strong>
+				{{#items}}
+				<!-- Just for convenience -->
+				<a href="#{{name}}">{{name}}</a>
+				{{/items}}
+				{{/projects}}
 			</div>
 			<div class="border">
 				{{&badges}}
@@ -40,7 +46,27 @@
 					Central hub for all of my projects. Contains most of the
 					major stuff, but there's still some things missing.
 				</p>
-				{{&projects-text}}
+				{{#projects}}
+				<section>
+					<h2 id="{{name}}">{{name}}</h2>
+					<p>{{desc}}</p>
+					<div class="card-gallery">
+						{{#items}}
+						<card-component id="{{name}}">
+							<div slot="name">{{name}}</div>
+							<div slot="text">{{desc}}</div>
+							<img class="{{imgform}}" slot="image" src="{{img}}"
+								 alt="{{name}}">
+							<span slot="links">
+								{{#links}}
+								<a class="spanLink" href="{{href}}">{{text}}</a>
+								{{/links}}
+							</span>
+						</card-component>
+						{{/items}}
+					</div>
+				</section>
+				{{/projects}}
 			</div>
 		</main>
 	</div>
