@@ -8,9 +8,8 @@
 	  <link href="https://github.com/Wisdurm/infinite-canvas">Src</link>
 	</item>
 	<item name="Rhythm games" desc="
-	  I've made a few very small & simple rhythm games (sometimes without any actual rhythm!) that run in the browser. <br>
-      <div style='height: 10px;'></div>
-	  <b>Heads up!</b> These use DFJK for the control scheme!"
+	  I've made a few very small & simple rhythm games (sometimes without any actual rhythm!) that run in the browser.
+	  Heads up! These use DFJK for the control scheme!"
 	  img="/static/images/thumb-rhy.webp" imgform="fullimgw"
 	  alt="Runtime logo">
 	  <link href="/static/projects/rhythm2/index.html">
@@ -33,8 +32,11 @@
 	  <link href="https://github.com/Wisdurm/Unnamed-Tower-Defense-Game">Video</link>
 	  <link href="https://github.com/Wisdurm/Horrible-World">Src</link>
 	</item>
-	<item name="Terrabit" desc="Very simple text-based Terraria remake. More of a proof of concept, never got far into development.
-      <small>(Also my first proper programming project ever!)</small>" img="/static/images/thumb-ter.webp" imgform="fullimgh">
+	<item name="Terrabit" desc="Very simple text-based Terraria remake. More of
+								a proof of concept, never got far into
+								development. (Also my first proper programming
+								project ever!)"
+		  img="/static/images/thumb-ter.webp" imgform="fullimgh"> 
 	  <link href="https://www.youtube.com/watch?v=ivEEdUHqQ6c">Video</link>
 	  <link href="https://github.com/Wisdurm/Terrabit">Src</link>
 	</item>
