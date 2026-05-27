@@ -26,15 +26,48 @@
 						I'm a bit more stupid, and I have no idea what I'm
 						talking about.
 					</p>
-					<h2>Posts</h2>
-					<ol reversed>
-						{{#posts}}
-						<li>
-							<a href="/blog/{{link}}">{{name}}</a>
-						</li>
-						{{/posts}}
-					</ol>
-					<a href="/static/rss.xml"><img id="rss" src="/static/images/Feed-icon.svg"></a>
+					<p>
+						The posts are grouped into canonical ones, which are a
+						linear series of somewhat regular posts, mostly just
+						about what I'm working on at the moment. The other
+						"deuterocanonical" ones are sporadic, maybe humorous
+						or maybe actually somewhat interesting posts centered
+						around some random idea I've had, which has nothing in
+						particular to do with any of my current projects.
+					</p>
+					<div class="split">
+						<div>
+							<h2>Canonical posts</h2>
+							<ol reversed>
+								{{#main.posts}}
+								<li>
+									<a href="/blog/{{link}}">{{name}} - (28.2.2012)</a>
+								</li>
+								{{/main.posts}}
+							</ol>
+							<a href="/static/rss.xml">
+								<img id="rss" src="/static/images/Feed-icon.svg">
+							</a>
+						</div>
+						{{#categories}}
+						<div>
+							<h2>{{name}} posts</h2>
+							<ul reversed>
+								{{#posts}}
+								<li>
+									<a href="/blog/{{link}}">{{name}} - (28.2.2012)</a>
+								</li>
+								{{/posts}}
+							</ul>
+							<a href="/static/rss.xml">
+								<img id="rss" src="/static/images/Feed-icon.svg">
+							</a>
+						</div>
+						{{/categories}}
+					</div>
+					<a href="/static/rss.xml">
+						<img id="rss" src="/static/images/Feed-icon.svg">
+					</a>
 				</div>
 			</main>
 		</div>

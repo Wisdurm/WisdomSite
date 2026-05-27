@@ -1,3 +1,4 @@
+
 // Internal
 #include "crow/json.h"
 #include "markdown.hpp"
@@ -76,6 +77,7 @@ static crow::json::wvalue toCard(pugi::xml_node item) {
 	return json;
 }
 
+
 // Generate a list of web badge elements
 static crow::json::wvalue webBadgeArray(const std::vector<std::pair<std::string, std::string>>& webBadges, int amount) {
 	crow::json::wvalue result;
@@ -101,7 +103,8 @@ int main()
 	srand(time(0));
 	crow::SimpleApp app;
 	// Database
-	sqlite3 *db;
+	sqlite3 *dbComments;
+	sqlite3 *dbBlog;
 	// Password things
 	const std::string salt = "mirri"; // Password salt
 	const std::string pass = "$2a$12$VZOmbvUUaMNmafKN3nynAuZtlJ6SKLJrB25G3Ssm/zFPtFbr8owGG"; // TODO: Maybe should be in .env file? Idk
@@ -114,9 +117,6 @@ int main()
 	pugi::xml_document pdoc;
 	crow::json::wvalue projectStructure; // yadadadadada blah blah blah lalalalalalala
 	std::vector<crow::json::wvalue> projects;
-	// Blogs
-	std::map<std::string, std::string> blogPosts = {};
-	const char* blogPath = "blog";
 	// Badges
 	const std::vector<std::pair<std::string, std::string>> webBadges = {
 		{"powered-by-openbsd.webp", "https://openbsd.org"},
@@ -202,49 +202,86 @@ int main()
 		return page.render(ctx);
 	});
 
-	CROW_ROUTE(app, "/blog")([&dailyMsg, &motdBackup, &lastUpdate, &blogPosts]
+	CROW_ROUTE(app, "/blog")([&dailyMsg, &motdBackup, &lastUpdate, &dbBlog]
 				 (const crow::request& req){       
 		// List of posts
 		auto page = crow::mustache::load("blog.html");
 		crow::mustache::context ctx;
 		ctx["msg-daily"] = getMotd(dailyMsg, motdBackup, lastUpdate);
 		// ctx["badges"] = webBadgeArray(webBadges, 8);
-		int i = 0;
-		std::map<std::string, std::string>::reverse_iterator it;
-		for (it = blogPosts.rbegin(); it != blogPosts.rend(); it++)   
-		{
-			// Links
-			std::string postName = it->first.substr(0, it->first.find_last_of('.'));
-			ctx["posts"][i]["link"] = postName;
-
-			// Posts
-
-			// Replace underscore with space
-			std::transform(postName.begin(), postName.end(), postName.begin(),
-				       [](unsigned char c) { if (c == '_') return ' '; else return (char)c; });
-			// Remove numbers since ol
-			ctx["posts"][i]["name"] = std::string(postName.begin() + 3, postName.end());
-			i++;
+		// Get list of categories
+		std::vector<std::pair<int, std::string>> categories;
+		sqlite3_exec(dbBlog,
+			     "SELECT * FROM categories;",
+			     [](void* data, int argc, char** argv, char** azColName) {
+				     auto cats = reinterpret_cast<std::vector<std::pair<int, std::string>>*>(data);
+				     cats->push_back(<% std::stoi(argv[0]), argv<:1:> %>);
+				     // First letter uppercase
+				     cats->back().second[0] = std::toupper(cats->back().second<:0:>);
+				     return 0;
+			     }, &categories, NULL);
+		// Get all posts
+		for (auto cat : categories) {
+			// Name
+			if (cat.first != 1) // First category is canonical, which is ordered so done seperately
+				ctx["categories"][cat.first-2]["name"] = cat.second;
+			// idk bruh
+			sqlite3_stmt* st;
+			int rc = sqlite3_prepare_v2(dbBlog,
+						       "SELECT * FROM posts "
+						       "WHERE category_id=?;",
+						       -1, &st, NULL);
+			CROW_LOG_DEBUG << "Prepare: " << rc;
+			if (rc != SQLITE_OK) {
+				CROW_LOG_ERROR << "SQL ERROR: " << rc;
+				rc = sqlite3_finalize(st); // I think?
+				break;
+			}
+			// Add values to statement
+			sqlite3_bind_int(st, 1, cat.first);
+			// Step forward to get results
+			int index = 0;
+			while (true) {
+				rc = sqlite3_step(st);
+				CROW_LOG_DEBUG << "Step: " << rc;
+				if (rc == SQLITE_ROW) {
+					// Apparently this only works if the text is ascii,
+					// but I'm sure that this won't come back to bite me in the ass
+					// :clueless:
+					std::string str = std::string(reinterpret_cast<const char*>(sqlite3_column_text(st, 1)));
+					if (cat.first == 1) { // Canonical
+						ctx["main"]["posts"][index]["name"] = str;
+					}
+					else {
+						ctx["categories"][cat.first-2]["posts"][index]["name"] = str;
+					}
+					index++;
+				} else
+					break;
+			}
+			CROW_LOG_DEBUG << "Last code (should be 101): " << rc;
+			// Cleanup
+			rc = sqlite3_finalize(st);
+			CROW_LOG_DEBUG << "Finalize: " << rc;
 		}
 		return page.render(ctx);
 	});
 
-	CROW_ROUTE(app, "/blog/<string>")([&dailyMsg, &motdBackup, &lastUpdate, &blogPosts]
+	CROW_ROUTE(app, "/blog/<string>")([&dailyMsg, &motdBackup, &lastUpdate]
 					  (const crow::request& req, crow::response& res, std::string str) {
-		// Actual blog page
-		str += ".md";
-		std::map<std::string, std::string>::iterator it = blogPosts.find(str);
-		if (it != blogPosts.end()) // Exists
-		{
-			auto page = crow::mustache::load("blogPost.html");
-			crow::mustache::context ctx({ {"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)}, {"blogText", parse(blogPosts.at(str))} });
-			res.body = page.render(ctx).body_;
-		}
-		else // Blog post does not exist
-		{
-			res.redirect("/404");
-		}
-		res.end();
+		// Get blog post text
+		// TODO
+		// if (it != blogPosts.end()) // Exists
+		// {
+		// 	auto page = crow::mustache::load("blogPost.html");
+		// 	crow::mustache::context ctx({ {"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)}, {"blogText", parse(blogPosts.at(str))} });
+		// 	res.body = page.render(ctx).body_;
+		// }
+		// else // Blog post does not exist
+		// {
+		// 	res.redirect("/404");
+		// }
+		// res.end();
 	});
 
 	CROW_ROUTE(app, "/send")
@@ -279,7 +316,7 @@ int main()
 		});
 
 	CROW_ROUTE(app, "/guestbook")
-		.methods("GET"_method, "POST"_method)([&dailyMsg, &motdBackup, &lastUpdate, &db, &errMsgs]
+		.methods("GET"_method, "POST"_method)([&dailyMsg, &motdBackup, &lastUpdate, &dbComments, &errMsgs]
 						      (const crow::request& req) {
 			// Page for comments and form
 			auto page = crow::mustache::load("guestbook.html");
@@ -306,7 +343,7 @@ int main()
 			std::vector<comment> comments;
 			// TODO: I think some tricks allow skipping the use of *data, they're just a
 			// tad too difficult for me to figure out at the moment
-			sqlite3_exec(db,
+			sqlite3_exec(dbComments,
 				     "SELECT * FROM comments "
 				     "ORDER BY posted DESC;",
 				     [](void* data, int argc, char** argv, char** azColName) {
@@ -335,7 +372,7 @@ int main()
 		});
 
 	CROW_ROUTE(app, "/comment").methods("GET"_method, "POST"_method)
-		([&dailyMsg, &pass, &salt, &motdBackup, &lastUpdate, &db]
+		([&dailyMsg, &pass, &salt, &motdBackup, &lastUpdate, &dbComments]
 		 (const crow::request& req, crow::response& res)
 		{
 			// Post comment
@@ -379,7 +416,7 @@ int main()
 				}
 				// Check ip not already used
 				sqlite3_stmt* st_ip;
-				int rc_ip = sqlite3_prepare_v2(db,
+				int rc_ip = sqlite3_prepare_v2(dbComments,
 							       "SELECT * FROM comments "
 							       "WHERE ip=?;",
 							       -1, &st_ip, NULL);
@@ -408,7 +445,7 @@ int main()
 				//
 				// Add to database
 				sqlite3_stmt* st;
-				int rc = sqlite3_prepare_v2(db,
+				int rc = sqlite3_prepare_v2(dbComments,
 							    "INSERT INTO comments "
 							    "VALUES(?, ?, ?, ?);",
 							    -1, &st, NULL);
@@ -452,29 +489,6 @@ int main()
 			}		
 			res.end();
 		});
-
-	// Find blog files
-	for (const auto& entry : std::filesystem::directory_iterator(blogPath))
-	{
-		CROW_LOG_INFO << "Loading file: " << entry.path();
-		std::ifstream file;
-		// Open file
-		file.open(entry.path(), std::fstream::in);
-		if (file.fail())
-		{
-			CROW_LOG_CRITICAL << "Unable to open file " << entry.path();
-			return EXIT_FAILURE;
-		}
-		file.seekg(0, std::ios::end);
-		size_t size = file.tellg();
-		std::string fileText(size, ' ');
-		file.seekg(0);
-		file.read(&fileText[0], size);
-		file.close();
-
-		std::string filePath = entry.path().string();
-		blogPosts[filePath.substr(filePath.find_last_of("/\\") + 1)] = fileText; // File name
-	}
 	// Motd
 	CROW_LOG_INFO << "Loading motd.txt";
 	std::ifstream motdFile;
@@ -513,11 +527,18 @@ int main()
 		i++;
 	}
 	// Initialize database connection
-	CROW_LOG_INFO << "Opening database connection";
-	int opened = sqlite3_open("db.db", &db);
+	CROW_LOG_INFO << "Opening database connections";
+	int opened = sqlite3_open("db.db", &dbComments);
 	if (opened) {
-		CROW_LOG_CRITICAL << "Unable to establish database connection: " << sqlite3_errmsg(db);
-		sqlite3_close(db);
+		CROW_LOG_CRITICAL << "Unable to establish comment database connection: " << sqlite3_errmsg(dbComments);
+		sqlite3_close(dbComments);
+		return EXIT_FAILURE;
+	}
+	opened = sqlite3_open("blog.db", &dbBlog);
+	if (opened) {
+		CROW_LOG_CRITICAL << "Unable to establish blog database connection: " << sqlite3_errmsg(dbBlog);
+		sqlite3_close(dbComments);
+		sqlite3_close(dbBlog);
 		return EXIT_FAILURE;
 	}
 	// Other stuff finished, start server
@@ -526,7 +547,8 @@ int main()
 		.loglevel(crow::LogLevel::INFO)
 		.run();
 	// Post run cleanup
-	std::cout << "[CLEANUP] Closing database connection\n";
-	sqlite3_close(db);
+	std::cout << "[CLEANUP] Closing database connections\n";
+	sqlite3_close(dbComments);
+	sqlite3_close(dbBlog);
 	std::cout << "[CLEANUP] Closed\n";
 }

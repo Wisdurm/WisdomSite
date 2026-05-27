@@ -144,6 +144,15 @@ main > .border,
 	word-break: break-word;
 	hyphens: auto;
 }
+/* Split view */
+.split {
+	display: flex;
+	flex-direction: row;
+}
+.right {
+	margin-left: auto;
+	margin-right: 10px;
+}
 /*
   INPUT STYLES
 */
