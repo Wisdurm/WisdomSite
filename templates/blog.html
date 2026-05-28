@@ -41,11 +41,11 @@
 							<ol reversed>
 								{{#main.posts}}
 								<li>
-									<a href="/blog/{{link}}">{{name}} - (28.2.2012)</a>
+									<a href="/blog/{{link}}">{{name}} - ({{date}})</a>
 								</li>
 								{{/main.posts}}
 							</ol>
-							<a href="/static/rss.xml">
+							<a href="/rss/canon">
 								<img id="rss" src="/static/images/Feed-icon.svg">
 							</a>
 						</div>
@@ -55,17 +55,17 @@
 							<ul reversed>
 								{{#posts}}
 								<li>
-									<a href="/blog/{{link}}">{{name}} - (28.2.2012)</a>
+									<a href="/blog/{{link}}">{{name}} - ({{date}})</a>
 								</li>
 								{{/posts}}
 							</ul>
-							<a href="/static/rss.xml">
+							<a href="/rss/{{name}}">
 								<img id="rss" src="/static/images/Feed-icon.svg">
 							</a>
 						</div>
 						{{/categories}}
 					</div>
-					<a href="/static/rss.xml">
+					<a href="/rss/universal">
 						<img id="rss" src="/static/images/Feed-icon.svg">
 					</a>
 				</div>

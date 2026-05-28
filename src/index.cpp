@@ -1,5 +1,6 @@
 
 // Internal
+#include "crow/app.h"
 #include "crow/json.h"
 #include "markdown.hpp"
 // C++
@@ -26,6 +27,26 @@
 #include <sqlite3.h>
 #include "crow.h"
 #include "crow/logging.h"
+
+// Source - https://stackoverflow.com/a/60337372
+// Posted by Tomáš Zato
+// Retrieved 2026-05-28, License - CC BY-SA 4.0
+struct xml_string_writer: pugi::xml_writer
+{
+	std::string result;
+
+	virtual void write(const void* data, size_t size)
+	{
+		result.append(static_cast<const char*>(data), size);
+	}
+};
+
+static std::string InnerXML(pugi::xml_node target)
+{
+	xml_string_writer writer;
+	target.print(writer, "");
+	return writer.result;
+}
 
 static std::string process_text(std::string str)
 {
@@ -95,6 +116,22 @@ static crow::json::wvalue webBadgeArray(const std::vector<std::pair<std::string,
 		j++;
 	}
 	return result;
+}
+
+// Format unix time stamp THE CORRECT way
+static std::string formatDate(int unixt) {
+	char buffer[256];
+	const auto t = static_cast<time_t>(unixt);
+	std::strftime(buffer, sizeof(buffer), "%d.%m.%Y", localtime(&t));
+	return buffer;
+}
+
+// Format unix time stamp like a sociopath
+static std::string formatDateRss(int unixt) {
+	char buffer[256];
+	const auto t = static_cast<time_t>(unixt);
+	std::strftime(buffer, sizeof(buffer), "%a, %d %b %Y %T +0300", localtime(&t));
+	return buffer;
 }
 
 int main()
@@ -228,9 +265,10 @@ int main()
 			// idk bruh
 			sqlite3_stmt* st;
 			int rc = sqlite3_prepare_v2(dbBlog,
-						       "SELECT * FROM posts "
-						       "WHERE category_id=?;",
-						       -1, &st, NULL);
+						    "SELECT * FROM posts "
+						    "WHERE category_id=? "
+						    "ORDER BY id DESC;",
+						    -1, &st, NULL);
 			CROW_LOG_DEBUG << "Prepare: " << rc;
 			if (rc != SQLITE_OK) {
 				CROW_LOG_ERROR << "SQL ERROR: " << rc;
@@ -248,12 +286,22 @@ int main()
 					// Apparently this only works if the text is ascii,
 					// but I'm sure that this won't come back to bite me in the ass
 					// :clueless:
-					std::string str = std::string(reinterpret_cast<const char*>(sqlite3_column_text(st, 1)));
+					const std::string title = std::string(reinterpret_cast<const char*>(sqlite3_column_text(st, 1)));
 					if (cat.first == 1) { // Canonical
-						ctx["main"]["posts"][index]["name"] = str;
+						ctx["main"]["posts"][index]["name"] = title;
+						ctx["main"]["posts"][index]["date"] = formatDate(sqlite3_column_int(st, 2));
+						std::string link = std::format("{}. {}", sqlite3_column_int(st, 0), title);
+						std::transform(link.begin(), link.end(), link.begin(),
+							       [](char c) { if (c == ' ') return '_'; else return c; });
+						ctx["main"]["posts"][index]["link"] = link;
 					}
 					else {
-						ctx["categories"][cat.first-2]["posts"][index]["name"] = str;
+						ctx["categories"][cat.first-2]["posts"][index]["name"] = title;
+						ctx["categories"][cat.first-2]["posts"][index]["date"] = formatDate(sqlite3_column_int(st, 2));;
+						std::string link = std::format("{}. {}", sqlite3_column_int(st, 0), title);
+						std::transform(link.begin(), link.end(), link.begin(),
+							       [](char c) { if (c == ' ') return '_'; else return c; });
+						ctx["categories"][cat.first-2]["posts"][index]["link"] = link;
 					}
 					index++;
 				} else
@@ -267,8 +315,114 @@ int main()
 		return page.render(ctx);
 	});
 
-	CROW_ROUTE(app, "/blog/<string>")([&dailyMsg, &motdBackup, &lastUpdate]
-					  (const crow::request& req, crow::response& res, std::string str) {
+	CROW_ROUTE(app, "/rss/<string>")([&dbBlog]
+					  (const crow::request& req, crow::response& res, std::string category) {
+		// Rss feeds
+		sqlite3_stmt* st_ct;
+		int rc_ct = sqlite3_prepare_v2(dbBlog,
+					       "SELECT * FROM categories "
+					       "WHERE name=?;",
+					       -1, &st_ct, NULL);
+		CROW_LOG_DEBUG << "Prepare: " << rc_ct;
+		if (rc_ct != SQLITE_OK) {
+			CROW_LOG_ERROR << "SQL ERROR: " << rc_ct;
+			rc_ct = sqlite3_finalize(st_ct);
+			res.code = 500;
+			res.end();
+			return;
+		}
+		// Add values to statement
+		sqlite3_bind_text(st_ct, 1, category.c_str(), -1, SQLITE_STATIC);
+		// Step forward to see if a result (1 at max)
+		rc_ct = sqlite3_step(st_ct);
+		CROW_LOG_DEBUG << "Step: " << rc_ct;
+		if (rc_ct != SQLITE_ROW) {
+			CROW_LOG_INFO << "Channel: " << category << " does not exist";
+			rc_ct = sqlite3_finalize(st_ct);
+			CROW_LOG_DEBUG << "Finalize: " << rc_ct;
+			res.code = 400;
+			res.end();
+			return;
+		}
+		// Get id
+		const int category_id = sqlite3_column_int(st_ct, 0);
+		// Cleanup
+		rc_ct = sqlite3_finalize(st_ct);
+		CROW_LOG_DEBUG << "Finalize: " << rc_ct;
+		//
+		// Get posts
+		//
+		sqlite3_stmt* st_p;
+		int rc_p = sqlite3_prepare_v2(dbBlog,
+					      "SELECT * FROM posts "
+					      "WHERE category_id=? "
+					      "ORDER BY id DESC;",
+					      -1, &st_p, NULL);
+		CROW_LOG_DEBUG << "Prepare: " << rc_p;
+		if (rc_p != SQLITE_OK) {
+			CROW_LOG_ERROR << "SQL ERROR: " << rc_p;
+			rc_p = sqlite3_finalize(st_p); // I think?
+			res.code = 500;
+			res.end();
+			return;
+		}
+		// Add values to statement
+		sqlite3_bind_int(st_p, 1, category_id);
+		// Step forward to get results
+		struct post {
+			const std::string title;
+			const std::string desc;
+			const std::string link;
+			const int posted;
+		};
+		std::vector<post> posts;
+		while (true) {
+			rc_p = sqlite3_step(st_p);
+			CROW_LOG_DEBUG << "Step: " << rc_p;
+			if (rc_p == SQLITE_ROW) {
+				const std::string title = std::string(reinterpret_cast<const char*>(sqlite3_column_text(st_p, 1)));
+				const std::string desc = std::string(reinterpret_cast<const char*>(sqlite3_column_text(st_p, 5)));
+				const int posted = sqlite3_column_int(st_p, 2);
+				std::string link = std::format("{}. {}", sqlite3_column_int(st_p, 0), title);
+				std::transform(link.begin(), link.end(), link.begin(),
+					       [](char c) { if (c == ' ') return '_'; else return c; });
+				posts.push_back(<%
+						.title = title,
+						.desc = desc,
+						.link = "https://wisdurm.fi/blog/" + link,
+						.posted = posted
+						%>);
+			} else
+				break;
+		}
+		// Format response
+		pugi::xml_document rss;
+		auto ch = rss.append_child("channel");
+		ch.append_attribute("xml:base") = "https://wisdurm.fi/blog";
+		ch.append_child("title").append_child(pugi::node_pcdata).set_value("Wisdurm blog");
+		ch.append_child("description").append_child(pugi::node_pcdata).set_value("Wisdurm blog posts :D");
+		ch.append_child("link").append_child(pugi::node_pcdata).set_value("https://wisdurm.fi/blog");
+		auto atom = ch.append_child("atom:link");
+		atom.append_attribute("href") = std::format("https://wisdurm.fi/rss/{}", category);
+		atom.append_attribute("rel") = "self";
+		atom.append_attribute("type") = "application/rss+xml";
+		// Items
+		for (auto post : posts) {
+			auto item = ch.append_child("item");
+			item.append_child("title").append_child(pugi::node_pcdata).set_value(post.title);
+			item.append_child("description").append_child(pugi::node_pcdata).set_value(post.desc);
+			item.append_child("link").append_child(pugi::node_pcdata).set_value(post.link);
+			item.append_child("guid").append_child(pugi::node_pcdata).set_value(post.link);
+			item.append_child("pubDate").append_child(pugi::node_pcdata).set_value(formatDateRss(post.posted));
+		}
+		res.body = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?> \n"
+			"<rss version=\"2.0\" xmlns:atom=\"http://www.w3.org/2005/Atom\"> \n"
+			+ InnerXML(rss) + "</rss>";
+		res.end();
+	});
+
+	CROW_ROUTE(app, "/blog/<int>.<string>")([&dailyMsg, &motdBackup, &lastUpdate, dbBlog]
+						(const crow::request& req, crow::response& res, int postId, std::string _) {
 		// Get blog post text
 		// TODO
 		// if (it != blogPosts.end()) // Exists
@@ -361,11 +515,7 @@ int main()
 			for (auto c : comments) {
 				ctx["comments"][i]["msg"] = c.msg;
 				ctx["comments"][i]["name"] = c.name;
-				// Format unix time
-				char buffer[256];
-				const auto t = static_cast<time_t>(c.posted);
-				std::strftime(buffer, sizeof(buffer), "%d.%m.%Y", localtime(&t));
-				ctx["comments"][i]["posted"] = buffer;
+				ctx["comments"][i]["posted"] = formatDate(c.posted);
 				i++;
 			}
 			return page.render(ctx);
