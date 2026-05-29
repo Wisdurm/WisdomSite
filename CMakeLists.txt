@@ -26,7 +26,7 @@ find_package(unofficial-sqlite3 REQUIRED)
 
 include(${CMAKE_SOURCE_DIR}/cmake/CPM.cmake)
 CPMAddPackage(Crow
-  VERSION 1.3.0
+  VERSION 1.3.2
   GITHUB_REPOSITORY CrowCpp/Crow
   OPTIONS
   "CROW_BUILD_EXAMPLES Off"
