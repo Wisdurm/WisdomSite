@@ -7,39 +7,12 @@
 	<link>https://wisdurm.fi/blog</link>
 	<atom:link href="https://wisdurm.fi/static/rss.xml" rel="self" type="application/rss+xml" />
 	<item>
-		<title>1. Hello world</title>
-		<description>First blog post, describing the process of setting up blog posts.</description>
+		<title>This feed is now invalid</title>
+		<description>This feed has been replaced, check wisdurm.fi/blog for
+		updated links. I'll also try to unblock Thunderbird from Anubis lol</description>
 		<link>https://wisdurm.fi/blog/1._Hello_world</link>
 		<guid>https://wisdurm.fi/blog/1._Hello_world</guid>
 		<pubDate>Wed, 24 Sep 2025 20:53:00 +0300</pubDate>
-	</item>
-	<item>
-		<title>2. Runtime difficulties</title>
-		<description>Back to blogging, to talk about some work on Runtime.</description>
-		<link>https://wisdurm.fi/blog/2._Runtime_difficulties</link>
-		<guid>https://wisdurm.fi/blog/2._Runtime_difficulties</guid>
-		<pubDate>Tue, 06 Jan 2026 17:03:00 +0300</pubDate>
-	</item>
-	<item>
-		<title>3. So Many ideas</title>
-		<description>Just rambling for the sake of it.</description>
-		<link>https://wisdurm.fi/blog/3._So_many_ideas</link>
-		<guid>https://wisdurm.fi/blog/3._So_many_ideas</guid>
-		<pubDate>Tue, 27 Jan 2026 20:57:40 +0300</pubDate>
-	</item>
-	<item>
-		<title>4. Hello anew</title>
-		<description>Site redesign!!!</description>
-		<link>https://wisdurm.fi/blog/4._Hello_anew</link>
-		<guid>https://wisdurm.fi/blog/4._Hello_anew</guid>
-		<pubDate>Fri, 27 Feb 2026 16:00:00 +0300</pubDate>
-	</item>
-	<item>
-		<title>5. Opening my eyes</title>
-		<description>OpenBSD and losing my mind!!!</description>
-		<link>https://wisdurm.fi/blog/5._Opening_my_eyes</link>
-		<guid>https://wisdurm.fi/blog/5._Opening_my_eyes</guid>
-		<pubDate>Sat, 21 Mar 2026 17:47:30 +0300</pubDate>
 	</item>
 </channel>
 	

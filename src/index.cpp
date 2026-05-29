@@ -286,6 +286,8 @@ int main()
 					// Apparently this only works if the text is ascii,
 					// but I'm sure that this won't come back to bite me in the ass
 					// :clueless:
+					// From the future, it seems to work, but I'll leave this comment here in case it ever does not
+					// for whatever reason
 					const std::string title = std::string(reinterpret_cast<const char*>(sqlite3_column_text(st, 1)));
 					if (cat.first == 1) { // Canonical
 						ctx["main"]["posts"][index]["name"] = title;
@@ -318,56 +320,71 @@ int main()
 	CROW_ROUTE(app, "/rss/<string>")([&dbBlog]
 					  (const crow::request& req, crow::response& res, std::string category) {
 		// Rss feeds
-		sqlite3_stmt* st_ct;
-		int rc_ct = sqlite3_prepare_v2(dbBlog,
-					       "SELECT * FROM categories "
-					       "WHERE name=?;",
-					       -1, &st_ct, NULL);
-		CROW_LOG_DEBUG << "Prepare: " << rc_ct;
-		if (rc_ct != SQLITE_OK) {
-			CROW_LOG_ERROR << "SQL ERROR: " << rc_ct;
-			rc_ct = sqlite3_finalize(st_ct);
-			res.code = 500;
-			res.end();
-			return;
-		}
-		// Add values to statement
-		sqlite3_bind_text(st_ct, 1, category.c_str(), -1, SQLITE_STATIC);
-		// Step forward to see if a result (1 at max)
-		rc_ct = sqlite3_step(st_ct);
-		CROW_LOG_DEBUG << "Step: " << rc_ct;
-		if (rc_ct != SQLITE_ROW) {
-			CROW_LOG_INFO << "Channel: " << category << " does not exist";
+		category<:0:> = std::tolower(category<:0:>);
+		int category_id;
+		std::string description = "Wisdurm blog posts, universal feed";
+		if (category != "universal") {
+			sqlite3_stmt* st_ct;
+			int rc_ct = sqlite3_prepare_v2(dbBlog,
+						       "SELECT * FROM categories "
+						       "WHERE name=?;",
+						       -1, &st_ct, NULL);
+			CROW_LOG_DEBUG << "Prepare: " << rc_ct;
+			if (rc_ct != SQLITE_OK) {
+				CROW_LOG_ERROR << "SQL ERROR: " << rc_ct;
+				rc_ct = sqlite3_finalize(st_ct);
+				res.code = 500;
+				res.end();
+				return;
+			}
+			// Add values to statement
+			sqlite3_bind_text(st_ct, 1, category.c_str(), -1, SQLITE_STATIC);
+			// Step forward to see if a result (1 at max)
+			rc_ct = sqlite3_step(st_ct);
+			CROW_LOG_DEBUG << "Step: " << rc_ct;
+			if (rc_ct != SQLITE_ROW) {
+				CROW_LOG_ERROR << "Channel: " << category << " does not exist";
+				rc_ct = sqlite3_finalize(st_ct);
+				CROW_LOG_DEBUG << "Finalize: " << rc_ct;
+				res.code = 400;
+				res.end();
+				return;
+			}
+			// Get info
+			category_id = sqlite3_column_int(st_ct, 0);
+			description = std::string(reinterpret_cast<const char*>(sqlite3_column_text(st_ct, 2)));
+			// Cleanup
 			rc_ct = sqlite3_finalize(st_ct);
 			CROW_LOG_DEBUG << "Finalize: " << rc_ct;
-			res.code = 400;
-			res.end();
-			return;
 		}
-		// Get id
-		const int category_id = sqlite3_column_int(st_ct, 0);
-		// Cleanup
-		rc_ct = sqlite3_finalize(st_ct);
-		CROW_LOG_DEBUG << "Finalize: " << rc_ct;
 		//
 		// Get posts
 		//
 		sqlite3_stmt* st_p;
-		int rc_p = sqlite3_prepare_v2(dbBlog,
-					      "SELECT * FROM posts "
-					      "WHERE category_id=? "
-					      "ORDER BY id DESC;",
-					      -1, &st_p, NULL);
+		int rc_p;
+		if (category == "universal") {
+			rc_p = sqlite3_prepare_v2(dbBlog,
+						  "SELECT * FROM posts "
+						  "ORDER BY id DESC;",
+						  -1, &st_p, NULL);
+		} else {
+			rc_p = sqlite3_prepare_v2(dbBlog,
+						      "SELECT * FROM posts "
+						      "WHERE category_id=? "
+						      "ORDER BY id DESC;",
+						      -1, &st_p, NULL);
+		}
 		CROW_LOG_DEBUG << "Prepare: " << rc_p;
 		if (rc_p != SQLITE_OK) {
 			CROW_LOG_ERROR << "SQL ERROR: " << rc_p;
-			rc_p = sqlite3_finalize(st_p); // I think?
+			rc_p = sqlite3_finalize(st_p);
 			res.code = 500;
 			res.end();
 			return;
 		}
 		// Add values to statement
-		sqlite3_bind_int(st_p, 1, category_id);
+		if (category != "universal")
+			sqlite3_bind_int(st_p, 1, category_id);
 		// Step forward to get results
 		struct post {
 			const std::string title;
@@ -399,8 +416,8 @@ int main()
 		pugi::xml_document rss;
 		auto ch = rss.append_child("channel");
 		ch.append_attribute("xml:base") = "https://wisdurm.fi/blog";
-		ch.append_child("title").append_child(pugi::node_pcdata).set_value("Wisdurm blog");
-		ch.append_child("description").append_child(pugi::node_pcdata).set_value("Wisdurm blog posts :D");
+		ch.append_child("title").append_child(pugi::node_pcdata).set_value("Wisdurm blog: " + category + " posts");
+		ch.append_child("description").append_child(pugi::node_pcdata).set_value(description);
 		ch.append_child("link").append_child(pugi::node_pcdata).set_value("https://wisdurm.fi/blog");
 		auto atom = ch.append_child("atom:link");
 		atom.append_attribute("href") = std::format("https://wisdurm.fi/rss/{}", category);
@@ -421,21 +438,45 @@ int main()
 		res.end();
 	});
 
-	CROW_ROUTE(app, "/blog/<int>.<string>")([&dailyMsg, &motdBackup, &lastUpdate, dbBlog]
+	CROW_ROUTE(app, "/blog/<int>.<string>")([&dailyMsg, &motdBackup, &lastUpdate, &dbBlog]
 						(const crow::request& req, crow::response& res, int postId, std::string _) {
 		// Get blog post text
-		// TODO
-		// if (it != blogPosts.end()) // Exists
-		// {
-		// 	auto page = crow::mustache::load("blogPost.html");
-		// 	crow::mustache::context ctx({ {"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)}, {"blogText", parse(blogPosts.at(str))} });
-		// 	res.body = page.render(ctx).body_;
-		// }
-		// else // Blog post does not exist
-		// {
-		// 	res.redirect("/404");
-		// }
-		// res.end();
+		sqlite3_stmt* st_p;
+		int rc_p = sqlite3_prepare_v2(dbBlog,
+					       "SELECT * FROM post_texts "
+					       "WHERE post_id=?;",
+					       -1, &st_p, NULL);
+		CROW_LOG_DEBUG << "Prepare: " << rc_p;
+		if (rc_p != SQLITE_OK) {
+			CROW_LOG_ERROR << "SQL ERROR: " << rc_p;
+			rc_p = sqlite3_finalize(st_p);
+			res.code = 500;
+			res.end();
+			return;
+		}
+		// Add values to statement
+		sqlite3_bind_int(st_p, 1, postId);
+		// Step forward to see if a result (1 at max)
+		rc_p = sqlite3_step(st_p);
+		CROW_LOG_DEBUG << "Step: " << rc_p;
+		if (rc_p != SQLITE_ROW) {
+			CROW_LOG_ERROR << "Post: " << postId << " does not exist";
+			rc_p = sqlite3_finalize(st_p);
+			CROW_LOG_DEBUG << "Finalize: " << rc_p;
+			res.redirect("/404");
+			res.end();
+			return;
+		}
+		// Get text
+		std::string postText = std::string(reinterpret_cast<const char*>(sqlite3_column_text(st_p, 1)));
+		// Cleanup
+		rc_p = sqlite3_finalize(st_p);
+		CROW_LOG_DEBUG << "Finalize: " << rc_p;
+		//
+		auto page = crow::mustache::load("blogPost.html");
+		crow::mustache::context ctx({ {"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)}, {"blogText", parse(postText)} });
+		res.body = page.render(ctx).body_;
+		res.end();
 	});
 
 	CROW_ROUTE(app, "/send")
