@@ -10,7 +10,7 @@ CrowCPP was used just because "C++ web framework funny"**
 First make sure dependencies are installed.  
 
 Linux:  
-```sudo apt install git cmake build-essential libsqlite3-dev libasio-dev``` 
+```sudo apt install git cmake build-essential libsqlite3-dev libasio-dev```   
 OpenBSD:  
 ```doas pkg_add git cmake sqlite3 asio```
 
