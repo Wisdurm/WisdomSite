@@ -10,41 +10,69 @@ src/index.cpp
 )
 # Dependencies
 
-#find_package(OpenSSL REQUIRED)
 # nginx handles SSL
+find_package(SQLite3 REQUIRED)
 
-# It took me like 2 HOURS to get A SINGLE hashing library TO LINK
-# I HATE USING LIBRARIES IN C++
-# ADD. CMAKE. TO. YOUR. PROJECT. PLEAAASEEEE *cough* *cough* argon2
-add_subdirectory(${CMAKE_SOURCE_DIR}/external/libbcrypt)
-include_directories(${CMAKE_SOURCE_DIR}/external/libbcrypt/include)
-
-find_package(ZLIB REQUIRED)
-find_package(md4c REQUIRED)
-find_package(pugixml REQUIRED)
-find_package(unofficial-sqlite3 REQUIRED)
-
-include(${CMAKE_SOURCE_DIR}/cmake/CPM.cmake)
-CPMAddPackage(Crow
-  VERSION 1.3.2
-  GITHUB_REPOSITORY CrowCpp/Crow
-  OPTIONS
-  "CROW_BUILD_EXAMPLES Off"
-  "CROW_BUILD_TOOLS Off"
-  "CROW_BUILD_TESTS Off"
-  "CROW_BUILD_DOCS Off"
-  "CROW_ENABLE_COMPRESSION On"
-  "CROW_ENABLE_SSL Off"
+include(FetchContent)
+FetchContent_Declare(
+	Crow
+	GIT_REPOSITORY https://github.com/CrowCpp/Crow
+	GIT_TAG v1.3.3
+	GIT_SHALLOW TRUE
+	GIT_PROGRESS TRUE
 )
+set(CROW_BUILD_EXAMPLES Off)
+set(CROW_BUILD_TOOLS Off)
+set(CROW_BUILD_TESTS Off)
+set(CROW_BUILD_DOCS Off)
+set(CROW_ENABLE_COMPRESSION On)
+set(CROW_ENABLE_SSL Off)
+FetchContent_MakeAvailable(Crow)
+
+FetchContent_Declare(
+	md4c
+	GIT_REPOSITORY https://github.com/mity/md4c
+	GIT_TAG release-0.5.3
+	GIT_SHALLOW TRUE
+	GIT_PROGRESS TRUE
+)
+FetchContent_MakeAvailable(md4c)
+
+FetchContent_Declare(
+	pugixml
+	GIT_REPOSITORY https://github.com/zeux/pugixml
+	GIT_TAG v1.16
+	GIT_SHALLOW TRUE
+	GIT_PROGRESS TRUE
+)
+FetchContent_MakeAvailable(pugixml)
+
+FetchContent_Declare(
+	libbcrypt
+	GIT_REPOSITORY https://github.com/trusch/libbcrypt
+	GIT_TAG master
+	GIT_SHALLOW TRUE
+	GIT_PROGRESS TRUE
+)
+FetchContent_MakeAvailable(libbcrypt)
+
+FetchContent_Declare(
+	zlib
+	GIT_REPOSITORY https://github.com/madler/zlib
+	GIT_TAG v1.3.2
+	GIT_SHALLOW TRUE
+	GIT_PROGRESS TRUE
+)
+FetchContent_MakeAvailable(zlib)
 
 target_link_libraries( WisdomSite
   PRIVATE
   #OpenSSL::SSL
   #OpenSSL::Crypto
-  ZLIB::ZLIB
-  Crow::Crow
-  md4c::md4c-html
+  zlib
+  Crow
+  md4c-html
   bcrypt
-  pugixml::pugixml
-  unofficial::sqlite3::sqlite3
+  pugixml
+  sqlite3 
 )

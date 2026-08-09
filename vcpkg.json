@@ -1,9 +1,0 @@
-{
-  "dependencies": [
-    "asio",
-    "md4c",
-    "pugixml",
-    "zlib",
-    "sqlite3"
-  ]
-}

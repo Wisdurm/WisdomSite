@@ -7,42 +7,19 @@ CrowCPP was used just because "C++ web framework funny"**
 
 # Setup
 
-## VCPKG & Linux
-
 First make sure dependencies are installed.  
-```sudo apt install git ninja-build libsqlite3-0``` 
 
-Then install and setup vcpkg.  
-Start by cloning the repository:  
-```git clone https://github.com/microsoft/vcpkg.git```  
-Then run the bootstrap script:  
-```cd vcpkg; .\bootstrap-vcpkg.bat``` On Windows  
-```cd vcpkg && ./bootstrap-vcpkg.sh``` On Linux  
+Linux:  
+```sudo apt install git cmake build-essential libsqlite3-dev libasio-dev``` 
+OpenBSD:  
+```doas pkg_add git cmake sqlite3 asio```
 
 Now all dependencies are setup.  
+
 For the next steps, clone and cd into this repository.   
-**When cloning this repository, make sure to clone all submodules**
 
 Then, compile the program with:  
-```cmake --preset=default```  
-```cmake --build build```  
-
-Create the motd.txt file
-
-To setup the database, create `db.db` using the command:  
-```sqlite3 db.db```  
-And then run the setup script in sqlite with:  
-```.read setup.sql```  
-Optionally delete the test comment left in the database.  
-
-## OpenBSD
-
-First install all dependencies  
-```doas pkg_add git md4c pugixml sqlite3 cmake asio```
-
-Then cd into this repository, **make sure to clone submodules.**  
-Compile with:  
-```cmake -S . -B build```  
+```cmake --S . -B build```  
 ```cmake --build build```  
 
 Create the motd.txt file
@@ -55,9 +32,10 @@ Optionally delete the test comment left in the database.
 
 **TODO:**
 Other stuff, and verify instructions are correct lol
+(Linux packages *may* be wrong)
 
 # Licenses
 
 The license for this site is [BSD-2-Clause](LICENSE)  
-HOWEVER, this license only covers this repository, and not any other repositories included as submodules (eg. infinite canvas).  
+This license only covers this repository, and not any other repositories included as submodules (eg. infinite canvas).  
 You can find the licenses for specific sub modules in their repository.

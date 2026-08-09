@@ -22,11 +22,12 @@
 #include <ctime>
 #include <cstdlib>
 // External
-#include "bcrypt/BCrypt.hpp"
+#include "../../libbcrypt-src/include/bcrypt/BCrypt.hpp"
 #include "pugixml.hpp"
 #include <sqlite3.h>
 #include "crow.h"
 #include "crow/logging.h"
+#include "crow/compression.h"
 
 // Source - https://stackoverflow.com/a/60337372
 // Posted by Tomáš Zato
