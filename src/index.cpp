@@ -192,7 +192,7 @@ int main()
 	sqlite3 *dbNpesta;
 	// Password things
 	const std::string salt = "montakymmentätuhattavoileipäsämpylää"; // Password salt
-	const std::string pass = "$2a$12$VZOmbvUUaMNmafKN3nynAuZtlJ6SKLJrB25G3Ssm/zFPtFbr8owGG"; // TODO: Maybe should be in .env file? Idk
+	const std::string pass = "$2a$12$HDOM/d1alYPXxWsLpiH1CuR4Pq0WiBkIrPmP5tl7s2fKLNRfOamC2"; // TODO: Maybe should be in .env file? Idk
 	// Message of the day (motd)
 	std::string dailyMsg = "";
 	std::vector<std::string> motdBackup; // Old motds to use in the abscence of a new one
