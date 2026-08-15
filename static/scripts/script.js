@@ -7,6 +7,24 @@ function swapFont() {
 }
 
 $( document ).ready(function() {
+		// let voted = false;
+		// $("#thumbup").on("click", function() {
+		// 		if (!voted) {
+		// 				const index = $("#message")[0].dataset.index;
+		// 				fetch(`/npesta?index=${index}&vote=-1`);
+		// 				$("#thumbup").addClass("clicked")
+		// 				$("#thumbdown").addClass("clicked")
+		// 		}
+		// });
+		// $("#thumbdown").on("click", function() {
+		// 		if (!voted) {
+		// 				const index = $("#message")[0].dataset.index;
+		// 				fetch(`/npesta?index=${index}&vote=1`);
+		// 				$("#thumbup").addClass("clicked")
+		// 				$("#thumbdown").addClass("clicked")
+		// 		}
+		// });
+		
 		// Add some annoyance to the submission form
 		// to stop the first level of trolls:
 		// 1. Losers without free time
@@ -52,7 +70,7 @@ $( document ).ready(function() {
 								break;
 						case 7:
 								const evils = [
-										"I didn't write anything bad but I am a spam bot",
+										"I didn't write anything bad but I am a spam bot and also the other stuff this said previously",
 										"I *promise* I didn't not write anything bad",
 										"I \"promise\"",
 										"Dubiously",

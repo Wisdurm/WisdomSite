@@ -162,6 +162,13 @@ input, textarea {
 	background-color: var(--blue);
 	color: white;
 }
+.clickable {
+	cursor: pointer;
+}
+.clicked {
+	cursor: default;
+	filter: brightness(35%);
+}
 /* Button */
 button {
 	border: none;

@@ -85,7 +85,7 @@
 					<a href="/blog">Here it is though</a>
 				</div>
 			</main>
-			<aside>
+			<aside style="flex: 1;">
 				<div class="border">
 					<h2>Project of the day!</h2>
 					{{#project-daily}}
@@ -101,6 +101,21 @@
 						</span>
 					</card-component>
 					{{/project-daily}}
+				</div>
+				<div class="border">
+					<strong>But what would npesta say?</strong><br>
+					<blockquote>
+						<p id="message" data-index="{{ npesta.index }}">
+							{{ npesta.message }}
+						</p>
+						<!-- Got other things to do atm! -->
+						<!-- <img src="/static/images/thumbsup.gif" -->
+						<!-- 	 style="width:35px;height:35px" id="thumbup" -->
+						<!-- 	 class="clickable"> -->
+						<!-- <img src="/static/images/thumbsdown.gif" -->
+						<!-- 	 style="width:35px;height:35px" id="thumbdown" -->
+						<!-- 	 class="clickable"> -->
+					</blockquote>
 				</div>
 			</aside>
 		</div>

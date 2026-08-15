@@ -75,6 +75,52 @@ static std::string getMotd(std::string& daily, std::vector<std::string>& motdBac
 	return motdBackup.at(day % motdBackup.size());
 }
 
+static crow::json::wvalue npestaQuip(sqlite3* dbNpesta)
+{
+	// Get message count
+	int count;
+	sqlite3_exec(dbNpesta,
+		     "SELECT count(id) FROM quips;",
+		     [](void* data, int argc, char** argv, char** azColName) {
+			     int* count = static_cast<int*>(data);
+			     *count = std::stoi(argv[0]);
+			     return 0;
+		     }, &count, NULL);
+	CROW_LOG_INFO << count;
+	// Get random message
+	std::default_random_engine rde {std::random_device{}()};
+	const int index = std::uniform_int_distribution<int>(1, count)(rde);
+			
+	sqlite3_stmt* st;
+	int rc = sqlite3_prepare_v2(dbNpesta,
+				    "SELECT msg FROM quips "
+				    "WHERE id=?;",
+				    -1, &st, NULL);
+	CROW_LOG_DEBUG << "Prepare: " << rc;
+	if (rc != SQLITE_OK) {
+		CROW_LOG_ERROR << "SQL ERROR: " << rc;
+		rc = sqlite3_finalize(st);
+		return crow::json::wvalue{{"success", false}};
+	}
+	// Add values to statement
+	sqlite3_bind_int(st, 1, index);
+	// Step forward to see if a result (1 at max)
+	rc = sqlite3_step(st);
+	CROW_LOG_DEBUG << "Step: " << rc;
+	if (rc != SQLITE_ROW) {
+		CROW_LOG_ERROR << "Message: " << index << " does not exist";
+		rc = sqlite3_finalize(st);
+		CROW_LOG_DEBUG << "Finalize: " << rc;				
+		return crow::json::wvalue{{"success", false}};
+	}
+	// Get text
+	const std::string message = std::string(reinterpret_cast<const char*>(sqlite3_column_text(st, 0)));
+	// Cleanup
+	rc = sqlite3_finalize(st);
+	CROW_LOG_DEBUG << "Finalize: " << rc;
+	return crow::json::wvalue{{"success", true}, {"message", message}, {"index", index}};
+}
+
 // Turns xml item into a wvalue
 static crow::json::wvalue toCard(pugi::xml_node item) {
 	crow::json::wvalue json;
@@ -143,8 +189,9 @@ int main()
 	// Database
 	sqlite3 *dbComments;
 	sqlite3 *dbBlog;
+	sqlite3 *dbNpesta;
 	// Password things
-	const std::string salt = "mirri"; // Password salt
+	const std::string salt = "montakymmentätuhattavoileipäsämpylää"; // Password salt
 	const std::string pass = "$2a$12$VZOmbvUUaMNmafKN3nynAuZtlJ6SKLJrB25G3Ssm/zFPtFbr8owGG"; // TODO: Maybe should be in .env file? Idk
 	// Message of the day (motd)
 	std::string dailyMsg = "";
@@ -191,7 +238,7 @@ int main()
 		 "make a comment, sorry."},
 	};
 
-	CROW_ROUTE(app, "/")([&dailyMsg, &motdBackup, &lastUpdate, &pdoc, &projects, &webBadges]
+	CROW_ROUTE(app, "/")([&dailyMsg, &motdBackup, &lastUpdate, &pdoc, &projects, &webBadges, &dbNpesta]
 			     (const crow::request& req){
 		// Project of the day
 		time_t now;
@@ -203,7 +250,8 @@ int main()
 		crow::mustache::context ctx({
 				{"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)},
 				{"project-daily", potd},
-				{"badges", webBadgeArray(webBadges, 8)}
+				{"badges", webBadgeArray(webBadges, 8)},
+				{"npesta", npestaQuip(dbNpesta)}
 			});
 		return page.render(ctx);
 	});
@@ -319,7 +367,7 @@ int main()
 	});
 
 	CROW_ROUTE(app, "/rss/<string>")([&dbBlog]
-					  (const crow::request& req, crow::response& res, std::string category) {
+					 (const crow::request& req, crow::response& res, std::string category) {
 		// Rss feeds
 		category<:0:> = std::tolower(category<:0:>);
 		int category_id;
@@ -370,10 +418,10 @@ int main()
 						  -1, &st_p, NULL);
 		} else {
 			rc_p = sqlite3_prepare_v2(dbBlog,
-						      "SELECT * FROM posts "
-						      "WHERE category_id=? "
-						      "ORDER BY id DESC;",
-						      -1, &st_p, NULL);
+						  "SELECT * FROM posts "
+						  "WHERE category_id=? "
+						  "ORDER BY id DESC;",
+						  -1, &st_p, NULL);
 		}
 		CROW_LOG_DEBUG << "Prepare: " << rc_p;
 		if (rc_p != SQLITE_OK) {
@@ -444,9 +492,9 @@ int main()
 		// Get blog post text
 		sqlite3_stmt* st_p;
 		int rc_p = sqlite3_prepare_v2(dbBlog,
-					       "SELECT * FROM post_texts "
-					       "WHERE post_id=?;",
-					       -1, &st_p, NULL);
+					      "SELECT * FROM post_texts "
+					      "WHERE post_id=?;",
+					      -1, &st_p, NULL);
 		CROW_LOG_DEBUG << "Prepare: " << rc_p;
 		if (rc_p != SQLITE_OK) {
 			CROW_LOG_ERROR << "SQL ERROR: " << rc_p;
@@ -668,6 +716,11 @@ int main()
 			res.end();
 		});
 
+	CROW_ROUTE(app, "/npesta")
+		([&dbNpesta] {			
+			return npestaQuip(dbNpesta);
+		});
+
 	CROW_CATCHALL_ROUTE(app)
 		([&dailyMsg](crow::response& res) {
 			if (res.code == 404) {
@@ -733,6 +786,14 @@ int main()
 		sqlite3_close(dbBlog);
 		return EXIT_FAILURE;
 	}
+	opened = sqlite3_open("npesta.db", &dbNpesta);
+	if (opened) {
+		CROW_LOG_CRITICAL << "Unable to establish blog database connection: " << sqlite3_errmsg(dbBlog);
+		sqlite3_close(dbNpesta);
+		sqlite3_close(dbComments);
+		sqlite3_close(dbBlog);
+		return EXIT_FAILURE;
+	}
 	// Other stuff finished, start server
 	app.port(18080).multithreaded()
 		.use_compression(crow::compression::algorithm::DEFLATE)
@@ -742,5 +803,6 @@ int main()
 	std::cout << "[CLEANUP] Closing database connections\n";
 	sqlite3_close(dbComments);
 	sqlite3_close(dbBlog);
+	sqlite3_close(dbNpesta);
 	std::cout << "[CLEANUP] Closed\n";
 }
