@@ -8,10 +8,8 @@
 #include <numeric>
 #include <string>
 #include <iostream>
-#include <filesystem>
 #include <fstream>
 #include <unordered_map>
-#include <unordered_set>
 #include <utility>
 #include <vector>
 #include <algorithm>
@@ -25,9 +23,6 @@
 #include "../../libbcrypt-src/include/bcrypt/BCrypt.hpp"
 #include "pugixml.hpp"
 #include <sqlite3.h>
-#include "crow.h"
-#include "crow/logging.h"
-#include "crow/compression.h"
 
 // Source - https://stackoverflow.com/a/60337372
 // Posted by Tomáš Zato
@@ -35,7 +30,7 @@
 struct xml_string_writer: pugi::xml_writer
 {
 	std::string result;
-
+	
 	virtual void write(const void* data, size_t size)
 	{
 		result.append(static_cast<const char*>(data), size);
@@ -90,7 +85,7 @@ static crow::json::wvalue npestaQuip(sqlite3* dbNpesta)
 	// Get random message
 	std::default_random_engine rde {std::random_device{}()};
 	const int index = std::uniform_int_distribution<int>(1, count)(rde);
-			
+
 	sqlite3_stmt* st;
 	int rc = sqlite3_prepare_v2(dbNpesta,
 				    "SELECT msg FROM quips "
@@ -100,7 +95,7 @@ static crow::json::wvalue npestaQuip(sqlite3* dbNpesta)
 	if (rc != SQLITE_OK) {
 		CROW_LOG_ERROR << "SQL ERROR: " << rc;
 		rc = sqlite3_finalize(st);
-		return crow::json::wvalue{{"success", false}};
+                return crow::json::wvalue{{"success", false}};
 	}
 	// Add values to statement
 	sqlite3_bind_int(st, 1, index);
@@ -188,7 +183,7 @@ int main()
 	crow::SimpleApp app;
 	// Database
 	sqlite3 *dbComments;
-	sqlite3 *dbBlog;
+        sqlite3 *dbBlog;
 	sqlite3 *dbNpesta;
 	// Password things
 	const std::string salt = "montakymmentätuhattavoileipäsämpylää"; // Password salt
@@ -238,7 +233,7 @@ int main()
 		 "make a comment, sorry."},
 	};
 
-	CROW_ROUTE(app, "/")([&dailyMsg, &motdBackup, &lastUpdate, &pdoc, &projects, &webBadges, &dbNpesta]
+	CROW_ROUTE(app, "/")([&dailyMsg, &motdBackup, &lastUpdate, &projects, &webBadges, &dbNpesta]
 			     (const crow::request& req){
 		// Project of the day
 		time_t now;
@@ -252,6 +247,15 @@ int main()
 				{"project-daily", potd},
 				{"badges", webBadgeArray(webBadges, 8)},
 				{"npesta", npestaQuip(dbNpesta)}
+			});
+		return page.render(ctx);
+	});
+
+	CROW_ROUTE(app, "/write")([&dailyMsg, &motdBackup, &lastUpdate]
+			     (const crow::request& req){
+		auto page = crow::mustache::load("write.html");
+		crow::mustache::context ctx({
+				{"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)}
 			});
 		return page.render(ctx);
 	});
@@ -461,7 +465,7 @@ int main()
 			} else
 				break;
 		}
-		// Format response
+                // Format response
 		pugi::xml_document rss;
 		auto ch = rss.append_child("channel");
 		ch.append_attribute("xml:base") = "https://wisdurm.fi/blog";
@@ -772,7 +776,7 @@ int main()
 		i++;
 	}
 	// Initialize database connection
-	CROW_LOG_INFO << "Opening database connections";
+        CROW_LOG_INFO << "Opening database connections";
 	int opened = sqlite3_open("db.db", &dbComments);
 	if (opened) {
 		CROW_LOG_CRITICAL << "Unable to establish comment database connection: " << sqlite3_errmsg(dbComments);
@@ -783,7 +787,7 @@ int main()
 	if (opened) {
 		CROW_LOG_CRITICAL << "Unable to establish blog database connection: " << sqlite3_errmsg(dbBlog);
 		sqlite3_close(dbComments);
-		sqlite3_close(dbBlog);
+                sqlite3_close(dbBlog);
 		return EXIT_FAILURE;
 	}
 	opened = sqlite3_open("npesta.db", &dbNpesta);
@@ -793,7 +797,7 @@ int main()
 		sqlite3_close(dbComments);
 		sqlite3_close(dbBlog);
 		return EXIT_FAILURE;
-	}
+        }
 	// Other stuff finished, start server
 	app.port(18080).multithreaded()
 		.use_compression(crow::compression::algorithm::DEFLATE)

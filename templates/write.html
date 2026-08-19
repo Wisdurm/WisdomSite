@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="/static/components/header.js"></script>
+		<script src="/static/components/footer.js"></script>
+		<script src="/static/components/card.js"></script>
+		<title>Write a post</title>
+		<link rel="stylesheet" href="/static/css/style.css">
+		<script src="/static/jquery-4.0.0.slim.min.js"></script>
+		<script defer src="/static/alpine.min.js"></script>
+		<script src="/static/marked.umd.js"></script>
+		<!-- Code highlighting -->
+		<link rel="stylesheet" href="/static/highlighting/isotope.min.css">
+		<script src="/static/highlighting/highlight.min.js"></script>
+		<script src="/static/highlighting/cpp.min.js"></script>
+	</head>
+	<body>
+		<div class="block">
+			<header-component>
+				<span slot="wisdom">{{msg-daily}}</span>
+			</header-component>
+		</div>
+		<div class="block zenith">
+			<aside>
+				<div class="border alt-nav">
+					<!-- General -->
+					<strong>General</strong>
+					<a href="/projects"> Projects </a>
+					<a href="/contact"> Contact </a>
+					<a href="/blog"> Blog </a>
+					<a href="/guestbook">Guestbook</a>
+					<!-- Page specific -->
+				</div>
+				<div class="border">
+					<img src="/static/images/fin.gif">
+				</div>
+			</aside>
+			<main x-data="{ preview: false }" style="flex: fit-content;">
+				<div class="border">
+					<button x-on:click="preview = ! preview; update();">Switch to preview</button>
+					<!-- Editor -->
+					<form x-show="!preview">
+						<h1>Write posts!</h1>
+						<p>This is a page for writing blog posts, obviously only for
+							internal use.
+						</p>
+						<label for="title">Title</label>
+						<input type="text" name="title" placeholder="Post
+																	 title"/>
+						<label for="title">Password</label>
+						<input type="password" name="pass" placeholder="Login"/>
+						<label for="cat">Category</label>
+						<input type="text" name="cat" placeholder="Canon"/>
+						<button>Post</button>
+						<br>
+						<textarea name="text" id="text" rows="50" cols="60"
+								  tabindex=""></textarea>
+					</form>
+					<!-- Preview -->
+					<div x-show="preview">
+							<h2>Preview</h2>
+					<div id="preview" class="border"></div>
+					</div>
+				</div>
+			</main>
+		</div>
+		<footer-component>
+		</footer-component>
+	</body>
+	<script type="text/javascript">
+		function update() {
+			$("#preview").html(marked.parse($("#text")[0].value));
+			hljs.highlightAll();
+		}
+	</script>
+</html>
