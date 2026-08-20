@@ -1,6 +1,8 @@
 
 // Internal
 #include "crow/app.h"
+#include "crow/http_request.h"
+#include "crow/http_response.h"
 #include "crow/json.h"
 #include "markdown.hpp"
 // C++
@@ -368,6 +370,106 @@ int main()
 			CROW_LOG_DEBUG << "Finalize: " << rc;
 		}
 		return page.render(ctx);
+	});
+
+	CROW_ROUTE(app, "/postblog")
+		.methods("GET"_method, "POST"_method)([&pass, &salt, &dbBlog] (const crow::request& req, crow::response& res){
+		// Post blog post
+		auto re = req.get_body_params();
+		if (const char* p = re.get("pass"),
+		    *title = re.get("title"),
+		    *text = re.get("text"),
+		    *desc = re.get("desc"),
+		    *n = re.get("nro"),
+		    *category = re.get("cat");
+		    p and n and desc and category and title and text)
+		{
+			const std::string url_pass = p;
+			if (BCrypt::validatePassword(url_pass + salt, pass))
+			{
+				// Validation not really needed because we can assume I'm not stupid
+				int nro = std::stoi(n);
+				{
+					sqlite3_stmt* st;
+					int rc = sqlite3_prepare_v2(dbBlog,
+								    "INSERT INTO posts "
+								    "(name, posted, category_id, nro, desc)"
+								    "VALUES(?, unixepoch('now'), ?, ?, ?);",
+								    -1, &st, NULL);
+					CROW_LOG_DEBUG << "Prepare: " << rc;
+					if (rc != SQLITE_OK) {
+						CROW_LOG_ERROR << "SQL ERROR: " << rc;
+						rc = sqlite3_finalize(st);
+						res.redirect("/");
+						return;
+					}
+					// Add values to statement
+					sqlite3_bind_text(st, 1, title, -1, SQLITE_STATIC);
+					sqlite3_bind_int(st, 2, 0); // TODO: Map category
+					sqlite3_bind_int(st, 3, nro);
+					sqlite3_bind_text(st, 4, desc, -1, SQLITE_STATIC);
+					// Execute statement
+					rc = sqlite3_step(st);
+					CROW_LOG_DEBUG << "Step: " << rc;
+					rc = sqlite3_finalize(st);
+					CROW_LOG_DEBUG << "Finalize: " << rc;
+				}
+				int post_id;
+				{
+					sqlite3_stmt* st;
+					int rc = sqlite3_prepare_v2(dbBlog,
+								    "SELECT id FROM posts "
+								    "WHERE nro=?;",
+								    -1, &st, NULL);
+					CROW_LOG_DEBUG << "Prepare: " << rc;
+					if (rc != SQLITE_OK) {
+						CROW_LOG_ERROR << "SQL ERROR: " << rc;
+						rc = sqlite3_finalize(st);
+						res.redirect("/");
+						return;
+					}
+					// Add values to statement
+					sqlite3_bind_int(st, 1, nro);
+					// Step forward to see if a result
+					rc = sqlite3_step(st);
+					CROW_LOG_DEBUG << "Step: " << rc;
+					if (rc != SQLITE_ROW) {
+						CROW_LOG_ERROR << "Post number: " << nro << " does not exist";
+						rc = sqlite3_finalize(st);
+						CROW_LOG_DEBUG << "Finalize: " << rc;
+						rc = sqlite3_finalize(st);
+						res.redirect("/");
+					}
+					// Get text
+					post_id = sqlite3_column_int(st, 0);	
+				}
+				{
+					sqlite3_stmt* st;
+					int rc = sqlite3_prepare_v2(dbBlog,
+								    "INSERT INTO post_texts "
+								    "(lang, text, post_id)"
+								    "VALUES('en', ?, ?);",
+								    -1, &st, NULL);
+					CROW_LOG_DEBUG << "Prepare: " << rc;
+					if (rc != SQLITE_OK) {
+						CROW_LOG_ERROR << "SQL ERROR: " << rc;
+						rc = sqlite3_finalize(st);
+						res.redirect("/");
+						return;
+					}
+					// Add values to statement
+					sqlite3_bind_text(st, 1, text, -1, SQLITE_STATIC);
+					sqlite3_bind_int(st, 2, post_id);
+					// Execute statement
+					rc = sqlite3_step(st);
+					CROW_LOG_DEBUG << "Step: " << rc;
+					rc = sqlite3_finalize(st);
+					CROW_LOG_DEBUG << "Finalize: " << rc;
+				}
+			}
+		}
+		res.redirect("/");
+		res.end();
 	});
 
 	CROW_ROUTE(app, "/rss/<string>")([&dbBlog]

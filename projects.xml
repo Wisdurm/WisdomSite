@@ -49,7 +49,7 @@
 	</item>
 	<item name="Cesp" desc="A cross-editor live-share protocol I made with my
 							friend. It works decently well, and does so in Emacs and Neovim!"
-		  img="/static/images/thumb-cesp.webp" imgform="fullimgh">
+		  img="/static/images/thumb-ces.webp" imgform="fullimgh">
 	  <link href="https://github.com/LukaHietala/cesp">Src</link>
 	</item>
 	<item name="Desktop Flashbang" desc="What it says on the tin, a program which throws a flashbang on your screen." img="/static/images/thumb-flb.webp" imgform="fullimgh">

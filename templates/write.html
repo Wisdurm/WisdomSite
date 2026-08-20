@@ -41,18 +41,23 @@
 				<div class="border">
 					<button x-on:click="preview = ! preview; update();">Switch to preview</button>
 					<!-- Editor -->
-					<form x-show="!preview">
+					<form action="/postblog" method="POST" x-show="!preview">
 						<h1>Write posts!</h1>
 						<p>This is a page for writing blog posts, obviously only for
 							internal use.
 						</p>
-						<label for="title">Title</label>
+						<label for="title">Title:</label>
 						<input type="text" name="title" placeholder="Post
 																	 title"/>
-						<label for="title">Password</label>
+						<label for="title">Password:</label>
 						<input type="password" name="pass" placeholder="Login"/>
-						<label for="cat">Category</label>
+						<br>
+						<label for="cat">Category:</label>
 						<input type="text" name="cat" placeholder="Canon"/>
+						<label for="desc">Description:</label>
+						<input type="text" name="desc" placeholder="Yapping"/>
+						<label for="nro">Nro.:</label>
+						<input type="number" name="nro" placeholder="1234"/>
 						<button>Post</button>
 						<br>
 						<textarea name="text" id="text" rows="50" cols="60"
