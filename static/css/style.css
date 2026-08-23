@@ -153,6 +153,18 @@ main > .border,
 	margin-left: auto;
 	margin-right: 10px;
 }
+h2.tight {
+	margin-bottom: 5px;
+}
+p.tight {
+	font-size: small;
+	margin-top: 5px;
+	padding-left: 10px;
+}
+.date {
+	font-size: small;
+	text-align: right;
+}
 /*
   INPUT STYLES
 */

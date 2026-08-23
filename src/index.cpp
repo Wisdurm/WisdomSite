@@ -1,12 +1,13 @@
-
 // Internal
-#include "crow/app.h"
-#include "crow/http_request.h"
-#include "crow/http_response.h"
-#include "crow/json.h"
+#include "SQLiteCpp/Database.h"
+#include "SQLiteCpp/Exception.h"
+#include "SQLiteCpp/Statement.h"
+#include "crow/logging.h"
+#include "crow/query_string.h"
 #include "markdown.hpp"
 // C++
 #include <array>
+#include <exception>
 #include <numeric>
 #include <string>
 #include <iostream>
@@ -25,6 +26,11 @@
 #include "../../libbcrypt-src/include/bcrypt/BCrypt.hpp"
 #include "pugixml.hpp"
 #include <sqlite3.h>
+#include "crow/app.h"
+#include "crow/http_request.h"
+#include "crow/http_response.h"
+#include "crow/json.h"
+#include <SQLiteCpp/SQLiteCpp.h>
 
 // Source - https://stackoverflow.com/a/60337372
 // Posted by Tomáš Zato
@@ -72,50 +78,28 @@ static std::string getMotd(std::string& daily, std::vector<std::string>& motdBac
 	return motdBackup.at(day % motdBackup.size());
 }
 
-static crow::json::wvalue npestaQuip(sqlite3* dbNpesta)
+static crow::json::wvalue npestaQuip(SQLite::Database& dbNpesta)
 {
-	// Get message count
-	int count;
-	sqlite3_exec(dbNpesta,
-		     "SELECT count(id) FROM quips;",
-		     [](void* data, int argc, char** argv, char** azColName) {
-			     int* count = static_cast<int*>(data);
-			     *count = std::stoi(argv[0]);
-			     return 0;
-		     }, &count, NULL);
-	CROW_LOG_INFO << count;
-	// Get random message
-	std::default_random_engine rde {std::random_device{}()};
-	const int index = std::uniform_int_distribution<int>(1, count)(rde);
-
-	sqlite3_stmt* st;
-	int rc = sqlite3_prepare_v2(dbNpesta,
-				    "SELECT msg FROM quips "
-				    "WHERE id=?;",
-				    -1, &st, NULL);
-	CROW_LOG_DEBUG << "Prepare: " << rc;
-	if (rc != SQLITE_OK) {
-		CROW_LOG_ERROR << "SQL ERROR: " << rc;
-		rc = sqlite3_finalize(st);
-                return crow::json::wvalue{{"success", false}};
+	try {
+		// Get message count
+		SQLite::Statement cquery (dbNpesta,
+					  "SELECT count(id) FROM quips;");
+		cquery.executeStep();
+		const int count = cquery.getColumn(0);
+		// Get random message
+		std::default_random_engine rde {std::random_device{}()};
+		const int index = std::uniform_int_distribution<int>(1, count)(rde);
+		SQLite::Statement mquery(dbNpesta,
+					 "SELECT msg FROM quips "
+					 "WHERE id=?;");
+		mquery.bind(1, index);
+		mquery.executeStep();
+		const std::string message = mquery.getColumn(0).getString();
+		return crow::json::wvalue{{"success", true}, {"message", message}, {"index", index}};
+	} catch (std::exception& e) {
+		CROW_LOG_ERROR << e.what();
+		return crow::json::wvalue{{"success", false}, {"message", "Server error"}};
 	}
-	// Add values to statement
-	sqlite3_bind_int(st, 1, index);
-	// Step forward to see if a result (1 at max)
-	rc = sqlite3_step(st);
-	CROW_LOG_DEBUG << "Step: " << rc;
-	if (rc != SQLITE_ROW) {
-		CROW_LOG_ERROR << "Message: " << index << " does not exist";
-		rc = sqlite3_finalize(st);
-		CROW_LOG_DEBUG << "Finalize: " << rc;				
-		return crow::json::wvalue{{"success", false}};
-	}
-	// Get text
-	const std::string message = std::string(reinterpret_cast<const char*>(sqlite3_column_text(st, 0)));
-	// Cleanup
-	rc = sqlite3_finalize(st);
-	CROW_LOG_DEBUG << "Finalize: " << rc;
-	return crow::json::wvalue{{"success", true}, {"message", message}, {"index", index}};
 }
 
 // Turns xml item into a wvalue
@@ -185,8 +169,8 @@ int main()
 	crow::SimpleApp app;
 	// Database
 	sqlite3 *dbComments;
-        sqlite3 *dbBlog;
-	sqlite3 *dbNpesta;
+	SQLite::Database dbBlog("blog.db");
+	SQLite::Database dbNpesta("npesta.db");
 	// Password things
 	const std::string salt = "montakymmentätuhattavoileipäsämpylää"; // Password salt
 	const std::string pass = "$2a$12$HDOM/d1alYPXxWsLpiH1CuR4Pq0WiBkIrPmP5tl7s2fKLNRfOamC2"; // TODO: Maybe should be in .env file? Idk
@@ -302,72 +286,55 @@ int main()
 		ctx["msg-daily"] = getMotd(dailyMsg, motdBackup, lastUpdate);
 		// ctx["badges"] = webBadgeArray(webBadges, 8);
 		// Get list of categories
-		std::vector<std::pair<int, std::string>> categories;
-		sqlite3_exec(dbBlog,
-			     "SELECT * FROM categories;",
-			     [](void* data, int argc, char** argv, char** azColName) {
-				     auto cats = reinterpret_cast<std::vector<std::pair<int, std::string>>*>(data);
-				     cats->push_back(<% std::stoi(argv[0]), argv<:1:> %>);
-				     // First letter uppercase
-				     cats->back().second[0] = std::toupper(cats->back().second<:0:>);
-				     return 0;
-			     }, &categories, NULL);
+		struct Category {
+			const int id;
+			const std::string name;
+			const std::string desc;
+		};
+		std::vector<Category> categories;
+		SQLite::Statement cquery(dbBlog, "SELECT * FROM categories;");
+		while (cquery.executeStep()) {
+			const int id = cquery.getColumn(0);
+			std::string name = cquery.getColumn(1);
+			name.at(0) = std::toupper(name.at(0));
+			const std::string desc = cquery.getColumn(2);
+			categories.push_back({id, name, desc});
+		}
 		// Get all posts
 		for (auto cat : categories) {
 			// Name
-			if (cat.first != 1) // First category is canonical, which is ordered so done seperately
-				ctx["categories"][cat.first-2]["name"] = cat.second;
-			// idk bruh
-			sqlite3_stmt* st;
-			int rc = sqlite3_prepare_v2(dbBlog,
-						    "SELECT * FROM posts "
-						    "WHERE category_id=? "
-						    "ORDER BY id DESC;",
-						    -1, &st, NULL);
-			CROW_LOG_DEBUG << "Prepare: " << rc;
-			if (rc != SQLITE_OK) {
-				CROW_LOG_ERROR << "SQL ERROR: " << rc;
-				rc = sqlite3_finalize(st); // I think?
-				break;
+			if (cat.id != 1) {
+				// First category is canonical, which is ordered so done seperately
+				// -2 so it begins at 0
+				ctx["categories"][cat.id-2]["name"] = cat.name;
+				ctx["categories"][cat.id-2]["desc"] = cat.desc;
 			}
-			// Add values to statement
-			sqlite3_bind_int(st, 1, cat.first);
+			SQLite::Statement pquery(dbBlog,
+						 "SELECT * FROM posts "
+						 "WHERE category_id=? "
+						 "ORDER BY id DESC;");
+			pquery.bind(1, cat.id);
 			// Step forward to get results
 			int index = 0;
-			while (true) {
-				rc = sqlite3_step(st);
-				CROW_LOG_DEBUG << "Step: " << rc;
-				if (rc == SQLITE_ROW) {
-					// Apparently this only works if the text is ascii,
-					// but I'm sure that this won't come back to bite me in the ass
-					// :clueless:
-					// From the future, it seems to work, but I'll leave this comment here in case it ever does not
-					// for whatever reason
-					const std::string title = std::string(reinterpret_cast<const char*>(sqlite3_column_text(st, 1)));
-					if (cat.first == 1) { // Canonical
-						ctx["main"]["posts"][index]["name"] = title;
-						ctx["main"]["posts"][index]["date"] = formatDate(sqlite3_column_int(st, 2));
-						std::string link = std::format("{}. {}", sqlite3_column_int(st, 0), title);
-						std::transform(link.begin(), link.end(), link.begin(),
-							       [](char c) { if (c == ' ') return '_'; else return c; });
-						ctx["main"]["posts"][index]["link"] = link;
-					}
-					else {
-						ctx["categories"][cat.first-2]["posts"][index]["name"] = title;
-						ctx["categories"][cat.first-2]["posts"][index]["date"] = formatDate(sqlite3_column_int(st, 2));;
-						std::string link = std::format("{}. {}", sqlite3_column_int(st, 0), title);
-						std::transform(link.begin(), link.end(), link.begin(),
-							       [](char c) { if (c == ' ') return '_'; else return c; });
-						ctx["categories"][cat.first-2]["posts"][index]["link"] = link;
-					}
-					index++;
-				} else
-					break;
+			while (pquery.executeStep()) {
+				const std::string title = pquery.getColumn(1);
+				const std::string date = formatDate(pquery.getColumn(2));
+				const int id = pquery.getColumn(0).getInt();
+				std::string link = std::format("{}. {}", id, title);
+				std::transform(link.begin(), link.end(), link.begin(),
+					       [](char c) { return (c == ' ') ? '_' : c; });
+				if (cat.id == 1) { // Canonical
+					ctx["main"]["posts"][index]["name"] = title;
+					ctx["main"]["posts"][index]["date"] = date;
+					ctx["main"]["posts"][index]["link"] = link;
+				}
+				else {
+					ctx["categories"][cat.id-2]["posts"][index]["name"] = title;
+					ctx["categories"][cat.id-2]["posts"][index]["date"] = date;
+					ctx["categories"][cat.id-2]["posts"][index]["link"] = link;
+				}
+				index++;
 			}
-			CROW_LOG_DEBUG << "Last code (should be 101): " << rc;
-			// Cleanup
-			rc = sqlite3_finalize(st);
-			CROW_LOG_DEBUG << "Finalize: " << rc;
 		}
 		return page.render(ctx);
 	});
@@ -375,6 +342,8 @@ int main()
 	CROW_ROUTE(app, "/postblog")
 		.methods("GET"_method, "POST"_method)([&pass, &salt, &dbBlog] (const crow::request& req, crow::response& res){
 		// Post blog post
+		res.redirect("/");
+		res.end();
 		auto re = req.get_body_params();
 		if (const char* p = re.get("pass"),
 		    *title = re.get("title"),
@@ -385,91 +354,36 @@ int main()
 		    p and n and desc and category and title and text)
 		{
 			const std::string url_pass = p;
-			if (BCrypt::validatePassword(url_pass + salt, pass))
-			{
-				// Validation not really needed because we can assume I'm not stupid
-				int nro = std::stoi(n);
-				{
-					sqlite3_stmt* st;
-					int rc = sqlite3_prepare_v2(dbBlog,
-								    "INSERT INTO posts "
-								    "(name, posted, category_id, nro, desc)"
-								    "VALUES(?, unixepoch('now'), ?, ?, ?);",
-								    -1, &st, NULL);
-					CROW_LOG_DEBUG << "Prepare: " << rc;
-					if (rc != SQLITE_OK) {
-						CROW_LOG_ERROR << "SQL ERROR: " << rc;
-						rc = sqlite3_finalize(st);
-						res.redirect("/");
-						return;
-					}
-					// Add values to statement
-					sqlite3_bind_text(st, 1, title, -1, SQLITE_STATIC);
-					sqlite3_bind_int(st, 2, 0); // TODO: Map category
-					sqlite3_bind_int(st, 3, nro);
-					sqlite3_bind_text(st, 4, desc, -1, SQLITE_STATIC);
-					// Execute statement
-					rc = sqlite3_step(st);
-					CROW_LOG_DEBUG << "Step: " << rc;
-					rc = sqlite3_finalize(st);
-					CROW_LOG_DEBUG << "Finalize: " << rc;
-				}
-				int post_id;
-				{
-					sqlite3_stmt* st;
-					int rc = sqlite3_prepare_v2(dbBlog,
-								    "SELECT id FROM posts "
-								    "WHERE nro=?;",
-								    -1, &st, NULL);
-					CROW_LOG_DEBUG << "Prepare: " << rc;
-					if (rc != SQLITE_OK) {
-						CROW_LOG_ERROR << "SQL ERROR: " << rc;
-						rc = sqlite3_finalize(st);
-						res.redirect("/");
-						return;
-					}
-					// Add values to statement
-					sqlite3_bind_int(st, 1, nro);
-					// Step forward to see if a result
-					rc = sqlite3_step(st);
-					CROW_LOG_DEBUG << "Step: " << rc;
-					if (rc != SQLITE_ROW) {
-						CROW_LOG_ERROR << "Post number: " << nro << " does not exist";
-						rc = sqlite3_finalize(st);
-						CROW_LOG_DEBUG << "Finalize: " << rc;
-						rc = sqlite3_finalize(st);
-						res.redirect("/");
-					}
-					// Get text
-					post_id = sqlite3_column_int(st, 0);	
-				}
-				{
-					sqlite3_stmt* st;
-					int rc = sqlite3_prepare_v2(dbBlog,
-								    "INSERT INTO post_texts "
-								    "(lang, text, post_id)"
-								    "VALUES('en', ?, ?);",
-								    -1, &st, NULL);
-					CROW_LOG_DEBUG << "Prepare: " << rc;
-					if (rc != SQLITE_OK) {
-						CROW_LOG_ERROR << "SQL ERROR: " << rc;
-						rc = sqlite3_finalize(st);
-						res.redirect("/");
-						return;
-					}
-					// Add values to statement
-					sqlite3_bind_text(st, 1, text, -1, SQLITE_STATIC);
-					sqlite3_bind_int(st, 2, post_id);
-					// Execute statement
-					rc = sqlite3_step(st);
-					CROW_LOG_DEBUG << "Step: " << rc;
-					rc = sqlite3_finalize(st);
-					CROW_LOG_DEBUG << "Finalize: " << rc;
-				}
+			if (not BCrypt::validatePassword(url_pass + salt, pass)) {
+				return;
 			}
+			// Validation not really needed because we can assume I'm not stupid
+			const int nro = std::stoi(n);
+			SQLite::Statement pquery(dbBlog,
+						 "INSERT INTO posts "
+						 "(name, posted, category_id, nro, desc)"
+						 "VALUES(?, unixepoch('now'), ?, ?, ?);");
+			pquery.bind(1, title);
+			pquery.bind(2, 0); // TODO: Map category
+			pquery.bind(3, nro); // TODO: Automatic numbering
+			pquery.bind(4, desc);
+			pquery.executeStep();
+			const int post_id = [&](){
+				SQLite::Statement query(dbBlog,
+							"SELECT id FROM posts "
+							"WHERE nro=?;");
+				query.bind(1, nro);
+				query.executeStep();
+				return query.getColumn(0);
+			}();
+			SQLite::Statement tquery(dbBlog,
+						 "INSERT INTO post_texts "
+						 "(lang, text, post_id)"
+						 "VALUES('en', ?, ?);");
+			tquery.bind(1, text);
+			tquery.bind(2, post_id);
+			tquery.executeStep();
 		}
-		res.redirect("/");
-		res.end();
 	});
 
 	CROW_ROUTE(app, "/rss/<string>")([&dbBlog]
@@ -479,67 +393,42 @@ int main()
 		int category_id;
 		std::string description = "Wisdurm blog posts, universal feed";
 		if (category != "universal") {
-			sqlite3_stmt* st_ct;
-			int rc_ct = sqlite3_prepare_v2(dbBlog,
-						       "SELECT * FROM categories "
-						       "WHERE name=?;",
-						       -1, &st_ct, NULL);
-			CROW_LOG_DEBUG << "Prepare: " << rc_ct;
-			if (rc_ct != SQLITE_OK) {
-				CROW_LOG_ERROR << "SQL ERROR: " << rc_ct;
-				rc_ct = sqlite3_finalize(st_ct);
+			try {
+				SQLite::Statement cquery(dbBlog,
+							 "SELECT * FROM categories "
+							 "WHERE name=?;");
+				cquery.bind(1, category);			
+				if (not cquery.executeStep()) {
+					CROW_LOG_ERROR << "Channel: " << category << " does not exist";
+					res.code = 400;
+					res.end();
+					return;
+				}
+				// Get info
+				category_id = cquery.getColumn(0);
+				description = cquery.getColumn(2).getString();
+			} catch (std::exception& e) {
+				CROW_LOG_ERROR << e.what();
 				res.code = 500;
 				res.end();
 				return;
 			}
-			// Add values to statement
-			sqlite3_bind_text(st_ct, 1, category.c_str(), -1, SQLITE_STATIC);
-			// Step forward to see if a result (1 at max)
-			rc_ct = sqlite3_step(st_ct);
-			CROW_LOG_DEBUG << "Step: " << rc_ct;
-			if (rc_ct != SQLITE_ROW) {
-				CROW_LOG_ERROR << "Channel: " << category << " does not exist";
-				rc_ct = sqlite3_finalize(st_ct);
-				CROW_LOG_DEBUG << "Finalize: " << rc_ct;
-				res.code = 400;
-				res.end();
-				return;
-			}
-			// Get info
-			category_id = sqlite3_column_int(st_ct, 0);
-			description = std::string(reinterpret_cast<const char*>(sqlite3_column_text(st_ct, 2)));
-			// Cleanup
-			rc_ct = sqlite3_finalize(st_ct);
-			CROW_LOG_DEBUG << "Finalize: " << rc_ct;
 		}
 		//
 		// Get posts
 		//
-		sqlite3_stmt* st_p;
-		int rc_p;
-		if (category == "universal") {
-			rc_p = sqlite3_prepare_v2(dbBlog,
-						  "SELECT * FROM posts "
-						  "ORDER BY id DESC;",
-						  -1, &st_p, NULL);
-		} else {
-			rc_p = sqlite3_prepare_v2(dbBlog,
-						  "SELECT * FROM posts "
-						  "WHERE category_id=? "
-						  "ORDER BY id DESC;",
-						  -1, &st_p, NULL);
-		}
-		CROW_LOG_DEBUG << "Prepare: " << rc_p;
-		if (rc_p != SQLITE_OK) {
-			CROW_LOG_ERROR << "SQL ERROR: " << rc_p;
-			rc_p = sqlite3_finalize(st_p);
-			res.code = 500;
-			res.end();
-			return;
-		}
+		auto pquery = (category == "universal") ?
+			SQLite::Statement(dbBlog,
+					  "SELECT * FROM posts "
+					  "ORDER BY id DESC;") :
+			SQLite::Statement(dbBlog,
+					  "SELECT * FROM posts "
+					  "WHERE category_id=? "
+					  "ORDER BY id DESC;");
 		// Add values to statement
-		if (category != "universal")
-			sqlite3_bind_int(st_p, 1, category_id);
+		if (category != "universal") {
+			pquery.bind(1, category_id);
+		}
 		// Step forward to get results
 		struct post {
 			const std::string title;
@@ -548,24 +437,19 @@ int main()
 			const int posted;
 		};
 		std::vector<post> posts;
-		while (true) {
-			rc_p = sqlite3_step(st_p);
-			CROW_LOG_DEBUG << "Step: " << rc_p;
-			if (rc_p == SQLITE_ROW) {
-				const std::string title = std::string(reinterpret_cast<const char*>(sqlite3_column_text(st_p, 1)));
-				const std::string desc = std::string(reinterpret_cast<const char*>(sqlite3_column_text(st_p, 5)));
-				const int posted = sqlite3_column_int(st_p, 2);
-				std::string link = std::format("{}. {}", sqlite3_column_int(st_p, 0), title);
-				std::transform(link.begin(), link.end(), link.begin(),
-					       [](char c) { if (c == ' ') return '_'; else return c; });
-				posts.push_back(<%
-						.title = title,
-						.desc = desc,
-						.link = "https://wisdurm.fi/blog/" + link,
-						.posted = posted
-						%>);
-			} else
-				break;
+		while (pquery.executeStep()) {
+			const std::string title = pquery.getColumn(1);
+			const std::string desc = pquery.getColumn(5);
+			const int posted = pquery.getColumn(2);
+			std::string link = std::format("{}. {}", pquery.getColumn(0).getInt(), title);
+			std::transform(link.begin(), link.end(), link.begin(),
+				       [](char c) { return (c == ' ') ? '_' : c; });
+			posts.push_back(<%
+					.title = title,
+					.desc = desc,
+					.link = "https://wisdurm.fi/blog/" + link,
+					.posted = posted
+					%>);
 		}
                 // Format response
 		pugi::xml_document rss;
@@ -596,40 +480,30 @@ int main()
 	CROW_ROUTE(app, "/blog/<int>.<string>")([&dailyMsg, &motdBackup, &lastUpdate, &dbBlog]
 						(const crow::request& req, crow::response& res, int postId, std::string _) {
 		// Get blog post text
-		sqlite3_stmt* st_p;
-		int rc_p = sqlite3_prepare_v2(dbBlog,
-					      "SELECT * FROM post_texts "
-					      "WHERE post_id=?;",
-					      -1, &st_p, NULL);
-		CROW_LOG_DEBUG << "Prepare: " << rc_p;
-		if (rc_p != SQLITE_OK) {
-			CROW_LOG_ERROR << "SQL ERROR: " << rc_p;
-			rc_p = sqlite3_finalize(st_p);
-			res.code = 500;
-			res.end();
-			return;
-		}
-		// Add values to statement
-		sqlite3_bind_int(st_p, 1, postId);
-		// Step forward to see if a result (1 at max)
-		rc_p = sqlite3_step(st_p);
-		CROW_LOG_DEBUG << "Step: " << rc_p;
-		if (rc_p != SQLITE_ROW) {
+		SQLite::Statement pquery(dbBlog,
+					 "SELECT * FROM post_texts "
+					 "WHERE post_id=?;");
+		pquery.bind(1, postId);
+		if (not pquery.executeStep()) {
 			CROW_LOG_ERROR << "Post: " << postId << " does not exist";
-			rc_p = sqlite3_finalize(st_p);
-			CROW_LOG_DEBUG << "Finalize: " << rc_p;
 			res.redirect("/404");
 			res.end();
 			return;
 		}
-		// Get text
-		std::string postText = std::string(reinterpret_cast<const char*>(sqlite3_column_text(st_p, 1)));
-		// Cleanup
-		rc_p = sqlite3_finalize(st_p);
-		CROW_LOG_DEBUG << "Finalize: " << rc_p;
+		const std::string postText = pquery.getColumn(1);
+		// Get date
+		SQLite::Statement dquery(dbBlog,
+			"SELECT posted FROM posts "
+					 "WHERE id=?;");
+		dquery.bind(1, postId);
+		dquery.executeStep();
+		const std::string date = formatDate(dquery.getColumn(0));
 		//
 		auto page = crow::mustache::load("blogPost.html");
-		crow::mustache::context ctx({ {"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)}, {"blogText", parse(postText)} });
+		crow::mustache::context ctx({
+				{"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)},
+				{"blogText", parse(postText)},
+				{"posted", date}});
 		res.body = page.render(ctx).body_;
 		res.end();
 	});
@@ -885,21 +759,6 @@ int main()
 		sqlite3_close(dbComments);
 		return EXIT_FAILURE;
 	}
-	opened = sqlite3_open("blog.db", &dbBlog);
-	if (opened) {
-		CROW_LOG_CRITICAL << "Unable to establish blog database connection: " << sqlite3_errmsg(dbBlog);
-		sqlite3_close(dbComments);
-                sqlite3_close(dbBlog);
-		return EXIT_FAILURE;
-	}
-	opened = sqlite3_open("npesta.db", &dbNpesta);
-	if (opened) {
-		CROW_LOG_CRITICAL << "Unable to establish blog database connection: " << sqlite3_errmsg(dbBlog);
-		sqlite3_close(dbNpesta);
-		sqlite3_close(dbComments);
-		sqlite3_close(dbBlog);
-		return EXIT_FAILURE;
-        }
 	// Other stuff finished, start server
 	app.port(18080).multithreaded()
 		.use_compression(crow::compression::algorithm::DEFLATE)
@@ -908,7 +767,5 @@ int main()
 	// Post run cleanup
 	std::cout << "[CLEANUP] Closing database connections\n";
 	sqlite3_close(dbComments);
-	sqlite3_close(dbBlog);
-	sqlite3_close(dbNpesta);
 	std::cout << "[CLEANUP] Closed\n";
 }

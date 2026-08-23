@@ -5,7 +5,7 @@
 
 static void captureHtmlFragment(const MD_CHAR* data, MD_SIZE data_size, void* userData);
 
-inline std::string parse(std::string& markdown)
+inline std::string parse(const std::string& markdown)
 {
 	// This is very bizarre
 	std::string result = "";
