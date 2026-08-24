@@ -28,7 +28,14 @@
 						I'll probably remove it if it isn't appropriate though.
 					</p>
 					<h2>Leave a message!</h2>
-					{{&error}}
+					{{#error}}
+					<div class='error'>
+						<strong>Error</strong><br>
+						The server could not process your request
+						for the following reason: <br>
+						{{error}}
+					</div><br>
+					{{/error}}
 					<form method="POST" action="/comment" class="border" id="comment">
 						<label for="name">Name:</label> <br>
 						<input type="text" id="name" name="name" required
