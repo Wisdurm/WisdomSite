@@ -1,16 +1,11 @@
 // Internal
-#include "SQLiteCpp/Database.h"
-#include "SQLiteCpp/Exception.h"
-#include "SQLiteCpp/Statement.h"
-#include "crow/logging.h"
-#include "crow/query_string.h"
 #include "markdown.hpp"
 // C++
 #include <array>
+#include <bits/chrono.h>
 #include <exception>
 #include <numeric>
 #include <string>
-#include <iostream>
 #include <fstream>
 #include <unordered_map>
 #include <utility>
@@ -18,9 +13,9 @@
 #include <algorithm>
 #include <format>
 #include <random>
+#include <chrono>
 // C
 #include <cctype>
-#include <ctime>
 #include <cstdlib>
 // External
 #include "../../libbcrypt-src/include/bcrypt/BCrypt.hpp"
@@ -31,6 +26,10 @@
 #include "crow/http_response.h"
 #include "crow/json.h"
 #include <SQLiteCpp/SQLiteCpp.h>
+#include "SQLiteCpp/Database.h"
+#include "SQLiteCpp/Statement.h"
+#include "crow/logging.h"
+#include "crow/query_string.h"
 
 // Source - https://stackoverflow.com/a/60337372
 // Posted by Tomáš Zato
@@ -54,28 +53,10 @@ static std::string InnerXML(pugi::xml_node target)
 
 static std::string process_text(std::string str)
 {
-	if (str.length() > 100)
-		str.erase(100);
-	return str;
-}
-
-static std::string getMotd(std::string& daily, std::vector<std::string>& motdBackup, time_t& lastUpdate)
-{
-	time_t now;
-	time(&now);
-	// If message of the day is set, use it.
-	if (daily != "") {
-		CROW_LOG_INFO << "Hours since last update: " << ((now - lastUpdate)/60.0/60);
-		if (((now - lastUpdate)/60.0/60) > 30) { // If more than 30 hours has passed, reset the daily word
-			lastUpdate = now;
-			daily = "";
-		} else {
-			return daily;
-		}
+	if (str.length() > 100) {
+		str.erase(str.begin() + 100, str.end());
 	}
- 	// Otherwise, fallback to older ones
-	long day = now/60/60/24; // How many days since Jan 1 1900
-	return motdBackup.at(day % motdBackup.size());
+	return str;
 }
 
 static crow::json::wvalue npestaQuip(SQLite::Database& dbNpesta) noexcept
@@ -146,26 +127,28 @@ static crow::json::wvalue webBadgeArray(const std::vector<std::pair<std::string,
 	return result;
 }
 
+template<typename... Args>
+std::string dyna_print(std::string_view rt_fmt_str, Args&&... args)
+{
+    return std::vformat(rt_fmt_str, std::make_format_args(args...));
+}
+
 // Format unix time stamp THE CORRECT way
 static std::string formatDate(int unixt) {
-	char buffer[256];
-	const auto t = static_cast<time_t>(unixt);
-	std::strftime(buffer, sizeof(buffer), "%d.%m.%Y", localtime(&t));
-	return buffer;
+	const auto time {std::chrono::seconds(unixt)};
+	const auto t = std::chrono::sys_time<std::chrono::seconds>{time};
+	return dyna_print("{:%d.%m.%Y}", t);
 }
 
 // Format unix time stamp like a sociopath
 static std::string formatDateRss(int unixt) {
-	char buffer[256];
-	const auto t = static_cast<time_t>(unixt);
-	std::strftime(buffer, sizeof(buffer), "%a, %d %b %Y %T +0300", localtime(&t));
-	return buffer;
+	const auto time {std::chrono::seconds(unixt)};
+	const auto t = std::chrono::sys_time<std::chrono::seconds>{time};
+	return dyna_print("{:%a, %d %b %Y %T} +0300", t);
 }
 
 int main()
 {
-	// Seed randomness
-	srand(time(0));
 	crow::SimpleApp app;
 	// Database
 	SQLite::Database dbComments("db.db", SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
@@ -175,10 +158,27 @@ int main()
 	const std::string salt = "montakymmentätuhattavoileipäsämpylää"; // Password salt
 	const std::string pass = "$2a$12$HDOM/d1alYPXxWsLpiH1CuR4Pq0WiBkIrPmP5tl7s2fKLNRfOamC2"; // TODO: Maybe should be in .env file? Idk
 	// Message of the day (motd)
-	std::string dailyMsg = "";
+	std::string dailyMsg;
 	std::vector<std::string> motdBackup; // Old motds to use in the abscence of a new one
-	time_t lastUpdate; // Time since motd last updated
-	time(&lastUpdate);
+	// When motd last updated
+	auto lastUpdate = std::chrono::system_clock::now();
+	const auto getMotd = [&dailyMsg, &motdBackup, &lastUpdate]() -> std::string {
+		using namespace std::chrono;
+		const auto now = system_clock::now();
+		// If motd not set, use old one
+		if (dailyMsg.empty()) {
+			const auto day = duration_cast<days>(now.time_since_epoch()).count();
+			return motdBackup.at(day % motdBackup.size());
+		}
+		// If motd is set, use it.
+		CROW_LOG_INFO << dyna_print("Time since last update: {:%H h %M m %S s}", now - lastUpdate);
+		// If more than 30 hours has passed, reset the daily word
+		if (duration_cast<hours>(now - lastUpdate).count() > 30) {
+			lastUpdate = now;
+			dailyMsg.clear();
+		}
+		return dailyMsg;
+	};
 	// Xml
 	pugi::xml_document pdoc;
 	crow::json::wvalue projectStructure; // yadadadadada blah blah blah lalalalalalala
@@ -219,17 +219,15 @@ int main()
 		 "make a comment, sorry."},
 	};
 
-	CROW_ROUTE(app, "/")([&dailyMsg, &motdBackup, &lastUpdate, &projects, &webBadges, &dbNpesta]
+	CROW_ROUTE(app, "/")([&getMotd, &projects, &webBadges, &dbNpesta]
 			     (const crow::request& req){
 		// Project of the day
-		time_t now;
-		time(&now);
-		long day = now/60/60/24; // How many days since Jan 1 1900
-		crow::json::wvalue potd = projects.at(day % projects.size()); // TODO: Randomization
-		//
-		auto page = crow::mustache::load("index.html");
+		const unsigned long day = duration_cast<std::chrono::days>(std::chrono::system_clock::now().time_since_epoch()).count();
+		std::default_random_engine rde {day};
+		const auto potd = projects.at(std::uniform_int_distribution<int>(0, projects.size() - 1)(rde));
+		const auto page = crow::mustache::load("index.html");
 		crow::mustache::context ctx({
-				{"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)},
+				{"msg-daily", getMotd()},
 				{"project-daily", potd},
 				{"badges", webBadgeArray(webBadges, 8)},
 				{"npesta", npestaQuip(dbNpesta)}
@@ -237,33 +235,33 @@ int main()
 		return page.render(ctx);
 	});
 
-	CROW_ROUTE(app, "/write")([&dailyMsg, &motdBackup, &lastUpdate]
+	CROW_ROUTE(app, "/write")([&getMotd]
 			     (const crow::request& req){
 		auto page = crow::mustache::load("write.html");
 		crow::mustache::context ctx({
-				{"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)}
+				{"msg-daily", getMotd()}
 			});
 		return page.render(ctx);
 	});
 
-	CROW_ROUTE(app, "/projects")([&dailyMsg, &motdBackup, &lastUpdate, &projectStructure, &webBadges]
+	CROW_ROUTE(app, "/projects")([&getMotd, &projectStructure, &webBadges]
 				     (const crow::request& req){
 		// List of projects
 		auto page = crow::mustache::load("projects.html");
 		crow::mustache::context ctx({
-				{"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)},
+				{"msg-daily", getMotd()},
 				{"projects", projectStructure},
 				{"badges", webBadgeArray(webBadges, 8)}
 			});
 		return page.render(ctx);
 	});
 
-	CROW_ROUTE(app, "/contact")([&dailyMsg, &motdBackup, &lastUpdate]
+	CROW_ROUTE(app, "/contact")([&getMotd]
 				    (const crow::request& req){       
 		// TODO: Contact form
 		auto page = crow::mustache::load("contact.html");
 		crow::mustache::context ctx({
-				{"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)}
+				{"msg-daily", getMotd()}
 			});
 		return page.render(ctx);
 	});
@@ -271,19 +269,19 @@ int main()
 	CROW_ROUTE(app, "/admin")([&lastUpdate]
 				  (const crow::request& req){       
 		// Admin page, plain
-		time_t now;
-		time(&now);
 		auto page = crow::mustache::load("motd.html");
-		crow::mustache::context ctx({{"time-since", (now - lastUpdate)/60/60 }}); // Hours since last update
+		crow::mustache::context ctx({
+				{"time-since", dyna_print("{:%H h %M m %S s}", (std::chrono::system_clock::now() - lastUpdate)) }
+			});
 		return page.render(ctx);
 	});
 
-	CROW_ROUTE(app, "/blog")([&dailyMsg, &motdBackup, &lastUpdate, &dbBlog]
+	CROW_ROUTE(app, "/blog")([&getMotd, &dbBlog]
 				 (const crow::request& req){       
 		// List of posts
 		auto page = crow::mustache::load("blog.html");
 		crow::mustache::context ctx;
-		ctx["msg-daily"] = getMotd(dailyMsg, motdBackup, lastUpdate);
+		ctx["msg-daily"] = getMotd();
 		try {
 			// Get list of categories
 			struct Category {
@@ -496,7 +494,7 @@ int main()
 		res.end();
 	});
 
-	CROW_ROUTE(app, "/blog/<int>.<string>")([&dailyMsg, &motdBackup, &lastUpdate, &dbBlog]
+	CROW_ROUTE(app, "/blog/<int>.<string>")([&getMotd, &dbBlog]
 						(const crow::request& req, crow::response& res, int postId, std::string _) {
 		// Get blog post text
 		try {
@@ -520,7 +518,7 @@ int main()
 			//
 			auto page = crow::mustache::load("blogPost.html");
 			crow::mustache::context ctx({
-					{"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)},
+					{"msg-daily", getMotd()},
 					{"blogText", parse(postText)},
 					{"posted", date}});
 			res.body = page.render(ctx).body_;
@@ -547,7 +545,7 @@ int main()
 					CROW_LOG_INFO << "Updated motd : \"" << dailyMsg << "\"";
 					motdBackup.push_back(dailyMsg);
 					// Update date
-					time(&lastUpdate);
+					lastUpdate = std::chrono::system_clock::now();
 					// Write dailymsg to file in case it's funny :D
 					std::ofstream motdFile;
 					motdFile.open("motd.txt", std::fstream::app);
@@ -564,12 +562,12 @@ int main()
 		});
 
 	CROW_ROUTE(app, "/guestbook")
-		.methods("GET"_method, "POST"_method)([&dailyMsg, &motdBackup, &lastUpdate, &dbComments, &errMsgs]
+		.methods("GET"_method, "POST"_method)([&getMotd, &dbComments, &errMsgs]
 						      (const crow::request& req) {
 			// Page for comments and form
 			auto page = crow::mustache::load("guestbook.html");
 			crow::mustache::context ctx({
-					{"msg-daily", getMotd(dailyMsg, motdBackup, lastUpdate)}
+					{"msg-daily", getMotd()}
 				});
 			// If error message
 			if (const char* e = req.url_params.get("err")) {
@@ -594,7 +592,7 @@ int main()
 		});
 
 	CROW_ROUTE(app, "/comment").methods("GET"_method, "POST"_method)
-		([&dailyMsg, &pass, &salt, &motdBackup, &lastUpdate, &dbComments]
+		([&pass, &salt, &dbComments]
 		 (const crow::request& req, crow::response& res)
 		{
 			// Post comment
