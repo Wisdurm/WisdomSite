@@ -1,12 +1,29 @@
+async function access() {
+		const accessibility = await cookieStore.get("reader");
+		if (accessibility.value == "false") {
+				swapFont();
+				await cookieStore.set("reader", true);
+		} else {
+				await cookieStore.set("reader", false);
+				document.location.reload();
+		}
+}
+
 function swapFont() {
 		// More readable font
 		$(".zenith").css("font-family", "Lexend");
+		$(".zenith").css("font-size", "1.2em");
 		// Increase article readablity (is this actually better? TODO)
 		$("article").css("font-size", "1.4em");
 		$("article").css("line-height", "1.5em");
 }
 
-$( document ).ready(function() {
+$( document ).ready(async function() {
+		const accessibility = await cookieStore.get("reader");
+		if (accessibility.value == "true") {
+				swapFont();
+		}
+		
 		// let voted = false;
 		// $("#thumbup").on("click", function() {
 		// 		if (!voted) {

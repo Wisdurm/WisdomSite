@@ -21,7 +21,7 @@ headerTemplate.innerHTML = `
           Word(s) of the day: <slot name="wisdom">NO SLOT</slot>
         </p>
     </div>
-    <button class="important" onclick="swapFont()">Readability features</button>
+    <button class="important" onclick="access()">Readability features</button>
 <div class="notice">
     This site is now in a stable state from the redesign,
     but periodic changes will still happen.

@@ -1,8 +1,8 @@
 // Internal
+#include "SQLiteCpp/Transaction.h"
 #include "markdown.hpp"
 // C++
 #include <array>
-#include <bits/chrono.h>
 #include <exception>
 #include <numeric>
 #include <string>
@@ -49,14 +49,6 @@ static std::string InnerXML(pugi::xml_node target)
 	xml_string_writer writer;
 	target.print(writer, "");
 	return writer.result;
-}
-
-static std::string process_text(std::string str)
-{
-	if (str.length() > 100) {
-		str.erase(str.begin() + 100, str.end());
-	}
-	return str;
 }
 
 static crow::json::wvalue npestaQuip(SQLite::Database& dbNpesta) noexcept
@@ -223,7 +215,7 @@ int main()
 			     (const crow::request& req){
 		// Project of the day
 		const unsigned long day = duration_cast<std::chrono::days>(std::chrono::system_clock::now().time_since_epoch()).count();
-		std::default_random_engine rde {day};
+		std::default_random_engine rde (day);
 		const auto potd = projects.at(std::uniform_int_distribution<int>(0, projects.size() - 1)(rde));
 		const auto page = crow::mustache::load("index.html");
 		crow::mustache::context ctx({
@@ -369,7 +361,7 @@ int main()
 							 "(name, posted, category_id, nro, desc)"
 							 "VALUES(?, unixepoch('now'), ?, ?, ?);");
 				pquery.bind(1, title);
-				pquery.bind(2, 0); // TODO: Map category
+				pquery.bind(2, std::stoi(category)); // TODO: Map category
 				pquery.bind(3, nro); // TODO: Automatic numbering
 				pquery.bind(4, desc);
 				pquery.executeStep();
@@ -541,7 +533,10 @@ int main()
 				const std::string url_pass = p;
 				if (BCrypt::validatePassword(url_pass + salt, pass))
 				{
-					dailyMsg = process_text(m);
+					dailyMsg = m;
+					if (dailyMsg.length() > 100) {
+						dailyMsg.erase(dailyMsg.begin() + 100, dailyMsg.end());
+					}
 					CROW_LOG_INFO << "Updated motd : \"" << dailyMsg << "\"";
 					motdBackup.push_back(dailyMsg);
 					// Update date
