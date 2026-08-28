@@ -1,6 +1,6 @@
 async function access() {
 		const accessibility = await cookieStore.get("reader");
-		if (accessibility.value == "false") {
+		if (accessibility && accessibility.value == "false") {
 				swapFont();
 				await cookieStore.set("reader", true);
 		} else {
@@ -20,7 +20,7 @@ function swapFont() {
 
 $( document ).ready(async function() {
 		const accessibility = await cookieStore.get("reader");
-		if (accessibility.value == "true") {
+		if (accessibility && accessibility.value == "true") {
 				swapFont();
 		}
 		
