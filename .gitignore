@@ -2,6 +2,7 @@ build/
 CMakeUserPresets.json
 .vs/
 compile_commands.json
-motd.txt
-db.db
 .cache/
+# Because
+comments.db
+motd.txt

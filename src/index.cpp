@@ -140,9 +140,9 @@ int main()
 {
 	crow::SimpleApp app;
 	// Database
-	SQLite::Database dbComments("comments.db", SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
-	SQLite::Database dbBlog("blog.db", SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
-	SQLite::Database dbNpesta("npesta.db", SQLite::OPEN_READONLY);
+	SQLite::Database dbComments("dbs/comments.db", SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
+	SQLite::Database dbSite("dbs/site.db", SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
+	SQLite::Database dbNpesta("dbs/npesta.db", SQLite::OPEN_READONLY);
 	// Password things
 	const std::string salt = "montakymmentätuhattavoileipäsämpylää"; // Password salt
 	const std::string pass = "$2a$12$HDOM/d1alYPXxWsLpiH1CuR4Pq0WiBkIrPmP5tl7s2fKLNRfOamC2"; // TODO: Maybe should be in .env file? Idk
@@ -265,7 +265,7 @@ int main()
 		return page.render(ctx);
 	});
 
-	CROW_ROUTE(app, "/blog")([&getMotd, &dbBlog]
+	CROW_ROUTE(app, "/blog")([&getMotd, &dbSite]
 				 (const crow::request& req){       
 		// List of posts
 		auto page = crow::mustache::load("blog.html");
@@ -279,7 +279,7 @@ int main()
 				const std::string desc;
 			};
 			std::vector<Category> categories;
-			SQLite::Statement cquery(dbBlog, "SELECT * FROM categories;");
+			SQLite::Statement cquery(dbSite, "SELECT * FROM categories;");
 			while (cquery.executeStep()) {
 				const int id = cquery.getColumn(0);
 				std::string name = cquery.getColumn(1);
@@ -296,7 +296,7 @@ int main()
 					ctx["categories"][cat.id-2]["name"] = cat.name;
 					ctx["categories"][cat.id-2]["desc"] = cat.desc;
 				}
-				SQLite::Statement pquery(dbBlog,
+				SQLite::Statement pquery(dbSite,
 							 "SELECT * FROM posts "
 							 "WHERE category_id=? "
 							 "ORDER BY id DESC;");
@@ -333,7 +333,7 @@ int main()
 	});
 
 	CROW_ROUTE(app, "/postblog")
-		.methods("GET"_method, "POST"_method)([&pass, &salt, &dbBlog] (const crow::request& req, crow::response& res){
+		.methods("GET"_method, "POST"_method)([&pass, &salt, &dbSite] (const crow::request& req, crow::response& res){
 		// Post blog post
 		auto re = req.get_body_params();
 		if (const char* p = re.get("pass"),
@@ -353,7 +353,7 @@ int main()
 			// Validation not really needed because we can assume I'm not stupid
 			try {
 				const int nro = std::stoi(n);
-				SQLite::Statement pquery(dbBlog,
+				SQLite::Statement pquery(dbSite,
 							 "INSERT INTO posts "
 							 "(name, posted, category_id, nro, desc)"
 							 "VALUES(?, unixepoch('now'), ?, ?, ?);");
@@ -363,14 +363,14 @@ int main()
 				pquery.bind(4, desc);
 				pquery.executeStep();
 				const int post_id = [&](){
-					SQLite::Statement query(dbBlog,
+					SQLite::Statement query(dbSite,
 								"SELECT id FROM posts "
 								"WHERE nro=?;");
 					query.bind(1, nro);
 					query.executeStep();
 					return query.getColumn(0);
 				}();
-				SQLite::Statement tquery(dbBlog,
+				SQLite::Statement tquery(dbSite,
 							 "INSERT INTO post_texts "
 							 "(lang, text, post_id)"
 							 "VALUES('en', ?, ?);");
@@ -385,7 +385,7 @@ int main()
 		res.end();
 	});
 
-	CROW_ROUTE(app, "/rss/<string>")([&dbBlog]
+	CROW_ROUTE(app, "/rss/<string>")([&dbSite]
 					 (const crow::request& req, crow::response& res, std::string category) {
 		// Rss feeds
 		category<:0:> = std::tolower(category<:0:>);
@@ -393,7 +393,7 @@ int main()
 		std::string description = "Wisdurm blog posts, universal feed";
 		if (category != "universal") {
 			try {
-				SQLite::Statement cquery(dbBlog,
+				SQLite::Statement cquery(dbSite,
 							 "SELECT * FROM categories "
 							 "WHERE name=?;");
 				cquery.bind(1, category);			
@@ -425,10 +425,10 @@ int main()
 		std::vector<post> posts;
 		try {
 			auto pquery = (category == "universal") ?
-				SQLite::Statement(dbBlog,
+				SQLite::Statement(dbSite,
 						  "SELECT * FROM posts "
 						  "ORDER BY id DESC;") :
-				SQLite::Statement(dbBlog,
+				SQLite::Statement(dbSite,
 						  "SELECT * FROM posts "
 						  "WHERE category_id=? "
 						  "ORDER BY id DESC;");
@@ -483,11 +483,11 @@ int main()
 		res.end();
 	});
 
-	CROW_ROUTE(app, "/blog/<int>.<string>")([&getMotd, &dbBlog]
+	CROW_ROUTE(app, "/blog/<int>.<string>")([&getMotd, &dbSite]
 						(const crow::request& req, crow::response& res, int postId, std::string _) {
 		// Get blog post text
 		try {
-			SQLite::Statement pquery(dbBlog,
+			SQLite::Statement pquery(dbSite,
 						 "SELECT * FROM post_texts "
 						 "WHERE post_id=?;");
 			pquery.bind(1, postId);
@@ -498,7 +498,7 @@ int main()
 			}
 			const std::string postText = pquery.getColumn(1);
 			// Get date
-			SQLite::Statement dquery(dbBlog,
+			SQLite::Statement dquery(dbSite,
 						 "SELECT posted FROM posts "
 						 "WHERE id=?;");
 			dquery.bind(1, postId);
