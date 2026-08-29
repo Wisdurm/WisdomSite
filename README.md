@@ -14,8 +14,6 @@ Linux:
 OpenBSD:  
 ```doas pkg_add git cmake sqlite3 asio```
 
-Now all dependencies are setup.  
-
 For the next steps, clone and cd into this repository.   
 
 Then, compile the program with:  
@@ -23,12 +21,6 @@ Then, compile the program with:
 ```cmake --build build```  
 
 Create the motd.txt file
-
-To setup the database, create `db.db` using the command:  
-```sqlite3 db.db```  
-And then run the setup script in sqlite with:  
-```.read setup.sql```  
-Optionally delete the test comment left in the database.  
 
 **TODO:**
 Other stuff, and verify instructions are correct lol
