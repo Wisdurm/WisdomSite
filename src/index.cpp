@@ -55,10 +55,7 @@ static crow::json::wvalue npestaQuip(SQLite::Database& dbNpesta) noexcept
 {
 	try {
 		// Get message count
-		SQLite::Statement cquery (dbNpesta,
-					  "SELECT count(id) FROM quips;");
-		cquery.executeStep();
-		const int count = cquery.getColumn(0);
+		const int count = dbNpesta.execAndGet("SELECT count(id) FROM quips;");
 		// Get random message
 		std::default_random_engine rde {std::random_device{}()};
 		const int index = std::uniform_int_distribution<int>(1, count)(rde);
@@ -120,7 +117,7 @@ static crow::json::wvalue webBadgeArray(const std::vector<std::pair<std::string,
 }
 
 template<typename... Args>
-std::string dyna_print(std::string_view rt_fmt_str, Args&&... args)
+static std::string dyna_print(std::string_view rt_fmt_str, Args&&... args)
 {
     return std::vformat(rt_fmt_str, std::make_format_args(args...));
 }
@@ -143,7 +140,7 @@ int main()
 {
 	crow::SimpleApp app;
 	// Database
-	SQLite::Database dbComments("db.db", SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
+	SQLite::Database dbComments("comments.db", SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
 	SQLite::Database dbBlog("blog.db", SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
 	SQLite::Database dbNpesta("npesta.db", SQLite::OPEN_READONLY);
 	// Password things
@@ -682,15 +679,15 @@ int main()
 				res.body = "The HTTP method does not seem to be correct.";
 			} else if (res.code == 500) {
 				res.body = "500 Intenal error. Something serious is going on";
-			}		
+			} else {
+				res.body = std::format("Error {}: idk what's going on", res.code);
+			}
 			res.end();
 		});
 	// Motd
 	CROW_LOG_INFO << "Loading motd.txt";
-	std::ifstream motdFile;
-	motdFile.open("motd.txt", std::fstream::in);
-	if (motdFile.fail())
-	{
+	std::ifstream motdFile("motd.txt", std::fstream::in);
+	if (motdFile.fail()) {
 		CROW_LOG_CRITICAL << "Unable to open motd.txt file";
 		return EXIT_FAILURE;
 	}
@@ -722,7 +719,12 @@ int main()
 		}
 		i++;
 	}
-	// Other stuff finished, start server
+	dbComments.exec("CREATE TABLE IF NOT EXISTS comments("
+			"msg TEXT NOT NULL,"
+			"name TEXT NOT NULL,"
+			"posted INT NOT NULL,"
+			"ip TEXT NOT NULL UNIQUE"
+			");");
 	app.port(18080).multithreaded()
 		.use_compression(crow::compression::algorithm::DEFLATE)
 		.loglevel(crow::LogLevel::INFO)
