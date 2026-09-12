@@ -37,7 +37,7 @@
 struct xml_string_writer: pugi::xml_writer
 {
 	std::string result;
-	
+
 	virtual void write(const void* data, size_t size)
 	{
 		result.append(static_cast<const char*>(data), size);
@@ -195,6 +195,10 @@ int main()
 		{"winrar4.webp", "https://www.win-rar.com/"},
 		{"winxp.webp", "https://endof10.org/"},
 		{"tor.webp", "https://www.torproject.org"},
+		{"mystery.webp", "https://webring.xxiivv.com/"},
+		{"waxbutton_1.gif", "https://chunkofwax.com/"},
+		{"88tgb-button1.gif", "/questbook"},
+		{"button167.png", "/sitemap"},
 		{"valid-rss-rogers.webp", "http://validator.w3.org/feed/check.cgi?url=https%3A//wisdurm.fi/rss/canon"},
 	};
 	// Error messages
@@ -224,6 +228,21 @@ int main()
 		return page.render(ctx);
 	});
 
+	CROW_ROUTE(app, "/sitemap")([&getMotd, &projects, &webBadges, &dbNpesta]
+			     (const crow::request& req){
+		// Project of the day
+		const unsigned long day = duration_cast<std::chrono::days>(std::chrono::system_clock::now().time_since_epoch()).count();
+		std::default_random_engine rde (day);
+		const auto potd = projects.at(std::uniform_int_distribution<int>(0, projects.size() - 1)(rde));
+		const auto page = crow::mustache::load("sitemap.html");
+		crow::mustache::context ctx({
+				{"msg-daily", getMotd()},
+				{"project-daily", potd},
+				{"badges", webBadgeArray(webBadges, 10)},
+			});
+		return page.render(ctx);
+	});
+
 	CROW_ROUTE(app, "/write")([&getMotd]
 			     (const crow::request& req){
 		auto page = crow::mustache::load("write.html");
@@ -246,7 +265,7 @@ int main()
 	});
 
 	CROW_ROUTE(app, "/contact")([&getMotd]
-				    (const crow::request& req){       
+				    (const crow::request& req){
 		// TODO: Contact form
 		auto page = crow::mustache::load("contact.html");
 		crow::mustache::context ctx({
@@ -256,7 +275,7 @@ int main()
 	});
 
 	CROW_ROUTE(app, "/admin")([&lastUpdate]
-				  (const crow::request& req){       
+				  (const crow::request& req){
 		// Admin page, plain
 		auto page = crow::mustache::load("motd.html");
 		crow::mustache::context ctx({
@@ -266,7 +285,7 @@ int main()
 	});
 
 	CROW_ROUTE(app, "/blog")([&getMotd, &dbSite]
-				 (const crow::request& req){       
+				 (const crow::request& req){
 		// List of posts
 		auto page = crow::mustache::load("blog.html");
 		crow::mustache::context ctx;
@@ -345,7 +364,7 @@ int main()
 		    p and n and desc and category and title and text)
 		{
 			const std::string url_pass = p;
-			if (not BCrypt::validatePassword(url_pass + salt, pass)) {				
+			if (not BCrypt::validatePassword(url_pass + salt, pass)) {
 				res.redirect("/");
 				res.end();
 				return;
@@ -396,7 +415,7 @@ int main()
 				SQLite::Statement cquery(dbSite,
 							 "SELECT * FROM categories "
 							 "WHERE name=?;");
-				cquery.bind(1, category);			
+				cquery.bind(1, category);
 				if (not cquery.executeStep()) {
 					CROW_LOG_ERROR << "Channel: " << category << " does not exist";
 					res.code = 400;
@@ -665,7 +684,7 @@ int main()
 		});
 
 	CROW_ROUTE(app, "/npesta")
-		([&dbNpesta] {			
+		([&dbNpesta] {
 			return npestaQuip(dbNpesta);
 		});
 

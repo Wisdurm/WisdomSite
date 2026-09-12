@@ -11,8 +11,8 @@ headerTemplate.innerHTML = `
     <nav>
         <a href="/" class="link logo">Wisdurm.fi</a>
         <a href="/projects" class="sub">Projects</a>
-        <a href="/contact" class="sub">Contact</a>
         <a href="/blog" class="sub">Blog</a>
+        <a href="/sitemap" class="sub">Sitemap</a>
     </nav>
 </div>
 <div class="border">

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="/static/components/header.js"></script>
+		<script src="/static/components/footer.js"></script>
+		<script src="/static/components/card.js"></script>
+		<title>Landing page</title>
+		<link rel="stylesheet" href="/static/css/style.css">
+		<script src="/static/jquery-4.0.0.slim.min.js"></script>
+		<script src="/static/fittext.js"></script>
+		<script src="/static/scripts/script.js"></script>
+	</head>
+	<body>
+		<div class="block">
+			<header-component>
+				<span slot="wisdom">{{msg-daily}}</span>
+			</header-component>
+		</div>
+		<div class="block zenith">
+			<aside>
+				<div class="border">
+					<img src="/static/images/cat.gif">
+				</div>
+				<div class="border">
+					{{#badges}}
+					<a href="{{href}}" class="i88x31">
+						<img src="/static/images/badges/{{img}}">
+					</a>
+					{{/badges}}
+				</div>
+			</aside>
+			<main>
+				<div class="border">
+					<h1>Sitemap</h1>
+					<p>
+						This is a map of (maybe) all pages on this server.
+					</p>
+					<p>
+						There's also all kinds of buttons everywhere to distract
+						you and try to lead you astray.
+					</p>
+					<h2>89.167.62.36</h2>
+					<div class="indent">
+						<h3>wisdurm.fi</h3>
+						<div class="indent">
+							<h4>www.wisdurm.fi (or just wisdurm.fi)</h4>
+							<div class="indent">
+								<p>
+									This is my main site for everything except large
+									projects which have their own seperate backend.
+								</p>
+								<p>
+									Top level pages
+								</p>
+								<ul>
+									<li>
+										<a href="/projects">Projects</a>
+									</li>
+									<li>
+										<a href="/contact">Contact</a>
+									</li>
+									<li>
+										<a href="/blog">Blog</a>
+									</li>
+									<li>
+										<a href="/guestbook">Guestbook</a>
+									</li>
+									<li>
+										<a href="/sitemap">Sitemap</a>
+									</li>
+								</ul>
+								<p>
+									Misc. pages
+								</p>
+								<ul>
+									<li>
+										<a href="/static/things/knowledge.html">Knowledge</a>
+									</li>
+								</ul>
+								<p>
+									Api (because why not)
+								</p>
+								<ul>
+									<li>
+										<a href="/npesta">Npesta quip</a>
+									</li>
+								</ul>
+							</div>
+							<h4>rhythm.wisdurm.fi</h4>
+							<div class="indent">
+								<p>
+									This is a small rhythm game I made, which is
+									just an expanded version of an old game.
+									This time it has it's own backend, written
+									in Haskell!
+								</p>
+								<ul>
+									<li>
+										<a href="https://rhythm.wisdurm.fi">
+											The game
+										</a>
+									</li>
+								</ul>
+							</div>
+						</div>
+						<h3>sandels.site</h3>
+						<div class="indent">
+							<p>
+								This is my friends site which happens to be hosted on
+								the same server :)
+							</p>
+							<ul>
+								<li>
+									<a href="https://sandels.site">Index</a>
+								</li>
+							</ul>
+						</div>
+						<h3>otsojohannes.fi</h3>
+						<div class="indent">
+							<p>
+								Currently just a redirect to sandels.site
+							</p>
+						</div>
+					</div>
+				</div>
+			</main>
+			<aside style="flex: 1;">
+				<div class="border">
+					<h2>Project of the day!</h2>
+					{{#project-daily}}
+					<card-component id="{{name}}">
+						<div slot="name">{{name}}</div>
+						<div slot="text">{{desc}}</div>
+						<img class="{{imgform}}" slot="image" src="{{img}}"
+							 alt="{{name}}">
+						<span slot="links">
+							{{#links}}
+							<a class="spanLink" href="{{href}}">{{text}}</a>
+							{{/links}}
+						</span>
+					</card-component>
+					{{/project-daily}}
+				</div>
+			</aside>
+		</div>
+		<footer-component>
+		</footer-component>
+	</body>
+</html>

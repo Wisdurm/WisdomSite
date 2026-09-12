@@ -144,6 +144,9 @@ main > .border,
 	word-break: break-word;
 	hyphens: auto;
 }
+.indent {
+	margin-left: 10px;
+}
 /* Split view */
 .split {
 	display: flex;
