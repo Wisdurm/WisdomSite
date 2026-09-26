@@ -683,9 +683,14 @@ int main()
 			}
 		});
 
-	CROW_ROUTE(app, "/npesta")
+	CROW_ROUTE(app, "/api/npesta")
 		([&dbNpesta] {
 			return npestaQuip(dbNpesta);
+		});
+
+	CROW_ROUTE(app, "/api/motd")
+		([&getMotd] {
+			return crow::json::wvalue{{"message", getMotd()}};
 		});
 
 	CROW_CATCHALL_ROUTE(app)
