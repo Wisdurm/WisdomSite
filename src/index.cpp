@@ -163,7 +163,6 @@ int main()
 		CROW_LOG_INFO << dyna_print("Time since last update: {:%H h %M m %S s}", now - lastUpdate);
 		// If more than 30 hours has passed, reset the daily word
 		if (duration_cast<hours>(now - lastUpdate).count() > 30) {
-			lastUpdate = now;
 			dailyMsg.clear();
 		}
 		return dailyMsg;
@@ -384,8 +383,8 @@ int main()
 				const int post_id = [&](){
 					SQLite::Statement query(dbSite,
 								"SELECT id FROM posts "
-								"WHERE nro=?;");
-					query.bind(1, nro);
+								"WHERE desc=?;");
+					query.bind(1, desc);
 					query.executeStep();
 					return query.getColumn(0);
 				}();
