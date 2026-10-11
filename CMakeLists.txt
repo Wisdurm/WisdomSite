@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Project
 project(WisdomSite)
 
-add_executable(WisdomSite 
+add_executable(WisdomSite
   src/index.cpp
 )
 # Dependencies
@@ -17,7 +17,7 @@ include(FetchContent)
 FetchContent_Declare(
   Crow
   GIT_REPOSITORY https://github.com/CrowCpp/Crow
-  GIT_TAG v1.3.3
+  GIT_TAG v1.3.4
   GIT_SHALLOW TRUE
   GIT_PROGRESS TRUE
 )

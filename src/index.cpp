@@ -1,6 +1,6 @@
 // Internal
-#include "SQLiteCpp/Transaction.h"
 #include "markdown.hpp"
+#include "guard.hpp"
 // C++
 #include <array>
 #include <exception>
@@ -28,6 +28,7 @@
 #include <SQLiteCpp/SQLiteCpp.h>
 #include "SQLiteCpp/Database.h"
 #include "SQLiteCpp/Statement.h"
+#include "SQLiteCpp/Transaction.h"
 #include "crow/logging.h"
 #include "crow/query_string.h"
 
@@ -138,7 +139,7 @@ static std::string formatDateRss(int unixt) {
 
 int main()
 {
-	crow::SimpleApp app;
+	crow::App<SpamGuard> app;
 	// Database
 	SQLite::Database dbComments("dbs/comments.db", SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
 	SQLite::Database dbSite("dbs/site.db", SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
