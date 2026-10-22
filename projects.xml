@@ -13,6 +13,36 @@
 	  <link href="https://github.com/LukaHietala/cesp">Src</link>
 	</item>
   </cat>
+  <cat name="Programming languages" desc="Some toy languages I've made for fun.
+										  If my Github contributions are
+										  private for a long period of time,
+										  I've probably started working on a
+										  new one :) (that or I'm doing
+										  something actually reasonable)">
+
+	<item name="Runtime" desc="A high-level, questionably-evaluated, interpreted
+							   programming language.
+							   Made for fun, and is not particularly efficient,
+							   but hopefully a bit fun to mess around with :)"
+		  img="/static/images/thumb-run.webp" imgform="imgcenter">
+	  <link href="https://runtime.wisdurm.fi/public/index.php">
+		Site (DOWN)
+	  </link>
+	  <link href="https://github.com/Wisdurm/Runtime">
+		Src
+	  </link>
+	</item>
+	<item name="Re-time" desc="A  simple, purely object-oriented, Lisp inspired
+							   programming language which is a redesigned and
+							   rewritten version of Runtime.
+							   Same disclaimer as with Runtime, except I know
+							   even less about Haskell than C++."
+		  img="/static/images/thumb-ret.webp" imgform="fullimgh">
+	  <link href="https://github.com/Wisdurm/Re-time">
+		Src
+	  </link>
+	</item>
+  </cat>
   <cat name="Web" desc="These are some little web projects I've been working on.">
 	<item name="Wisdurm.fi" desc="This is my website, the one you're currently
 								  on!" img="/static/images/thumb-wis.webp"
@@ -81,19 +111,6 @@
   <cat name="Miscellaneous" desc="Projects I've made that don't neatly fit into
 								  any of the other categories. These may be
 								  better organized in the future.">
-	<item name="Runtime" desc="A high-level, questionably-evaluated, interpreted
-							   programming language.
-							   Made for fun, and is not particularly efficient,
-							   but hopefully a bit fun to mess around with :)
-							   Will be rewritten at some point."
-		  img="/static/images/thumb-run.webp" imgform="imgcenter">
-	  <link href="https://runtime.wisdurm.fi/public/index.php">
-		Site (DOWN)
-	  </link>
-	  <link href="https://github.com/Wisdurm/Runtime">
-		Src
-	  </link>
-	</item>
 	<item name="Desktop Flashbang" desc="What it says on the tin, a program
 										 which throws a flashbang on your
 										 screen."
