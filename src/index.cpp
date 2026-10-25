@@ -1,6 +1,7 @@
 // Internal
 #include "markdown.hpp"
 #include "guard.hpp"
+#include "cache.hpp"
 // C++
 #include <array>
 #include <exception>
@@ -140,7 +141,7 @@ static std::string formatDateRss(int unixt) {
 
 int main()
 {
-	crow::App<SpamGuard> app;
+	crow::App<SpamGuard, Cache> app;
 	// Database
 	SQLite::Database dbComments("dbs/comments.db", SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
 	SQLite::Database dbSite("dbs/site.db", SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
@@ -199,7 +200,7 @@ int main()
 		{"mystery.webp", "https://webring.xxiivv.com/"},
 		{"waxbutton_1.gif", "https://chunkofwax.com/"},
 		{"88tgb-button1.gif", "/guestbook"},
-		{"button167.png", "/sitemap"},
+		{"button167.webp", "/sitemap"},
 		{"valid-rss-rogers.webp", "http://validator.w3.org/feed/check.cgi?url=https%3A//wisdurm.fi/rss/canon"},
 	};
 	// Error messages

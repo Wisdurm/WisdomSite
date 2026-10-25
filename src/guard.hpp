@@ -2,6 +2,7 @@
 #include "crow/logging.h"
 #include <crow.h>
 #include <numeric>
+#include <optional>
 #include <unordered_map>
 #include <chrono>
 #include <vector>
@@ -18,6 +19,7 @@ struct SpamGuard
 	struct ConnectionInfo {
 		int timeOuts;
 		TimePoint firstConnection;
+		std::optional<TimePoint> timeout;
 		std::vector<Req> reqs;
 	};
 
@@ -59,6 +61,18 @@ struct SpamGuard
 			return;
 		}
 
+		if (m->second.timeout) {
+			if (now - m->second.timeout.value() < std::chrono::seconds(10)) {
+				auto page = crow::mustache::load(
+					"limbo.html");
+				res.body = page.render_string();
+				res.code = 403;
+				res.end();
+				return;
+			}
+			m->second.timeout = std::nullopt;
+		}
+
 		auto& reqs = m->second.reqs;
 
 		// Weight request
@@ -70,10 +84,11 @@ struct SpamGuard
 			: req.url.ends_with("jpg") ? 40
 			: req.url.contains("components") ? 3
 			: req.url.ends_with("js") ? 5
-			: req.url.ends_with("css") ? 5
-			: req.url.ends_with("webp") ? 1
-			: req.url.ends_with("gif") ? 1
-			: 30;
+			: req.url.ends_with("css") ? 10
+			: req.url.ends_with("webp") ? 3
+			: req.url.ends_with("png") ? 5
+			: req.url.ends_with("gif") ? 3
+			: 15;
 
 		reqs.push_back( {
 				std::chrono::system_clock::now(),
@@ -100,6 +115,7 @@ struct SpamGuard
 			: 250;
 
 		if (sum > limit) {
+			m->second.timeout = now;
 			m->second.timeOuts++;
 
 			auto page = crow::mustache::load(
