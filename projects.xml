@@ -1,6 +1,5 @@
 <projects>
-  <cat name="Tools" desc="Projects I've made or took part in making which
-						  actually serve some purpose.">
+  <cat name="Tools" desc="Projects which serve some purpose, or act like it.">
 	<item name="wisdomkey" desc="Small accessiblity program for moving around
 								 the mouse using a small set of keys."
 		  img="/static/images/thumb-key.webp" imgform="fullimgh">
@@ -11,6 +10,12 @@
 							Emacs and Neovim!"
 		  img="/static/images/thumb-ces.webp" imgform="fullimgh">
 	  <link href="https://github.com/LukaHietala/cesp">Src</link>
+	</item>
+	<item name="kpedu" desc="A simple terminal-based text-editor with Emacs-like
+							 keybindings. You should probably just use Emacs
+							 though."
+		  img="/static/images/thumb-kpd.webp" imgform="fullimgw">
+	  <link href="https://github.com/Wisdurm/kpedu">Src</link>
 	</item>
   </cat>
   <cat name="Programming languages" desc="Some toy languages I've made for fun.
@@ -43,17 +48,18 @@
 	  </link>
 	</item>
   </cat>
-  <cat name="Web" desc="These are some little web projects I've been working on.">
+  <cat name="Web" desc="Some small web projects I've made.">
 	<item name="Wisdurm.fi" desc="This is my website, the one you're currently
 								  on!" img="/static/images/thumb-wis.webp"
 		  imgform="fullimgh">
 	  <link href="https://wisdurm.fi">Wisdurm.fi</link>
 	</item>
-	<item name="Infinite canvas" desc="This is a (incomplete!) website that
+	<item name="Infinite canvas" desc="This is an (incomplete!) website that
 									   features a canvas for drawing, with
 									   infinite space to pan and zoom around in.
 									   Code for smoothing the lines and a
-									   possible shared canvas are in the works."
+									   possible shared canvas are in the works
+									   (circa 1846)."
 		  img="/static/images/thumb-can.webp"
 		  imgform="fullimgh">
 	  <link href="/static/projects/infinite-canvas/infinite-canvas.html">Canvas</link>
@@ -62,7 +68,8 @@
 	<item name="Rhythm game" desc="A simple rhythm game which uses MIDI-data to
 								   generate gameplay. Maybe doesn't work very
 								   well for complex songs, but still kinda cool!
-								   Heads up! These use DFJK for the control scheme!"
+								   Heads up! These use DFJK for the control
+								   scheme!"
 		  img="/static/images/thumb-rtm.webp" imgform="fullimgw"
 		  alt="Rhythm game screenshot">
 	  <link href="https://rhythm.wisdurm.fi"> The game </link>
@@ -71,7 +78,8 @@
 	<item name="Rhythm slop" desc="A very small & simple rhythm game, without
 								   any actual rhythm. I made this while bored at
 								   school.
-								   Heads up! These use DFJK for the control scheme!"
+								   Heads up! These use DFJK for the control
+								   scheme!"
 		  img="/static/images/thumb-rhy.webp" imgform="fullimgw"
 		  alt="Runtime logo">
 	  <link href="/static/projects/rhythm/Rytmipeli.html">
@@ -82,19 +90,23 @@
   <cat name="Games" desc="Games I've that are more in depth experiences. This
 						  doesn't include all of my games, and even so these are
 						  all currently unfinished, but maybe you'll still find
-						  them cool.">
-	<item name="Unnamed-Tower-Defense-Game" desc="This is a tower defense game I started writing in C#.
-												  It's currently in a perfectly
-												  playable state, but it's
-												  obviously unfinished."
+						  them cool. Most of these are also a pita to run since
+						  they
+						  were built with C# and SDL2 in Visual Studio.">
+	<item name="Unnamed-Tower-Defense-Game" desc="This is a tower defense game I
+												  wrote in C#. It's currently in
+												  a perfectly playable state,
+												  but it's obviously unfinished.
+												  May be rewritten later."
 		  img="/static/images/thumb-tow.webp" imgform="fullimgw">
 	  <link href="https://www.youtube.com/watch?v=fkQT2tmIeyg">Video</link>
 	  <link href="https://github.com/Wisdurm/Unnamed-Tower-Defense-Game">Src</link>
 	</item>
-	<item name="Horrible World" desc="This is a war/civilization simulation game I also wrote in C#.
-									  This is, I believe, still my largest
-									  project by lines of code. (not that that's
-									  a good metric)"
+	<item name="Horrible World" desc="This is a war/civilization simulation game
+									  I also wrote in C#. This is, I believe,
+									  still my largest project by lines of code.
+									  (not that that's a good metric).
+									  Unfinished C++ rewrite also exists."
 		  img="/static/images/thumb-hor.webp" imgform="fullimgw" >
 	  <link href="https://github.com/Wisdurm/Unnamed-Tower-Defense-Game">Video</link>
 	  <link href="https://github.com/Wisdurm/Horrible-World">Src</link>
@@ -102,7 +114,8 @@
 	<item name="Terrabit" desc="Very simple text-based Terraria remake. More of
 								a proof of concept, never got far into
 								development. (Also my first proper programming
-								project ever!)"
+								project ever!). Probably won't be rewritten (but
+								who knows!)"
 		  img="/static/images/thumb-ter.webp" imgform="fullimgh">
 	  <link href="https://www.youtube.com/watch?v=ivEEdUHqQ6c">Video</link>
 	  <link href="https://github.com/Wisdurm/Terrabit">Src</link>
