@@ -14,6 +14,7 @@
 #include <format>
 #include <random>
 #include <chrono>
+#include <filesystem>
 // C
 #include <cctype>
 #include <cstdlib>
@@ -187,7 +188,7 @@ int main()
 		{"firefox_now.webp", "https://www.firefox.com/"},
 		{"best_viewed_with_eyes.gif", ""},
 		{"button38.webp", "https://github.com/Wisdurm/"},
-		{"gue.jpg", "/guestbook"},
+		{"gue.webp", "/guestbook"},
 		{"powered-cpp.webp", "https://legacy.cplusplus.com/"},
 		{"powered-cpp.webp", "https://cppreference.com/"},
 		{"sdl.webp", "https://www.libsdl.org/"},
@@ -197,7 +198,7 @@ int main()
 		{"tor.webp", "https://www.torproject.org"},
 		{"mystery.webp", "https://webring.xxiivv.com/"},
 		{"waxbutton_1.gif", "https://chunkofwax.com/"},
-		{"88tgb-button1.gif", "/questbook"},
+		{"88tgb-button1.gif", "/guestbook"},
 		{"button167.png", "/sitemap"},
 		{"valid-rss-rogers.webp", "http://validator.w3.org/feed/check.cgi?url=https%3A//wisdurm.fi/rss/canon"},
 	};
@@ -210,6 +211,8 @@ int main()
 		 "you should probably checkback later."},
 		{"ip", "Your public ip address has already been used to "
 		 "make a comment, sorry."},
+		{"trust", "Your connection is not trusted enough. "
+		 "Try looking around the site for a bit before commenting"}
 	};
 
 	CROW_ROUTE(app, "/")([&getMotd, &projects, &webBadges, &dbNpesta]
@@ -274,12 +277,39 @@ int main()
 		return page.render(ctx);
 	});
 
-	CROW_ROUTE(app, "/admin")([&lastUpdate]
+	CROW_ROUTE(app, "/admin")([&app, &lastUpdate]
 				  (const crow::request& req){
 		// Admin page, plain
 		auto page = crow::mustache::load("motd.html");
+		const auto& guard = app.get_context<SpamGuard>(req);
+		const std::string addr = req.get_header_value("X-Real-IP");
 		crow::mustache::context ctx({
-				{"time-since", dyna_print("{:%H h %M m %S s}", (std::chrono::system_clock::now() - lastUpdate)) }
+				{"time-since", dyna_print("{:%H h %M m %S s}", (std::chrono::system_clock::now() - lastUpdate)) },
+				{"trust", guard.getTrust(addr)}
+
+			});
+		return page.render(ctx);
+	});
+
+	CROW_ROUTE(app, "/gallery")([&getMotd]
+				    (const crow::request& req){
+		auto page = crow::mustache::load("gallery.html");
+		crow::json::wvalue images;
+		int i = 0;
+		for (const auto& entry :
+			     std::filesystem::directory_iterator("static/images/gallery/photos")) {
+			if (not entry.path().filename().string().starts_with("thumb")) {
+				images["photos"][i]["thumb"] =
+					std::format("{}/thumb-{}.webp",
+						    entry.path().parent_path().string(),
+						    entry.path().stem().string());
+				images["photos"][i]["full"] = entry.path();
+				i++;
+			}
+		}
+		crow::mustache::context ctx({
+				{"msg-daily", getMotd()},
+				{"images", images}
 			});
 		return page.render(ctx);
 	});
@@ -603,10 +633,11 @@ int main()
 		});
 
 	CROW_ROUTE(app, "/comment").methods("GET"_method, "POST"_method)
-		([&pass, &salt, &dbComments]
+		([&app, &pass, &salt, &dbComments]
 		 (const crow::request& req, crow::response& res)
 		{
 			// Post comment
+			const auto& guard = app.get_context<SpamGuard>(req);
 			// remote_ip_address does not work because of reverse proxy
 			// X-Real-IP needs to be configued in Nginx
 			const std::string addr = req.get_header_value("X-Real-IP");
@@ -618,7 +649,6 @@ int main()
 			{
 				const std::string name = n;
 				const std::string msg = m;
-				time_t now = time(nullptr);
 				// Validation
 				if (name.size() == 0 or
 				    name.size() > 50) {
@@ -634,7 +664,14 @@ int main()
 					res.end();
 					return;
 				}
+				if (not guard.canTrust(addr)) {
+					// Untrusted connection
+					res.redirect("/guestbook?err=trust");
+					res.end();
+					return;
+				}
 				// Correct checkmarks
+				const time_t now = time(nullptr);
 				const int trick = localtime(&now)->tm_hour % 6;
 				for (uint8_t i = 0; i < 8; i++) {
 					// bruh

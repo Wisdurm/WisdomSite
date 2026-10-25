@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="/static/components/header.js"></script>
+		<script src="/static/components/footer.js"></script>
+		<title>Gallery</title>
+		<link rel="stylesheet" href="/static/css/style.css">
+		<script src="/static/scripts/script.js"></script>
+	</head>
+	<body>
+		<div class="block">
+			<header-component>
+				<span slot="wisdom">{{msg-daily}}</span>
+			</header-component>
+		</div>
+		<div class="block zenith">
+			<main>
+				<div class="border">
+					<h1>Gallery</h1>
+					<p>
+						This page serves as a gallery (duh) to showcase some
+						"images" (photos or whatever) that I've accrued over time.
+					</p>
+					<p>
+						Unless otherwise specified, these are all licensed under
+						CC-??
+						(use wherever with credit)
+					</p>
+					<div class="border">
+						<h2>Pictures</h2>
+						<p>
+							Here are some pictures I've taken. The collection is
+							rather small at the moment as I've tried to keep it
+							varied and interesting enough.
+						</p>
+						<div class="gallery">
+							{{#images.photos}}
+							<a href="{{full}}">
+								<img loading="lazy" class="gallery-img"
+									 src="{{thumb}}">
+							</a>
+							{{/images.photos}}
+						</div>
+					</div>
+				</div>
+			</main>
+		</div>
+		<footer-component>
+		</footer-component>
+	</body>
+</html>

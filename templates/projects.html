@@ -28,6 +28,7 @@
 				<a href="/blog"> Blog </a>
 				<a href="/guestbook">Guestbook</a>
 				<a href="/sitemap">Sitemap</a>
+				<a href="/gallery">Gallery</a>
 				<!-- Page specific -->
 				{{#projects}}
 				<strong>{{name}}</strong>
@@ -61,8 +62,8 @@
 						<card-component id="{{name}}">
 							<div slot="name">{{name}}</div>
 							<div slot="text">{{desc}}</div>
-							<img class="{{imgform}}" slot="image" src="{{img}}"
-								 alt="{{name}}">
+							<img class="{{imgform}}" loading="lazy" slot="image"
+								 src="{{img}}" alt="{{name}}">
 							<span slot="links">
 								{{#links}}
 								<a class="spanLink" href="{{href}}">{{text}}</a>
