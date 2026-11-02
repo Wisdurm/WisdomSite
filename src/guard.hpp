@@ -83,12 +83,14 @@ struct SpamGuard
 			: req.url.ends_with("otf") ? (newC ? 0 : 30)
 			: req.url.ends_with("jpg") ? 40
 			: req.url.contains("components") ? 3
-			: req.url.ends_with("js") ? 5
-			: req.url.ends_with("css") ? 10
-			: req.url.ends_with("webp") ? 3
+			: req.url.ends_with("js") ? (newC ? 0 : 5)
+			: req.url.ends_with("css") ? (newC ? 0 : 10)
+			: req.url.ends_with("webp") ? 2
 			: req.url.ends_with("png") ? 5
 			: req.url.ends_with("gif") ? 3
+			: req.url.ends_with("ico") ? 3
 			: 15;
+		CROW_LOG_INFO << weight;
 
 		reqs.push_back( {
 				std::chrono::system_clock::now(),
@@ -105,7 +107,7 @@ struct SpamGuard
 						{
 							return sum + x.weight;
 						});
-		// CROW_LOG_INFO << "Sum: " << sum;
+		CROW_LOG_INFO << "Sum: " << sum;
 		// CROW_LOG_INFO << "Len: " << reqs.size();
 
 		const int limit =

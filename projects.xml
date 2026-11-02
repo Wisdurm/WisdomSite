@@ -11,6 +11,13 @@
 		  img="/static/images/thumb-ces.webp" imgform="fullimgh">
 	  <link href="https://github.com/LukaHietala/cesp">Src</link>
 	</item>
+	<item name="shldnbththrd" desc="Super simple vector animation tool made to
+									fill the need for a simple, foss Pivot
+									animator-like tool for Linux. Not very good
+									UX, but it gets the job done."
+		  img="/static/images/thumb-shl.webp" imgform="fullimgw">
+	  <link href="https://github.com/Wisdurm/shldnbththrd">Src</link>
+	</item>
 	<item name="kpedu" desc="A simple terminal-based text-editor with Emacs-like
 							 keybindings. You should probably just use Emacs
 							 though."
