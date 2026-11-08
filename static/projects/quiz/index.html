@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="/static/components/header.js"></script>
+		<script src="/static/components/footer.js"></script>
+		<script src="/static/components/card.js"></script>
+		<title>Guessing game</title>
+		<link rel="stylesheet" href="/static/css/style.css">
+		<script src="/static/jquery-4.0.0.slim.min.js"></script>
+	</head>
+	<body>
+		<div class="block">
+			<header-component>
+				<span slot="wisdom">You are in too deep</span>
+			</header-component>
+		</div>
+		<div class="block zenith">
+			<aside>
+				<div class="border">
+					<img src="/static/images/dope.gif">
+				</div>
+				<div class="border">
+					<small>
+					Was this cool?<br>
+					Leave a comment! <br>
+					<a href="/guestbook"><button>Guestbook</button></a>
+					</small>
+				</div>
+			</aside>
+			<main>
+				<div class="border">
+					<h1>Imagine</h1>
+					<p>
+						Through some weird kafkaesque sequence of events, you've
+						found yourself in a rabbit-hole 10 layers deep full of
+						random cli programs, and now you must navigate your way
+						out, <strong>however</strong> you cannot make <strong>any</strong>
+						mistakes. Think you can do it?
+					</p>
+					<div class="border">
+						<div id="start">
+							<button id="play">Start?</button>
+						</div>
+						<div id="game" style="display:none;">
+							<h2>You are in: <span id="program-name"></span></h2>
+							<p>
+								Type the <strong>exact</strong> key sequence necessary
+								to exit. (C-d is cheating)
+							</p>
+							<input type="text" disabled id="guess">
+						</div>
+						<div id="win" style="display:none;">
+							You won!
+						</div>
+						<div id="lost" style="display:none;">
+							Whoops you lost.
+							<button id="play2">Try again</button>
+						</div>
+					</div>
+				</div>
+			</main>
+		</div>
+		<footer-component>
+		</footer-component>
+	</body>
+	<script>
+		const answers = new Map([
+			["Vim", [":qEnter", ":wqEnter", ":q!Enter", ":quitEnter"]],
+			["GHCi", [":qEnter", ":quitEnter"]],
+			["Emacs", "C-x C-c"],
+			["SQLite", [".exitEnter", "C-c C-c"]],
+			["Node", [".exitEnter", "C-c C-c"]],
+			["sh", "exitEnter"],
+			["Nano", "C-x"],
+			["Python", ["exitEnter", "exit()Enter", "quitEnter", "quit()Enter"]],
+			["Python venv", "deactivateEnter"],
+			["Midnight Commander", ["F10", "exitEnter"]],
+			["Lua", ["C-c", "os.exit()Enter"]],
+			["ed", "qEnter"],
+			["top", "q"],
+			["less", "q"],
+		]);
+
+		let programs = [];
+		let currentProg = "Vim";
+		let guess = "";
+
+		// Source - https://stackoverflow.com/a/2450976
+		// Posted by ChristopheD, modified by community. See post 'Timeline' for change history
+		// Retrieved 2026-11-08, License - CC BY-SA 4.0
+		function shuffle(array) {
+			let currentIndex = array.length;
+
+			// While there remain elements to shuffle...
+			while (currentIndex != 0) {
+
+				// Pick a remaining element...
+				let randomIndex = Math.floor(Math.random() * currentIndex);
+				currentIndex--;
+
+				// And swap it with the current element.
+				[array[currentIndex], array[randomIndex]] = [
+					array[randomIndex], array[currentIndex]];
+			}
+		}
+
+		function start()
+		{
+			$("#start").hide();
+			$("#win").hide();
+			$("#lost").hide();
+			$("#game").show();
+			// Random programs
+			programs = [];
+			for (const [p, _] of answers)
+				programs.push(p);
+			shuffle(programs);
+			programs = programs.slice(0, 10);
+
+			round();
+		}
+		$("#play").on("click", start);
+		$("#play2").on("click", start);
+
+		function round()
+		{
+			guess = "";
+			$("#guess")[0].value = guess;
+			$("#program-name").text(programs[0]);
+			if (programs.length == 0) {
+ 				$("#game").hide();
+				$("#win").show();
+			}
+		}
+
+		document.addEventListener("keydown", (event) => {
+			const keyName = event.key;
+			if (keyName == "Shift" || keyName == "Control")
+				return;
+
+			if (event.ctrlKey)
+				guess += `C-${keyName} `;
+			else
+				guess += keyName;
+			$("#guess")[0].value = guess;
+			// Check
+			const check = (answer) =>
+				  answer.startsWith(guess.trim()) ?
+				  (answer === guess.trim() ? "WIN" : "CONTINUE") : "LOSE";
+
+			const answer = answers.get(programs[0]);
+			if (typeof(answer) === "string") {
+				switch (check(answer)) {
+				case "WIN":
+					programs = programs.slice(1);
+					round();
+					break;
+				case "LOSE":
+					$("#game").hide();
+					$("#lost").show();
+					break;
+				}
+			} else {
+				for (const a of answer) {
+					const r = check(a);
+					if (r === "WIN") {
+						programs = programs.slice(1);
+						round();
+						return;
+					} else if (r === "CONTINUE") return;
+				}
+				$("#game").hide();
+				$("#lost").show();
+			}
+		});
+	</script>
+</html>

@@ -82,24 +82,23 @@
 	  <link href="https://rhythm.wisdurm.fi"> The game </link>
 	  <link href="https://github.com/Wisdurm/rhythm"> Source </link>
 	</item>
-	<item name="Rhythm slop" desc="A very small & simple rhythm game, without
-								   any actual rhythm. I made this while bored at
-								   school.
-								   Heads up! These use DFJK for the control
-								   scheme!"
+	<item name="Other minor projects" desc="There is also a page on this site
+											for other web projects which are so
+											small that it feels wrong to put
+											them on the same page Runtime."
 		  img="/static/images/thumb-rhy.webp" imgform="fullimgw"
 		  alt="Runtime logo">
-	  <link href="/static/projects/rhythm/Rytmipeli.html">
-		The game
+	  <link href="/static/projects/listing.html">
+		Page
 	  </link>
 	</item>
   </cat>
-  <cat name="Games" desc="Games I've that are more in depth experiences. This
-						  doesn't include all of my games, and even so these are
-						  all currently unfinished, but maybe you'll still find
-						  them cool. Most of these are also a pita to run since
-						  they
-						  were built with C# and SDL2 in Visual Studio.">
+  <cat name="Games" desc="Games I've made that are more in depth experiences.
+						  This doesn't include all of my games, and even so
+						  these are all currently unfinished, but maybe you'll
+						  still find them cool. Most of these are also a pita
+						  to run since they were built with C# and SDL2 in
+						  Visual Studio.">
 	<item name="Unnamed-Tower-Defense-Game" desc="This is a tower defense game I
 												  wrote in C#. It's currently in
 												  a perfectly playable state,
