@@ -36,13 +36,22 @@
 						particular to do with any of my current projects.
 					</p>
 					<div class="split">
-						<div>
+						<div style="width:50%">
 							<h2 class="tight">Canonical posts</h2>
 							<p class="tight">Main ordered posts about whatever I'm thinking about.</p>
 							<ol reversed>
 								{{#main.posts}}
 								<li>
-									<a href="/blog/{{link}}">{{name}} - ({{date}})</a>
+									<a href="/blog/{{link}}"
+									   style="display:inline">
+										{{name}} - ({{date}})
+									</a>
+									{{#lang}}
+									<a href="/blog/{{link}}/{{flag}}" style="display:inline">
+										<img src="/static/images/{{flag}}.gif"
+											 alt="flag_{{flag}}">
+									</a>
+									{{/lang}}
 								</li>
 								{{/main.posts}}
 							</ol>
@@ -50,22 +59,33 @@
 								<img id="rss" src="/static/images/Feed-icon.svg">
 							</a>
 						</div>
-						{{#categories}}
 						<div>
-							<h2 class="tight">{{name}} posts</h2>
-							<p class="tight">{{desc}}</p>
-							<ul reversed>
-								{{#posts}}
-								<li>
-									<a href="/blog/{{link}}">{{name}} - ({{date}})</a>
-								</li>
-								{{/posts}}
-							</ul>
-							<a href="/rss/{{name}}">
-								<img id="rss" src="/static/images/Feed-icon.svg">
-							</a>
+							{{#categories}}
+							<div>
+								<h2 class="tight">{{name}} posts</h2>
+								<p class="tight">{{desc}}</p>
+								<ul reversed>
+									{{#posts}}
+									<li>
+										<a href="/blog/{{link}}"
+										   style="display:inline">
+											{{name}} - ({{date}})
+										</a>
+										{{#lang}}
+										<a href="/blog/{{link}}/{{flag}}" style="display:inline">
+											<img src="/static/images/{{flag}}.gif"
+												 alt="flag_{{flag}}">
+										</a>
+										{{/lang}}
+									</li>
+									{{/posts}}
+								</ul>
+								<a href="/rss/{{name}}">
+									<img id="rss" src="/static/images/Feed-icon.svg">
+								</a>
+							</div>
+							{{/categories}}
 						</div>
-						{{/categories}}
 					</div>
 					<a href="/rss/universal">
 						<img id="rss" src="/static/images/Feed-icon.svg">

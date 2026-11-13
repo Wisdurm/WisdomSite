@@ -360,15 +360,31 @@ int main()
 					std::string link = std::format("{}. {}", id, title);
 					std::transform(link.begin(), link.end(), link.begin(),
 						       [](char c) { return (c == ' ') ? '_' : c; });
+					// Get languages
+					SQLite::Statement lquery(dbSite,
+								 "SELECT lang FROM post_texts "
+								 "WHERE post_id= ?;");
+					lquery.bind(1, id);
+					std::vector<std::string> languages;
+					while (lquery.executeStep())
+						languages.push_back(lquery.getColumn(0));
+
 					if (cat.id == 1) { // Canonical
 						ctx["main"]["posts"][index]["name"] = title;
 						ctx["main"]["posts"][index]["date"] = date;
 						ctx["main"]["posts"][index]["link"] = link;
-					}
-					else {
+						for (int li = 0; li < languages.size(); li++) {
+							ctx["main"]["posts"][index]["lang"][li]["flag"] = languages.at(li);
+							ctx["main"]["posts"][index]["lang"][li]["link"] = link;
+						}
+					} else {
 						ctx["categories"][cat.id-2]["posts"][index]["name"] = title;
 						ctx["categories"][cat.id-2]["posts"][index]["date"] = date;
 						ctx["categories"][cat.id-2]["posts"][index]["link"] = link;
+						for (int li = 0; li < languages.size(); li++) {
+							ctx["categories"][cat.id-2]["posts"][index]["lang"][li]["flag"] = languages.at(li);
+							ctx["categories"][cat.id-2]["posts"][index]["lang"][li]["link"] = link;
+						}
 					}
 					index++;
 				}
@@ -533,14 +549,21 @@ int main()
 		res.end();
 	});
 
-	CROW_ROUTE(app, "/blog/<int>.<string>")([&getMotd, &dbSite]
-						(const crow::request& req, crow::response& res, int postId, std::string _) {
+	// Legacy blog route
+	CROW_ROUTE(app, "/blog/<int>.<string>")([](const crow::request& req, crow::response& res, int postId, std::string name) {
+		res.redirect(std::format("/blog/{}.{}/en", postId, name));
+		res.end();
+	});
+
+	CROW_ROUTE(app, "/blog/<int>.<string>/<string>")([&getMotd, &dbSite]
+							 (const crow::request& req, crow::response& res, int postId, std::string _, std::string lang) {
 		// Get blog post text
 		try {
 			SQLite::Statement pquery(dbSite,
 						 "SELECT * FROM post_texts "
-						 "WHERE post_id=?;");
+						 "WHERE post_id=? and lang=?;");
 			pquery.bind(1, postId);
+			pquery.bind(2, lang);
 			if (not pquery.executeStep()) {
 				res.redirect("/404");
 				res.end();
