@@ -17,7 +17,7 @@
 }
 :root {
 	--dark: black;
-	--page-width: 1200px;
+	--page-width: min(80vw, 1200px);
 	--dark: #333;
 	--light: #EEE;
 
@@ -104,6 +104,11 @@ figcaption {
 	padding: 10px 20px;
 	border-left: 4px solid var(--dark);
 }
+@media (aspect-ratio < 10/12) {
+	.bloat {
+		display: none;
+	}
+}
 /* Card gallery */
 .card-gallery {
 	display: flex;
@@ -151,6 +156,9 @@ main > .border,
 .split {
 	display: flex;
 	flex-direction: row;
+}
+.equal {
+	flex: 1 1 0;
 }
 .right {
 	margin-left: auto;

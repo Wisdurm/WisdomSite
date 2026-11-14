@@ -15,7 +15,7 @@ headerTemplate.innerHTML = `
         <a href="/sitemap" class="sub">Sitemap</a>
     </nav>
 </div>
-<div class="border">
+<div class="border bloat">
     <div class="flex-right" id="daily-container">
         <p id="daily">
           Word(s) of the day: <slot name="wisdom">NO SLOT</slot>
