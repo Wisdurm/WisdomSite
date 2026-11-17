@@ -6,16 +6,17 @@
     src: url(FreeSerif.otf);
 }
 @font-face {
-  font-family: "Hasklug";
-  src:
-    url("HasklugNerdFontMono-Regular.otf") format("opentype");
+	font-family: "Hasklug";
+	src:
+		url("HasklugNerdFontMono-Regular.otf") format("opentype");
 }
 @font-face {
-  font-family: "Lexend";
-  src:
-    url("Lexend-Light.ttf");
+	font-family: "Lexend";
+	src:
+		url("Lexend-Light.ttf");
 }
 :root {
+	/* Desktop */
 	--dark: black;
 	--page-width: min(80vw, 1200px);
 	--dark: #333;
@@ -33,7 +34,10 @@
 	--vlight: #bda6a6;
 
 	--yellow: #dbdb87;
-
+	/* Mobile */
+	--mobil-bg: rgba(0,0,0, 0.2);
+	--mobil-txt-bg: rgba(0,0,0, 0.6);
+	--white: #fff;
 	/*
 	  Every element that isn't a child
 	   of .zenith will have this font by default.
@@ -44,322 +48,614 @@
 html {
 	height: 100%;
 }
-/* Main */
-body {
-	/* space */
-    margin: 0;
-    padding: 0;
-	/* flex */
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	/* bg */
-	background-color: var(--blue);
-	background: linear-gradient(180deg, var(--blue) 0%, var(--dank-blue) 100%) no-repeat;
-	background-attachment: fixed;
+/* Actual styles */
+/* Desktop */
+@media (aspect-ratio > 10/12) {
+	/* Main */
+	body {
+		/* space */
+		margin: 0;
+		padding: 0;
+		/* flex */
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		/* bg */
+		background-color: var(--blue);
+		background: linear-gradient(180deg, var(--blue) 0%, var(--dank-blue) 100%) no-repeat;
+		background-attachment: fixed;
+	}
+	/* Highest level block  */
+	.block {
+		/* Default color */
+		background-color: var(--txt-bg);
+		background: linear-gradient(90deg, var(--dank-bg) 0%, var(--txt-bg) 50%, var(--dank-bg) 100%);
+		/* Shadow */
+		-webkit-box-shadow: 15px 16px 0px 5px #000000;
+		box-shadow: 15px 16px 0px 5px #000000;
+		/* Some space */
+		margin: 20px;
+	}
+	/* Main center block */
+	.zenith {
+		display: flex;
+		flex-direction: row;
+		font-family: "Hasklug";
+		/* Space */
+		width: var(--page-width);
+		/* min-height: 1000px; */
+	}
+	/* Containers for main content blocks */
+	main, aside, header {
+		padding: 10px 5px;
+		/* background-color: wheat; */
+		/* Flex */
+		display: flex;
+		flex-direction: column;
+	}
+	/* Main boxes */
+	figure,
+	.border {
+		border: 1px solid var(--dark);
+		padding: 5px;
+		height: fit-content;
+	}
+	main > .border {
+		padding-left: 10px;
+	}
+	aside > .border {
+		margin-bottom: 5px;
+	}
+	figcaption {
+		padding: 10px 20px;
+		border-left: 4px solid var(--dark);
+	}
+	/* Card gallery */
+	.card-gallery {
+		display: flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+	}
+	.spanLink {
+		width: auto;
+	}
+	/* Left hand nav */
+	.alt-nav {
+		display: flex;
+		flex-direction: column;
+		min-width: 100px;
+	}
+	.addition {
+		font-size: 1.5em;
+	}
+	.addition > a {
+		background-color: var(--vlight);
+	}
+
+	/* EXTRA PADDING WHEN NEED BE */
+	main > .border,
+	.comment-list > .border {
+		margin-bottom: 10px;
+	}
+	.error {
+		padding: 10px;
+		background-color: var(--light-em);
+	}
+	.notice {
+		background-color: var(--yellow);
+		padding: 2px;
+		word-break: break-word;
+		hyphens: auto;
+	}
+	.indent {
+		margin-left: 10px;
+	}
+	/* Split view */
+	.split {
+		display: flex;
+		flex-direction: row;
+	}
+	h2.tight {
+		margin-bottom: 5px;
+	}
+	p.tight {
+		font-size: small;
+		margin-top: 5px;
+		padding-left: 10px;
+	}
+	.date {
+		font-size: small;
+		text-align: right;
+	}
+	/* Gallery */
+	.gallery {
+
+	}
+	.gallery > a {
+		width: fit-content;
+	}
+	.gallery-img {
+		width: 300px;
+	}
+
+	/*
+	  INPUT STYLES
+   */
+
+	/* Input */
+	input, textarea {
+		background-color: var(--blue);
+		color: white;
+	}
+	.clickable {
+		cursor: pointer;
+	}
+	.clicked {
+		cursor: default;
+		filter: brightness(35%);
+	}
+	/* Button */
+	button {
+		border: none;
+		background-color: inherit;
+		font-family: inherit;
+		width: fit-content;
+		margin-left: auto;
+		margin-right: auto;
+	}
+	button:hover {
+		cursor: pointer;
+		text-decoration: underline;
+		background-color: var(--red);
+		color: white;
+	}
+	button:before {
+		content: "<";
+	}
+	button:after {
+		content: ">";
+	}
+	/* Multiple choice */
+	a {
+		width: 100%;
+		display: inline-block;
+		color: black;
+		text-decoration: none;
+	}
+	a:hover {
+		background-color: var(--red);
+		color: white;
+		text-decoration: underline;
+	}
+	/* Exception for 88x31 */
+	.i88x31 {
+		display: block;
+		image-rendering: auto;
+		image-rendering: crisp-edges;
+		image-rendering: pixelated;
+		image-rendering: -webkit-optimize-contrast;
+	}
+	.i88x31 > img {
+		width: 88px;
+		height: 31px;
+	}
+	.i88x31:hover {
+		background-color: inherit;
+	}
+	/* Radio and checkbox */
+	fieldset {
+		background-color: var(--blue);
+		color: white;
+		font-size: 0.8em;
+	}
+	input[type="radio"],
+	input[type="checkbox"]
+	{
+		/* Add if not using autoprefixer */
+		-webkit-appearance: none;
+		appearance: none;
+		/* Not removed via appearance */
+		margin: 0;
+	}
+	input[type="radio"]::before,
+	input[type="checkbox"]::before
+	{
+		content: "[ ";
+	}
+	input[type="radio"]:checked::before,
+	input[type="checkbox"]:checked::before
+	{
+		content: "[*";
+	}
+	input[type="radio"]::after,
+	input[type="checkbox"]::after
+	{
+		content: "]";
+	}
+
+	/*
+	  MARKDOWN STUFF
+   */
+	blockquote {
+		border-left: 4px solid var(--dark);
+		padding-left: 5px;
+	}
+	article {
+		width: 70%;
+		font-size: 1.2em;
+	}
+	article > p > img {
+		width: 100%;
+	}
+
+	/*
+	  COMPONENTS CSS
+   */
+
+	/* Header css */
+	header-component {
+		width: var(--page-width);
+		display: block; /* Could be flex but oh well */
+	}
+	header {
+		/* Some space */
+		margin-top: 20px;
+		/* Aligning items */
+		display: flex;
+		flex-direction: row;
+	}
+	.logo {
+		font-size: 6em;
+	}
+	.sub {
+		font-size: 1.4em;
+	}
+	/* Message of the day */
+	#daily-container {
+		display:flex;
+		align-items:center;
+		justify-content: center;
+		padding: 0px 20px;
+		/* Visual */
+		background-color: var(--blue);
+		color: var(--light);
+	}
+	#daily {
+		font-size: 2em;
+	}
+	/* Flex utils */
+	.flex-right {
+		margin-left: auto;
+	}
+
+	/* Card css */
+	.fullimgh{
+		height: 100%;
+	}
+	.fullimgw{
+		width: 100%;
+	}
+	.imgcenter{
+		display: flex;
+		width: 100%; /* TODO: Properly center */
+		margin: auto;
+	}
+	.spanlink {
+		display: inline;
+		font-size: 0.8em;
+	}
 }
-/* Highest level block  */
-.block {
-	/* Default color */
-	background-color: var(--txt-bg);
-	background: linear-gradient(90deg, var(--dank-bg) 0%, var(--txt-bg) 50%, var(--dank-bg) 100%);
-	/* Shadow */
-	-webkit-box-shadow: 15px 16px 0px 5px #000000;
-	box-shadow: 15px 16px 0px 5px #000000;
-	/* Some space */
-	margin: 20px;
-}
-/* Main center block */
-.zenith {
-	display: flex;
-	flex-direction: row;
-	font-family: "Hasklug";
-	/* Space */
-	width: var(--page-width);
-	/* min-height: 1000px; */
-}
-/* Containers for main content blocks */
-main, aside, header {
-	padding: 10px 5px;
-	/* background-color: wheat; */
-	/* Flex */
-	display: flex;
-	flex-direction: column;
-}
-/* Main boxes */
-figure,
-.border {
-	border: 1px solid var(--dark);
-	padding: 5px;
-	height: fit-content;
-}
-main > .border {
-	padding-left: 10px;
-}
-aside > .border {
-	margin-bottom: 5px;
-}
-figcaption {
-	padding: 10px 20px;
-	border-left: 4px solid var(--dark);
-}
+
+
+
+/* Mobile */
 @media (aspect-ratio < 10/12) {
+	/* Hide bloat on mobile */
 	.bloat {
 		display: none;
 	}
-}
-/* Card gallery */
-.card-gallery {
-	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
-}
-.spanLink {
-	width: auto;
-}
-/* Left hand nav */
-.alt-nav {
-	display: flex;
-	flex-direction: column;
-	min-width: 100px;
-}
-#rss {
-	width: 30px;
-}
-.addition {
-	font-size: 1.5em;
-}
-.addition > a {
-	background-color: var(--vlight);
+	/* Main */
+	body {
+		/* space */
+		margin: 0;
+		padding: 0;
+		/* flex */
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		/* bg */
+		background-image: url("https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4d/%E0%B8%99%E0%B9%89%E0%B8%B3%E0%B8%95%E0%B8%81%E0%B8%95%E0%B8%B3%E0%B8%AB%E0%B8%99%E0%B8%B1%E0%B8%87.jpg/1280px-%E0%B8%99%E0%B9%89%E0%B8%B3%E0%B8%95%E0%B8%81%E0%B8%95%E0%B8%B3%E0%B8%AB%E0%B8%99%E0%B8%B1%E0%B8%87.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail");
+		background-size: cover;
+		background-attachment: fixed;
+	}
+	/* Highest level block  */
+	.block {
+		border-radius: 35px;
+		background-color: var(--mobil-bg);
+		-webkit-box-shadow:0px 0px 5px 0px rgba(255,255,255,1);
+		-moz-box-shadow: 0px 0px 5px 0px rgba(255,255,255,1);
+		box-shadow: 0px 0px 5px 0px rgba(255,255,255,1);
+
+		color: var(--white);
+		/* Some space */
+		margin: 20px;
+	}
+	/* Main center block */
+	.zenith {
+		display: flex;
+		flex-direction: row;
+		font-family: "Hasklug";
+		/* Space */
+		width: var(--page-width);
+		/* min-height: 1000px; */
+	}
+	/* Containers for main content blocks */
+	main, aside, header {
+		padding: 5px;
+		/* background-color: wheat; */
+		/* Flex */
+		display: flex;
+		flex-direction: column;
+	}
+	/* Main boxes */
+	figure,
+	.border {
+		border-radius: 10px;
+		border: 2px solid var(--white);
+		background-color: var(--mobil-txt-bg);
+		-webkit-box-shadow:0px 0px 5px 0px rgba(255,255,255,1);
+		-moz-box-shadow: 0px 0px 5px 0px rgba(255,255,255,1);
+		box-shadow: 0px 0px 5px 0px rgba(255,255,255,1);
+
+		padding: 5px;
+		margin: 5px;
+		height: fit-content;
+	}
+	main > .border {
+		padding-left: 10px;
+	}
+	aside > .border {
+		margin-bottom: 5px;
+	}
+	figcaption {
+		padding: 10px 20px;
+		border-left: 4px solid var(--dark);
+	}
+	/* Card gallery */
+	.card-gallery {
+		display: flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+	}
+	.spanLink {
+		width: auto;
+	}
+	/* Left hand nav */
+	.alt-nav {
+		display: flex;
+		flex-direction: column;
+		min-width: 100px;
+	}
+	.addition {
+		font-size: 1.5em;
+	}
+	/* EXTRA PADDING WHEN NEED BE */
+	main > .border,
+	.comment-list > .border {
+		margin-bottom: 10px;
+	}
+	.error {
+		padding: 10px;
+		background-color: var(--light-em);
+	}
+	.notice {
+		background-color: var(--yellow);
+		padding: 2px;
+		word-break: break-word;
+		hyphens: auto;
+	}
+	.indent {
+		margin-left: 10px;
+	}
+	/* Split view */
+	.split {
+		display: flex;
+		flex-direction: column;
+	}
+	h2.tight {
+		margin-bottom: 5px;
+	}
+	p.tight {
+		font-size: small;
+		margin-top: 5px;
+		padding-left: 10px;
+	}
+	.date {
+		font-size: small;
+		text-align: right;
+	}
+	/* Gallery */
+	.gallery {
+
+	}
+	.gallery > a {
+		width: fit-content;
+	}
+	.gallery-img {
+		width: 300px;
+	}
+
+	/*
+	  INPUT STYLES
+   */
+
+	/* Input */
+	input, textarea {
+		background: #030303;
+		background: linear-gradient(0deg,rgba(255, 255, 255 , 0.2) 0%, rgba(255, 255, 255, 0) 100%);
+		color: white;
+	}
+	.clickable {
+		cursor: pointer;
+	}
+	.clicked {
+		cursor: default;
+		filter: brightness(35%);
+	}
+	/* Button */
+	button {
+		border: none;
+		font-family: inherit;
+		color: var(--white);
+
+		/* BULL */
+		margin-top: 5px;
+
+		border-radius: 5px;
+		border: 1px solid var(--white);
+		background: #030303;
+		background: linear-gradient(0deg,rgba(255, 255, 255 , 0.2) 0%, rgba(255, 255, 255, 0) 100%);
+	}
+	button:hover {
+		cursor: pointer;
+		text-decoration: underline;
+	}
+	/* Multiple choice */
+	a {
+		width: 100%;
+		color: var(--white);
+		display: inline-block;
+		text-decoration: none;
+		/* Button-like */
+		border-radius: 5px;
+		border: 1px solid var(--white);
+		background: #030303;
+		background: linear-gradient(0deg,rgba(255, 255, 255 , 0.2) 0%, rgba(255, 255, 255, 0) 100%);
+	}
+	a:hover {
+		text-decoration: underline;
+	}
+	/* Exception for 88x31 */
+	.i88x31 {
+		display: block;
+		image-rendering: auto;
+		image-rendering: crisp-edges;
+		image-rendering: pixelated;
+		image-rendering: -webkit-optimize-contrast;
+	}
+	.i88x31 > img {
+		width: 88px;
+		height: 31px;
+	}
+	.i88x31:hover {
+		background-color: inherit;
+	}
+	/* Radio and checkbox */
+	fieldset {
+		background: #030303;
+		background: linear-gradient(0deg,rgba(255, 255, 255 , 0.2) 0%, rgba(255, 255, 255, 0) 100%);
+		color: white;
+		font-size: 0.8em;
+		margin: 0;
+	}
+	input[type="radio"],
+	input[type="checkbox"]
+	{
+		/* Add if not using autoprefixer */
+		-webkit-appearance: none;
+		appearance: none;
+		/* Not removed via appearance */
+		margin: 0;
+	}
+	input[type="radio"]::before,
+	input[type="checkbox"]::before
+	{
+		content: "[ ";
+	}
+	input[type="radio"]:checked::before,
+	input[type="checkbox"]:checked::before
+	{
+		content: "[*";
+	}
+	input[type="radio"]::after,
+	input[type="checkbox"]::after
+	{
+		content: "]";
+	}
+
+	/*
+	  MARKDOWN STUFF
+   */
+	blockquote {
+		border-left: 4px solid var(--dark);
+		padding-left: 5px;
+	}
+	article {
+		font-size: 1.2em;
+	}
+	article > p > img {
+		width: 100%;
+	}
+
+	/*
+	  COMPONENTS CSS
+   */
+	/* Header css */
+	header-component {
+		width: var(--page-width);
+		display: block; /* Could be flex but oh well */
+	}
+	header {
+		/* Aligning items */
+		display: flex;
+		flex-direction: row;
+	}
+	.logo {
+		font-size: 6em;
+	}
+	.sub {
+		font-size: 1.4em;
+	}
+	/* Message of the day */
+	#daily-container {
+		display:flex;
+		align-items:center;
+		justify-content: center;
+		padding: 0px 20px;
+		/* Visual */
+		background-color: var(--blue);
+		color: var(--light);
+	}
+	#daily {
+		font-size: 2em;
+	}
+	/* Flex utils */
+	.flex-right {
+		margin-left: auto;
+	}
+
+	/* Card css */
+	.fullimgh{
+		height: 100%;
+	}
+	.fullimgw{
+		width: 100%;
+	}
+	.imgcenter{
+		display: flex;
+		width: 100%; /* TODO: Properly center */
+		margin: auto;
+	}
+	.spanlink {
+		display: inline;
+		font-size: 0.8em;
+	}
+
 }
 
-/* EXTRA PADDING WHEN NEED BE */
-main > .border,
-.comment-list > .border {
-	margin-bottom: 10px;
-}
-.error {
-	padding: 10px;
-	background-color: var(--light-em);
-}
-.notice {
-	background-color: var(--yellow);
-	padding: 2px;
-	word-break: break-word;
-	hyphens: auto;
-}
-.indent {
-	margin-left: 10px;
-}
-/* Split view */
-.split {
-	display: flex;
-	flex-direction: row;
-}
-.equal {
-	flex: 1 1 0;
-}
-.right {
-	margin-left: auto;
-	margin-right: 10px;
-}
-h2.tight {
-	margin-bottom: 5px;
-}
-p.tight {
-	font-size: small;
-	margin-top: 5px;
-	padding-left: 10px;
-}
-.date {
-	font-size: small;
-	text-align: right;
-}
-/* Gallery */
-.gallery {
-
-}
-.gallery > a {
-	width: fit-content;
-}
-.gallery-img {
-	width: 300px;
-}
-
-/*
-  INPUT STYLES
-*/
-
-/* Input */
-input, textarea {
-	background-color: var(--blue);
-	color: white;
-}
-.clickable {
-	cursor: pointer;
-}
-.clicked {
-	cursor: default;
-	filter: brightness(35%);
-}
-/* Button */
-button {
-	border: none;
-	background-color: inherit;
-	font-family: inherit;
-	width: fit-content;
-	margin-left: auto;
-	margin-right: auto;
-}
-button:hover {
-	cursor: pointer;
-	text-decoration: underline;
-	background-color: var(--red);
-	color: white;
-}
-button:before {
-	content: "<";
-}
-button:after {
-	content: ">";
-}
-/* Multiple choice */
-a {
-	width: 100%;
-	display: inline-block;
-	color: black;
-	text-decoration: none;
-}
-a:hover {
-	background-color: var(--red);
-	color: white;
-	text-decoration: underline;
-}
-/* Exception for 88x31 */
-.i88x31 {
-	display: block;
-	image-rendering: auto;
-    image-rendering: crisp-edges;
-    image-rendering: pixelated;
-    image-rendering: -webkit-optimize-contrast;
-}
-.i88x31 > img {
-	width: 88px;
-	height: 31px;
-}
-.i88x31:hover {
-	background-color: inherit;
-}
-/* Radio and checkbox */
-fieldset {
-	background-color: var(--blue);
-	color: white;
-	font-size: 0.8em;
-}
-input[type="radio"],
-input[type="checkbox"]
-{
-  /* Add if not using autoprefixer */
-  -webkit-appearance: none;
-  appearance: none;
-  /* Not removed via appearance */
-  margin: 0;
-}
-input[type="radio"]::before,
-input[type="checkbox"]::before
-{
-	content: "[ ";
-}
-input[type="radio"]:checked::before,
-input[type="checkbox"]:checked::before
-{
-	content: "[*";
-}
-input[type="radio"]::after,
-input[type="checkbox"]::after
-{
-	content: "]";
-}
-
-/*
-  MARKDOWN STUFF
-*/
-blockquote {
-	border-left: 4px solid var(--dark);
-	padding-left: 5px;
-}
-article {
-	width: 70%;
-	font-size: 1.2em;
-}
-article > p > img {
-	width: 100%;
-}
-
-/*
-  COMPONENTS CSS
-*/
-
-/* Footer css */
-footer{
-	background-color: white;
-	margin: 20px;
-	padding: 10px;
-}
-/* Header css */
-header-component {
-	width: var(--page-width);
-	display: block; /* Could be flex but oh well */
-}
-header {
-	/* Some space */
-	margin-top: 20px;
-	/* Aligning items */
-	display: flex;
-	flex-direction: row;
-}
-.logo {
-	font-size: 6em;
-}
-.sub {
-	font-size: 1.4em;
-}
-/* Message of the day */
-#daily-container {
-	display:flex;
-	align-items:center;
-	justify-content: center;
-	padding: 0px 20px;
-	/* Visual */
-	background-color: var(--blue);
-	color: var(--light);
-}
-#daily {
-	font-size: 2em;
-}
-/* Flex utils */
-.flex-right {
-	margin-left: auto;
-}
-
-/* Card css */
-.fullimgh{
-    height: 100%;
-}
-.fullimgw{
-    width: 100%;
-}
-.imgcenter{
-    display: flex;
-    width: 100%; /* TODO: Properly center */
-    margin: auto;
-}
-.spanlink {
-	display: inline;
-	font-size: 0.8em;
-}
-
+/* Global */
 /*
   ACCESSIBILITY
 */
@@ -379,4 +675,28 @@ header {
 		background-color: var(--light-em);
 		color: white;
 	}
+}
+/* Misc */
+.equal {
+	flex: 1 1 0;
+}
+.right {
+	margin-left: auto;
+	margin-right: 10px;
+}
+#rss {
+	width: 30px;
+}
+/*
+  COMPONENTS
+*/
+/* Footer css */
+footer {
+	background-color: white;
+	margin: 20px;
+	padding: 10px;
+	color: black;
+}
+footer > p > a {
+	color: black;
 }

@@ -11,14 +11,14 @@ cardTemplate.innerHTML = `
         h3 {
             text-align: center;
         }
-        p{  
+        p{
             font-weight: 700;
             text-decoration: none;
             font-size: 1.2em;
             padding: 10% 5% 0%;
             text-align: center;
         }
-        span{
+        .row{
             font-weight: 700;
             text-decoration: none;
             font-size: 1em;
@@ -27,6 +27,9 @@ cardTemplate.innerHTML = `
             margin-left: 4%;
             margin-bottom: 4%;
             margin-top: auto;
+        }
+				@media (aspect-ratio < 10/12) {
+		        div{ outline: solid var(--white); }
         }
     </style>
     <div style="width: 300px;height: 400px; display:inline-block; margin: 20px 10px; vertical-align: top">
@@ -42,7 +45,10 @@ cardTemplate.innerHTML = `
             Lorem ipsum dolor sit amet consectitur disapinis i not rember corec tisus soemon helepa mis
             </slot></p>
 
-            <span>Link(s): <slot name="links"><a href="https://www.google.com">Google</a></slot></span>
+            <span class="row">
+							Link(s): <slot name="links"><a href="https://www.google.com">Google</a></slot>
+							<span style="margin-left:auto"><slot name="lang"></slot></span>
+						</span>
         </div>
     </div>
 `;

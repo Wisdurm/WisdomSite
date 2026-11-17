@@ -1,6 +1,7 @@
 #include "crow/http_request.h"
 #include <array>
 #include <crow.h>
+#include "debug.hpp"
 
 #define PRETTY_LONG_TIME "86400"
 #define SOMEWHAT_LONG_TIME "3600"
@@ -27,6 +28,8 @@ struct Cache
 
 	void before_handle(crow::request& req, crow::response& res, context& ctx)
 	{
+		if (debug())
+			return;
 		for (const auto& ext : longCache) {
 			if (req.url.ends_with(ext)) {
 				res.add_header("Cache-Control",

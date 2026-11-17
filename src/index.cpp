@@ -2,6 +2,7 @@
 #include "markdown.hpp"
 #include "guard.hpp"
 #include "cache.hpp"
+#include "debug.hpp"
 // C++
 #include <array>
 #include <exception>
@@ -139,8 +140,10 @@ static std::string formatDateRss(int unixt) {
 	return dyna_print("{:%a, %d %b %Y %T} +0300", t);
 }
 
-int main()
+int main(int argc, char* argv[])
 {
+	if (argc > 1)
+		debug() = true;
 	crow::App<SpamGuard, Cache> app;
 	// Database
 	SQLite::Database dbComments("dbs/comments.db", SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);

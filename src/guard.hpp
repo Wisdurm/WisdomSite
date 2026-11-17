@@ -1,3 +1,4 @@
+#include "debug.hpp"
 #include "crow/http_request.h"
 #include "crow/logging.h"
 #include <crow.h>
@@ -47,6 +48,8 @@ struct SpamGuard
 
 	void before_handle(crow::request& req, crow::response& res, context& ctx)
 	{
+		if (debug())
+			return;
 		const std::string addr = req.get_header_value("X-Real-IP");
 		const auto now = std::chrono::system_clock::now();
 		const auto m = memory.find(addr);
