@@ -12,9 +12,8 @@ async function access() {
 function swapFont() {
 		// More readable font
 		$(".zenith").css("font-family", "Lexend");
-		$(".zenith").css("font-size", "1.2em");
-		// Increase article readablity (is this actually better? TODO)
-		$("article").css("font-size", "1.4em");
+		// $(".zenith").css("font-size", "1.2em");
+		// $("article").css("font-size", "1.4em");
 		$("article").css("line-height", "1.5em");
 }
 
@@ -23,7 +22,7 @@ $( document ).ready(async function() {
 		if (accessibility && accessibility.value == "true") {
 				swapFont();
 		}
-		
+
 		// let voted = false;
 		// $("#thumbup").on("click", function() {
 		// 		if (!voted) {
@@ -41,7 +40,7 @@ $( document ).ready(async function() {
 		// 				$("#thumbdown").addClass("clicked")
 		// 		}
 		// });
-		
+
 		// Add some annoyance to the submission form
 		// to stop the first level of trolls:
 		// 1. Losers without free time

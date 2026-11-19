@@ -35,8 +35,9 @@
 
 	--yellow: #dbdb87;
 	/* Mobile */
+	--mobil-page-width: 90vw;
 	--mobil-bg: rgba(0,0,0, 0.2);
-	--mobil-txt-bg: rgba(0,0,0, 0.6);
+	--mobil-txt-bg: rgba(0,0,0, 0.4);
 	--white: #fff;
 	/*
 	  Every element that isn't a child
@@ -51,6 +52,9 @@ html {
 /* Actual styles */
 /* Desktop */
 @media (aspect-ratio > 10/12) {
+	.mobil-copyright {
+		display: none;
+	}
 	/* Main */
 	body {
 		/* space */
@@ -187,6 +191,9 @@ html {
 	input, textarea {
 		background-color: var(--blue);
 		color: white;
+	}
+	textarea {
+		width: 50%;
 	}
 	.clickable {
 		cursor: pointer;
@@ -349,11 +356,16 @@ html {
 
 
 
+
+
 /* Mobile */
 @media (aspect-ratio < 10/12) {
 	/* Hide bloat on mobile */
-	.bloat {
+	aside, .bloat {
 		display: none;
+	}
+	.mobil-copyright {
+		display: inline;
 	}
 	/* Main */
 	body {
@@ -366,7 +378,7 @@ html {
 		align-items: center;
 		justify-content: center;
 		/* bg */
-		background-image: url("https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4d/%E0%B8%99%E0%B9%89%E0%B8%B3%E0%B8%95%E0%B8%81%E0%B8%95%E0%B8%B3%E0%B8%AB%E0%B8%99%E0%B8%B1%E0%B8%87.jpg/1280px-%E0%B8%99%E0%B9%89%E0%B8%B3%E0%B8%95%E0%B8%81%E0%B8%95%E0%B8%B3%E0%B8%AB%E0%B8%99%E0%B8%B1%E0%B8%87.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail");
+		background-image: url("/static/images/bg.jpg");
 		background-size: cover;
 		background-attachment: fixed;
 	}
@@ -380,7 +392,7 @@ html {
 
 		color: var(--white);
 		/* Some space */
-		margin: 20px;
+		margin: 10px 0;
 	}
 	/* Main center block */
 	.zenith {
@@ -388,11 +400,11 @@ html {
 		flex-direction: row;
 		font-family: "Hasklug";
 		/* Space */
-		width: var(--page-width);
+		width: var(--mobil-page-width);
 		/* min-height: 1000px; */
 	}
 	/* Containers for main content blocks */
-	main, aside, header {
+	main, header {
 		padding: 5px;
 		/* background-color: wheat; */
 		/* Flex */
@@ -415,9 +427,6 @@ html {
 	}
 	main > .border {
 		padding-left: 10px;
-	}
-	aside > .border {
-		margin-bottom: 5px;
 	}
 	figcaption {
 		padding: 10px 20px;
@@ -497,6 +506,9 @@ html {
 		background: linear-gradient(0deg,rgba(255, 255, 255 , 0.2) 0%, rgba(255, 255, 255, 0) 100%);
 		color: white;
 	}
+	textarea {
+		width: 80%;
+	}
 	.clickable {
 		cursor: pointer;
 	}
@@ -560,31 +572,9 @@ html {
 		font-size: 0.8em;
 		margin: 0;
 	}
-	input[type="radio"],
-	input[type="checkbox"]
-	{
-		/* Add if not using autoprefixer */
-		-webkit-appearance: none;
-		appearance: none;
-		/* Not removed via appearance */
-		margin: 0;
+	form {
+		width: 90%;
 	}
-	input[type="radio"]::before,
-	input[type="checkbox"]::before
-	{
-		content: "[ ";
-	}
-	input[type="radio"]:checked::before,
-	input[type="checkbox"]:checked::before
-	{
-		content: "[*";
-	}
-	input[type="radio"]::after,
-	input[type="checkbox"]::after
-	{
-		content: "]";
-	}
-
 	/*
 	  MARKDOWN STUFF
    */
@@ -595,16 +585,30 @@ html {
 	article {
 		font-size: 1.2em;
 	}
+	article > h1,
+	article > h2,
+	article > h3,
+	article > h4,
+	article > h5 {
+		line-break: anywhere;
+	}
 	article > p > img {
 		width: 100%;
 	}
-
+	/* Stupid but works */
+	pre {
+		white-space: -moz-pre-wrap; /* Mozilla, supported since 1999 */
+		white-space: -pre-wrap; /* Opera */
+		white-space: -o-pre-wrap; /* Opera */
+		white-space: pre-wrap; /* CSS3 - Text module (Candidate Recommendation) http://www.w3.org/TR/css3-text/#white-space */
+		word-wrap: break-word; /* IE 5.5+ */
+	}
 	/*
 	  COMPONENTS CSS
    */
 	/* Header css */
 	header-component {
-		width: var(--page-width);
+		width: var(--mobil-page-width);
 		display: block; /* Could be flex but oh well */
 	}
 	header {
@@ -613,7 +617,7 @@ html {
 		flex-direction: row;
 	}
 	.logo {
-		font-size: 6em;
+		font-size: 4em;
 	}
 	.sub {
 		font-size: 1.4em;
